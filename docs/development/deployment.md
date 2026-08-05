@@ -49,6 +49,19 @@ system_architecture.md 5章の通り、`main` ブランチへのpushで自動デ
 - 独自ドメインを使用する場合、DNS設定（Aレコード／CNAME）をVercelの指示に従って設定する
 - HTTPS証明書はVercelが自動発行・自動更新する（発注者側での証明書管理は不要）
 
+## 8.1 VercelのHobby（無料）プランに関する重要な注意（2026-08-05追記）
+
+Vercel公式ドキュメント（[Hobby Plan](https://vercel.com/docs/plans/hobby), 2026-06-16更新版）に以下の明記がある。
+
+> As stated in the fair use guidelines, the Hobby plan restricts users to **non-commercial, personal use only**.
+
+エムガレージは実店舗の商用サイトであるため、本番公開後もHobby（無料）プランを使い続けることはVercelの利用規約に反する。**独自ドメイン（`.com`等）を設定するだけではこの問題は解決しない**（プランとドメインは別軸の話であり、独自ドメインをHobbyプランのプロジェクトに設定しても規約違反は解消されない）。本番公開に進む際は、次の2つをセットで行う必要がある。
+
+1. Vercel **Proプランへのアップグレード**（商用利用として正式な状態にする。14日間の無料トライアルあり）
+2. 独自ドメイン（`.com`等）の取得・設定（`*.vercel.app`は信頼性・ブランディングの観点でも本番URLとして不適切）
+
+開発・確認段階（Preview環境、社内的な動作確認）では `*.vercel.app` のままでも実務上問題になりにくいが、一般ユーザーへの本番公開時点までにはこの2点の対応を完了させること。詳細は [docs/tasks/ISSUE-003](../tasks/ISSUE-003-production-domain-and-plan-upgrade.md) を参照。
+
 ## 9. Acceptance Criteria（本ドキュメントの受け入れ基準）
 
 - [ ] 本番・プレビュー・ローカルの環境構成が明確に区別されている
