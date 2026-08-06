@@ -2,6 +2,11 @@ import type { BaseEntity, SoftDeletable } from "@/lib/database/common";
 
 // Inventory Context（bounded_context.md 3章）: 車両そのものの管理。唯一のSSOT（BR-DATA-002）
 
+// 03_non_functional_requirements.md 9章: アップロードファイルのサイズ上限（1ファイルあたり）。
+// サーバー（app/api/admin/vehicles/[id]/photos/route.ts）・クライアント（vehicle-media-manager.tsx）双方で
+// 同じ上限値を参照する（型を持たないため server-only な lib/inventory/storage.ts ではなくこちらに置く）。
+export const MAX_VEHICLE_PHOTO_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20MB
+
 export interface Manufacturer extends BaseEntity, SoftDeletable {
   name: string;
   slug: string;

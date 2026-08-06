@@ -2,8 +2,11 @@ import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getPublicOwnerArchiveEntryByVehicleId } from "@/lib/archive/queries";
+import { getVehiclePhotos, getVehicleVideos } from "@/lib/inventory/queries";
+import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
+import { VehicleMediaGallery } from "@/components/inventory/vehicle-media-gallery";
 
-// SCR-PUB-016: オーナーズアーカイブ詳細（レストア履歴・販売履歴、FR-OWN-001〜003）
+// SCR-PUB-016: オーナーズアーカイブ詳細（レストア履歴・販売履歴、FR-OWN-001〜003。FR-OWN-002の写真部分）
 export default async function Page({
   params,
 }: {
@@ -16,6 +19,23 @@ export default async function Page({
     notFound();
   }
 
+  const [photos, videos] = await Promise.all([
+    getVehiclePhotos(vehicleId),
+    getVehicleVideos(vehicleId),
+  ]);
+  const photosWithUrl = photos.map((photo) => ({
+    id: photo.id,
+    public_url: getVehiclePhotoPublicUrl(photo.storage_path),
+  }));
+  // UIUXデザイナーレビュー指摘: ギャラリー画像のalt属性に使う車両名（メーカー・モデル・年式）
+  const vehicleName = [
+    entry.vehicles?.manufacturers?.name,
+    entry.vehicles?.models?.name,
+    entry.vehicles?.model_year ? `${entry.vehicles.model_year}年` : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
       <p className="text-xs font-medium text-neutral-500">ご成約済み</p>
@@ -26,6 +46,14 @@ export default async function Page({
       {entry.vehicles?.engine && (
         <p className="mt-2 text-neutral-600">{entry.vehicles.engine}</p>
       )}
+
+      <div className="mt-6">
+        <VehicleMediaGallery
+          photos={photosWithUrl}
+          videos={videos}
+          vehicleName={vehicleName}
+        />
+      </div>
 
       {entry.restoration_history && (
         <section className="mt-8">

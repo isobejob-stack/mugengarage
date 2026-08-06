@@ -8,6 +8,8 @@ import type {
   Grade,
   GradeTemplate,
   Vehicle,
+  VehiclePhoto,
+  VehicleVideo,
 } from "@/lib/inventory/types";
 
 // 車両階層マスタ一覧（管理画面フォームのセレクト用）。BR-DATA-003によりハードコードしない。
@@ -162,4 +164,31 @@ export async function getPublicVehicleBySlug(slug: string) {
         models: { name: string } | null;
       })
     | null;
+}
+
+// FR-INV-009: 車両写真一覧（論理削除除く、表示順）。table_definitions.md 4.8
+export async function getVehiclePhotos(vehicleId: string) {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("vehicle_photos")
+    .select("*")
+    .eq("vehicle_id", vehicleId)
+    .is("deleted_at", null)
+    .order("display_order", { ascending: true })
+    .returns<VehiclePhoto[]>();
+
+  return data ?? [];
+}
+
+// FR-INV-010: 車両動画一覧（表示順）。table_definitions.md 4.9
+export async function getVehicleVideos(vehicleId: string) {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("vehicle_videos")
+    .select("*")
+    .eq("vehicle_id", vehicleId)
+    .order("display_order", { ascending: true })
+    .returns<VehicleVideo[]>();
+
+  return data ?? [];
 }

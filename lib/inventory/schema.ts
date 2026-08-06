@@ -98,3 +98,20 @@ export const emptyVehicleFormValues: VehicleFormValues = {
   other_notes: null,
   scheduled_publish_at: null,
 };
+
+// FR-INV-010: 動画URL登録フォームの入力スキーマ（table_definitions.md 4.9準拠）
+// 動画ファイル自体はアップロードせず、YouTube等の外部URLのみを保持する
+export const vehicleVideoFormSchema = z.object({
+  video_url: z
+    .string()
+    .trim()
+    .min(1, "動画URLを入力してください")
+    .url("有効なURLを入力してください"),
+});
+
+export type VehicleVideoFormValues = z.infer<typeof vehicleVideoFormSchema>;
+
+// FR-INV-009: 写真並び替えフォームの入力スキーマ
+export const vehiclePhotoReorderSchema = z.object({
+  photoIds: z.array(z.string().uuid()).min(1, "並び替え対象の写真がありません"),
+});
