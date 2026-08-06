@@ -9,6 +9,8 @@ import {
   emptyVehicleFormValues,
   type VehicleFormValues,
 } from "@/lib/inventory/schema";
+import { emptySeoFieldsValues } from "@/lib/seo/schema";
+import { SeoFieldsSection } from "@/components/ui/seo-fields-section";
 import type {
   Manufacturer,
   Model,
@@ -16,8 +18,15 @@ import type {
   Generation,
   Grade,
   GradeTemplate,
+  VehicleVideo,
 } from "@/lib/inventory/types";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import {
+  VehicleMediaManager,
+  type PhotoWithUrl,
+} from "@/components/inventory/vehicle-media-manager";
+import { RelatedContentPicker } from "@/components/related/related-content-picker";
+import type { RelatedContentCandidate } from "@/lib/related/types";
 
 type HierarchyOptions = {
   manufacturers: Manufacturer[];
@@ -33,17 +42,27 @@ export function VehicleForm({
   options,
   vehicleId,
   defaultValues,
+  initialPhotos,
+  initialVideos,
+  candidates,
 }: {
   options: HierarchyOptions;
   vehicleId?: string;
   defaultValues?: VehicleFormValues;
+  initialPhotos?: PhotoWithUrl[];
+  initialVideos?: VehicleVideo[];
+  candidates?: RelatedContentCandidate[];
 }) {
+  const relatedCandidates = candidates ?? [];
   const router = useRouter();
   const isEdit = Boolean(vehicleId);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [pendingValues, setPendingValues] = useState<VehicleFormValues | null>(
     null,
   );
+  const [pendingDelete, setPendingDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const {
     register,
@@ -121,6 +140,30 @@ export function VehicleForm({
     if (!res.ok) {
       const body = await res.json().catch(() => null);
       setSubmitError(body?.error?.message ?? "保存に失敗しました");
+      return;
+    }
+
+    router.push("/admin/vehicles");
+    router.refresh();
+  };
+
+  // FR-INV-003: 車両の論理削除。BR-DEL-003により売約済み車両はAPI側で409を返す
+  const handleDelete = async () => {
+    if (!vehicleId) return;
+    setDeleteError(null);
+    setIsDeleting(true);
+    const res = await fetch(`/api/admin/vehicles/${vehicleId}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      setDeleteError(
+        res.status === 409
+          ? (body?.error?.message ?? "売約済みの車両は削除できません")
+          : (body?.error?.message ?? "削除に失敗しました"),
+      );
+      setIsDeleting(false);
       return;
     }
 
@@ -353,6 +396,37 @@ export function VehicleForm({
       </section>
 
       <section>
+        <h2 className="text-lg font-bold">写真・動画</h2>
+        <div className="mt-4">
+          {isEdit && vehicleId ? (
+            <VehicleMediaManager
+              vehicleId={vehicleId}
+              initialPhotos={initialPhotos ?? []}
+              initialVideos={initialVideos ?? []}
+            />
+          ) : (
+            <p className="text-base text-neutral-600">
+              写真・動画の登録は、車両を登録した後に編集画面から行えます。まずは基本情報を入力して登録してください。
+            </p>
+          )}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-lg font-bold">関連コンテンツ</h2>
+        <div className="mt-4">
+          {/* FR-INV-014: 関連記事／関連図鑑／関連ブログ／関連整備実績の紐付け（BR-DOM-004: 参照のみでコピーしない） */}
+          <Field label="関連コンテンツ（記事・図鑑・ライブラリ・整備実績、任意）">
+            <RelatedContentPicker
+              candidates={relatedCandidates}
+              selected={watch("related")}
+              onChange={(next) => setValue("related", next)}
+            />
+          </Field>
+        </div>
+      </section>
+
+      <section>
         <h2 className="text-lg font-bold">公開設定</h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="公開ステータス">
@@ -377,7 +451,57 @@ export function VehicleForm({
         </div>
       </section>
 
+      {isEdit && (
+        <section>
+          <h2 className="text-lg font-bold">SEO・URL設定</h2>
+          <div className="mt-4 flex flex-col gap-4">
+            {/* FR-SEO-004: vehiclesテーブル自体はslugを持たないため、seo_metas.slugを編集対象とする */}
+            <Field label="スラッグ（URL）" error={errors.slug?.message}>
+              <input
+                type="text"
+                className="input"
+                {...register("slug")}
+                value={watch("slug") ?? ""}
+              />
+            </Field>
+            <p className="text-base text-neutral-600">
+              URLが変更されます。変更前のURLは自動的に新しいURLへリダイレクトされます。
+            </p>
+            <SeoFieldsSection
+              value={watch("seo") ?? emptySeoFieldsValues}
+              onChange={(next) => setValue("seo", next)}
+              errors={{
+                title: errors.seo?.title?.message,
+                description: errors.seo?.description?.message,
+                og_image_url: errors.seo?.og_image_url?.message,
+                canonical_url: errors.seo?.canonical_url?.message,
+              }}
+            />
+          </div>
+        </section>
+      )}
+
       {submitError && <p className="text-sm text-red-600">{submitError}</p>}
+
+      {isEdit && (
+        <section className="rounded-md border border-red-200 bg-red-50 p-4">
+          <h2 className="text-base font-bold text-red-700">危険な操作</h2>
+          <p className="mt-1 text-base text-neutral-600">
+            この車両を削除すると公開ページから即座に非表示になります。この操作は元に戻せません。
+          </p>
+          {deleteError && (
+            <p className="mt-2 text-base text-red-600">{deleteError}</p>
+          )}
+          <button
+            type="button"
+            disabled={isDeleting}
+            onClick={() => setPendingDelete(true)}
+            className="mt-3 min-h-11 rounded-md border border-red-600 px-4 text-base font-medium text-red-600 disabled:opacity-60"
+          >
+            {isDeleting ? "削除中..." : "この車両を削除する"}
+          </button>
+        </section>
+      )}
 
       <div className="fixed inset-x-0 bottom-0 border-t bg-white p-4">
         <button
@@ -398,6 +522,19 @@ export function VehicleForm({
         onConfirm={() => {
           if (pendingValues) void save(pendingValues);
           setPendingValues(null);
+        }}
+      />
+
+      <ConfirmDialog
+        open={pendingDelete}
+        title="車両を削除します"
+        description="この車両を削除します。公開ページから即座に非表示になります。この操作は元に戻せません。"
+        confirmLabel="削除する"
+        danger
+        onCancel={() => setPendingDelete(false)}
+        onConfirm={() => {
+          setPendingDelete(false);
+          void handleDelete();
         }}
       />
     </form>

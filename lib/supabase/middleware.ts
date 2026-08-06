@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 // Supabase Authのセッションをリクエストごとに検証・更新し、
 // /admin/* への未認証アクセスをログイン画面へリダイレクトする
@@ -51,6 +52,31 @@ export async function updateSession(request: NextRequest) {
       maxAge: 60 * 60 * 24 * 365,
       path: "/",
     });
+  }
+
+  // FR-SEO-003 / BR-URL-002 / event_flow.md 3.7:
+  // redirectsテーブルを参照し、旧URLへのアクセスを新URLへ301リダイレクトする。
+  // 管理画面・APIルートは対象外とし、公開ページのみDBアクセスを発生させる（パフォーマンス配慮）。
+  const isRedirectCandidate = !isAdminRoute && !pathname.startsWith("/api");
+
+  if (isRedirectCandidate) {
+    const supabase = createAdminClient();
+    const { data: redirect } = await supabase
+      .from("redirects")
+      .select("new_path")
+      .eq("old_path", pathname)
+      .maybeSingle();
+
+    if (redirect) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = redirect.new_path;
+      const redirectResponse = NextResponse.redirect(redirectUrl, 301);
+      // 既存ロジックで発行されたCookie（Supabase認証セッション・mg_session_id）を引き継ぐ
+      for (const cookie of response.cookies.getAll()) {
+        redirectResponse.cookies.set(cookie);
+      }
+      return redirectResponse;
+    }
   }
 
   return response;

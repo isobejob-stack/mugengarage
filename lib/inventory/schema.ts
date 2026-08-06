@@ -1,7 +1,16 @@
 import { z } from "zod";
+import { seoFormFieldsSchema, slugValueSchema } from "@/lib/seo/schema";
+import { relatedTargetSchema } from "@/lib/related/schema";
 
 // FR-INV-001/002: 車両登録・編集フォームの入力スキーマ（table_definitions.md 4.6準拠）
 export const vehicleFormSchema = z.object({
+  // FR-SEO-004: vehiclesテーブル自体はslugを持たない（seo_metas.slugが正、BR-URL-003）ため任意項目とする。
+  // 新規登録時は自動生成（lib/inventory/slug.ts）に任せ、編集時のみ明示的な変更を受け付ける。
+  slug: slugValueSchema.optional(),
+  // FR-INV-011: SEOメタ情報（Title/Description/OGP画像/canonical URL）。編集画面でのみ入力対象とする
+  seo: seoFormFieldsSchema.optional(),
+  // FR-INV-014: 関連記事／関連図鑑／関連ブログ／関連整備実績の紐付け（BR-DOM-004: 参照のみでコピーしない）
+  related: z.array(relatedTargetSchema),
   manufacturer_id: z.string().uuid("メーカーを選択してください"),
   model_id: z.string().uuid("車種を選択してください"),
   series_id: z.string().uuid().nullable(),
@@ -55,6 +64,7 @@ export const vehicleFormSchema = z.object({
 export type VehicleFormValues = z.infer<typeof vehicleFormSchema>;
 
 export const emptyVehicleFormValues: VehicleFormValues = {
+  related: [],
   manufacturer_id: "",
   model_id: "",
   series_id: null,

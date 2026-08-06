@@ -18,6 +18,8 @@ function buildUrl(type: RelatedContentType, slug: string) {
       return `/encyclopedia/${slug}`;
     case "library_entry":
       return `/library/${slug}`;
+    case "maintenance_record":
+      return `/maintenance-records/${slug}`;
   }
 }
 
@@ -81,6 +83,17 @@ export async function listRelatedContentCandidates(
       .order("title");
     for (const l of data ?? []) {
       candidates.push({ type: "library_entry", id: l.id, label: l.title });
+    }
+  }
+
+  if (types.includes("maintenance_record")) {
+    const { data } = await supabase
+      .from("maintenance_records")
+      .select("id, title")
+      .is("deleted_at", null)
+      .order("title");
+    for (const m of data ?? []) {
+      candidates.push({ type: "maintenance_record", id: m.id, label: m.title });
     }
   }
 
@@ -193,6 +206,23 @@ export async function listRelatedContents(
         id: l.id,
         label: l.title,
         url: buildUrl("library_entry", l.slug),
+      });
+    }
+  }
+
+  const maintenanceRecordIds = idsByType.get("maintenance_record");
+  if (maintenanceRecordIds) {
+    const { data } = await supabase
+      .from("maintenance_records")
+      .select("id, title, slug")
+      .in("id", maintenanceRecordIds)
+      .is("deleted_at", null);
+    for (const m of data ?? []) {
+      items.set(`maintenance_record:${m.id}`, {
+        type: "maintenance_record",
+        id: m.id,
+        label: m.title,
+        url: buildUrl("maintenance_record", m.slug),
       });
     }
   }

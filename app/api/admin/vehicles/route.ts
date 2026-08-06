@@ -6,6 +6,7 @@ import { vehicleFormSchema } from "@/lib/inventory/schema";
 import { buildVehicleSlug } from "@/lib/inventory/slug";
 import { recordAuditLog } from "@/lib/audit/log";
 import { listAdminVehicles } from "@/lib/inventory/queries";
+import { replaceRelatedContents } from "@/lib/related/queries";
 
 // FR-INV-002: 車両一覧取得（管理用）
 export async function GET() {
@@ -52,15 +53,23 @@ export async function POST(request: NextRequest) {
     });
   }
 
+  // vehiclesテーブル自体はslug・relatedカラムを持たないため、insert対象から除外する（BR-URL-003）。
+  // 新規登録時のslugは常に自動生成のみを行い、手動指定は受け付けない（FR-SEO-004の対象はPATCHのみ）。
+  const { related, ...vehicleValues } = parsed.data;
+  delete vehicleValues.slug;
+
   const { data: vehicle, error } = await supabase
     .from("vehicles")
-    .insert(parsed.data)
+    .insert(vehicleValues)
     .select()
     .single();
 
   if (error || !vehicle) {
     return apiInternalError(error);
   }
+
+  // FR-INV-014: 関連記事／関連図鑑／関連ブログ／関連整備実績の紐付け（BR-DOM-004: 参照のみでコピーしない）
+  await replaceRelatedContents("vehicle", vehicle.id, related);
 
   const slug = buildVehicleSlug(model.slug, vehicle.id);
   await supabase.from("seo_metas").insert({
