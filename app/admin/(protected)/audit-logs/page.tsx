@@ -1,4 +1,4 @@
-import { listAuditLogs } from "@/lib/audit/log";
+import { listAuditLogs, type AuditLogListItem } from "@/lib/audit/log";
 import type { AuditAction } from "@/lib/audit/types";
 
 // FR-ADM-005: 操作日時・操作者・操作対象（種別・ID）・アクション種別を一覧表示する。
@@ -32,6 +32,16 @@ function targetTypeLabel(targetType: string) {
   return TARGET_TYPE_LABELS[targetType] ?? targetType;
 }
 
+// レビュー指摘対応（必須修正3, BR-HIST-002）: Vercel Cron Jobsによる公開予約の自動公開
+// （app/api/cron/publish-scheduled/route.ts）は actor_type = 'system' ・ admin_user_id = null
+// で記録されるため、管理者操作と区別できるよう表示を分ける。
+function actorLabel(log: AuditLogListItem) {
+  if (log.actor_type === "system") {
+    return "システム（自動公開）";
+  }
+  return log.admin_users?.name ?? "不明なユーザー";
+}
+
 export default async function Page() {
   const logs = await listAuditLogs();
 
@@ -58,9 +68,7 @@ export default async function Page() {
                 <td className="py-2 pr-4 text-neutral-500">
                   {new Date(log.created_at).toLocaleString("ja-JP")}
                 </td>
-                <td className="py-2 pr-4">
-                  {log.admin_users?.name ?? "不明なユーザー"}
-                </td>
+                <td className="py-2 pr-4">{actorLabel(log)}</td>
                 <td className="py-2 pr-4 font-mono">
                   {targetTypeLabel(log.target_type)} / {log.target_id}
                 </td>

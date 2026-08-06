@@ -6,8 +6,14 @@ import type { BaseEntity } from "@/lib/database/common";
 export type AuditAction =
   "create" | "update" | "delete" | "publish" | "unpublish";
 
+// レビュー指摘対応（必須修正3, BR-HIST-002）: 監査ログの操作者種別。
+// admin: 管理画面から管理者が行った操作（admin_user_id必須）
+// system: Vercel Cron Jobs等、管理者が紐付かないシステムによる自動操作（admin_user_idはnull）
+export type AuditActorType = "admin" | "system";
+
 export interface AuditLog extends BaseEntity {
-  admin_user_id: string;
+  actor_type: AuditActorType;
+  admin_user_id: string | null;
   target_type: string;
   target_id: string;
   action: AuditAction;

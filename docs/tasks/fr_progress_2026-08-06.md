@@ -38,7 +38,7 @@
 | FR-INV-004 | 公開ステータス変更 | ✅ | フォームのstatus select、PATCHで保存 |
 | FR-INV-005 | おすすめ／新着フラグ設定 | 🟡 | 管理側の設定は✅（P8参照）。公開側の表示（一覧強調）が❌ |
 | FR-INV-006 | 価格変更・履歴保持 | ✅ | `app/api/admin/vehicles/[id]/route.ts:69-76`（price_histories自動追記） |
-| FR-INV-007 | 公開予約 | 🟡 | P3参照。カラムはあるが入力UI・自動反映バッチがない |
+| FR-INV-007 | 公開予約 | ✅ | 2026-08-07実装。Vercel Cron（毎時）で自動公開、システム操作として監査ログに記録 |
 | FR-INV-008 | 一覧並び替え | ❌ | P7参照 |
 | FR-INV-009 | 写真アップロード・管理 | ✅ | 2026-08-06実装。`app/api/admin/vehicles/[id]/photos/**`、`components/inventory/vehicle-media-manager.tsx`。Storageバケット`vehicle-photos`は本番未作成のためユーザーによる手動SQL実行待ち |
 | FR-INV-010 | 動画登録 | ✅ | 2026-08-06実装。`app/api/admin/vehicles/[id]/videos/**`（外部URL方式、物理削除） |
@@ -81,7 +81,7 @@
 | FR-BLOG-001 | 記事作成・編集・削除（論理） | ✅ | 2026-08-06、削除機能実装済み |
 | FR-BLOG-002 | カテゴリ・タグ管理 | ✅ | カテゴリ（自由記述1件）・タグ（複数付与、2026-08-06実装）ともに対応済み |
 | FR-BLOG-003 | 下書き保存 | ✅ | status="draft" |
-| FR-BLOG-004 | 公開予約 | 🟡 | P3参照 |
+| FR-BLOG-004 | 公開予約 | ✅ | 2026-08-07実装 |
 | FR-BLOG-005 | 記事別SEO設定 | ✅ | 2026-08-06実装 |
 
 ### Jaguar Encyclopedia（図鑑）

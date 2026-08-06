@@ -29,6 +29,10 @@ import { RelatedContentPicker } from "@/components/related/related-content-picke
 import type { RelatedContentCandidate } from "@/lib/related/types";
 import { TagPicker } from "@/components/tags/tag-picker";
 import type { Tag } from "@/lib/seo/types";
+import {
+  toDatetimeLocalValue,
+  fromDatetimeLocalValue,
+} from "@/lib/utils/datetime-local";
 
 type HierarchyOptions = {
   manufacturers: Manufacturer[];
@@ -467,6 +471,23 @@ export function VehicleForm({
               新着
             </label>
           </div>
+          {/* FR-INV-007: 公開予約。下書き状態の車両にのみ意味を持つ項目のため、その旨をヘルプテキストで明示する */}
+          {/* レビュー指摘対応（必須修正1・2）: datetime-localはタイムゾーン情報を持たないローカル時刻
+              文字列を扱うため、表示時はUTC ISO→ローカル時刻、送信時はローカル時刻→UTC ISO（空文字はnull）
+              に変換する（lib/utils/datetime-local.ts）。 */}
+          <Field label="公開予約日時（任意）">
+            <input
+              type="datetime-local"
+              className="input"
+              {...register("scheduled_publish_at", {
+                setValueAs: (v) => fromDatetimeLocalValue(v as string),
+              })}
+              value={toDatetimeLocalValue(watch("scheduled_publish_at"))}
+            />
+            <p className="mt-1 text-base text-neutral-600">
+              指定日時になると自動的に公開ステータスに変わります（公開ステータスが「非公開」の場合のみ有効です）。
+            </p>
+          </Field>
         </div>
       </section>
 

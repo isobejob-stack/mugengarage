@@ -15,6 +15,10 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { SeoFieldsSection } from "@/components/ui/seo-fields-section";
 import { TagPicker } from "@/components/tags/tag-picker";
 import type { Tag } from "@/lib/seo/types";
+import {
+  toDatetimeLocalValue,
+  fromDatetimeLocalValue,
+} from "@/lib/utils/datetime-local";
 
 // SCR-ADM-010: ブログ記事編集フォーム
 export function ArticleForm({
@@ -150,6 +154,24 @@ export function ArticleForm({
           <option value="draft">下書き</option>
           <option value="published">公開</option>
         </select>
+      </Field>
+
+      {/* FR-BLOG-004: 公開予約。下書き状態の記事にのみ意味を持つ項目のため、その旨をヘルプテキストで明示する */}
+      {/* レビュー指摘対応（必須修正1・2）: datetime-localはタイムゾーン情報を持たないローカル時刻
+          文字列を扱うため、表示時はUTC ISO→ローカル時刻、送信時はローカル時刻→UTC ISO（空文字はnull）
+          に変換する（lib/utils/datetime-local.ts）。 */}
+      <Field label="公開予約日時（任意）">
+        <input
+          type="datetime-local"
+          className="input"
+          {...register("scheduled_publish_at", {
+            setValueAs: (v) => fromDatetimeLocalValue(v as string),
+          })}
+          value={toDatetimeLocalValue(watch("scheduled_publish_at"))}
+        />
+        <p className="mt-1 text-base text-neutral-600">
+          指定日時になると自動的に公開ステータスに変わります（公開ステータスが「下書き」の場合のみ有効です）。
+        </p>
       </Field>
 
       {isEdit && (

@@ -377,15 +377,22 @@ UNIQUE制約：`(tag_id, taggable_type, taggable_id)`
 
 ### 11.1 audit_logs（監査ログ）
 
-| カラム        | 型          | 制約                                                                  | 説明                 |
-| ------------- | ----------- | --------------------------------------------------------------------- | -------------------- |
-| id            | uuid        | PK                                                                    |                      |
-| admin_user_id | uuid        | FK→admin_users, NOT NULL                                              |                      |
-| target_type   | text        | NOT NULL                                                              | 変更対象のテーブル名 |
-| target_id     | uuid        | NOT NULL                                                              |                      |
-| action        | text        | NOT NULL, CHECK IN ('create','update','delete','publish','unpublish') |                      |
-| changes       | jsonb       | NULL可                                                                | 変更前後の差分       |
-| created_at    | timestamptz | NOT NULL DEFAULT now()                                                |                      |
+| カラム        | 型          | 制約                                                                                                  | 説明                                                                     |
+| ------------- | ----------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| id            | uuid        | PK                                                                                                      |                                                                           |
+| actor_type    | text        | NOT NULL DEFAULT 'admin', CHECK IN ('admin','system')                                                   | 操作者種別。管理者操作かCron等のシステム自動操作かを区別する             |
+| admin_user_id | uuid        | FK→admin_users, NULL可（actor_type='admin'の場合はNOT NULL、'system'の場合はNULLであることをCHECK制約で保証） |                                                                           |
+| target_type   | text        | NOT NULL                                                                                                 | 変更対象のテーブル名                                                     |
+| target_id     | uuid        | NOT NULL                                                                                                 |                                                                           |
+| action        | text        | NOT NULL, CHECK IN ('create','update','delete','publish','unpublish')                                   |                                                                           |
+| changes       | jsonb       | NULL可                                                                                                   | 変更前後の差分                                                           |
+| created_at    | timestamptz | NOT NULL DEFAULT now()                                                                                   |                                                                           |
+
+補足（レビュー指摘対応・必須修正3, BR-HIST-002）: Vercel Cron Jobsによる公開予約の自動公開
+（app/api/cron/publish-scheduled/route.ts）のように、紐付けられる管理者が存在しないシステム
+操作についても監査ログへの記録を省略しない。その際は actor_type = 'system' ・
+admin_user_id = null として記録する（マイグレーション:
+20260806110000_add_actor_type_to_audit_logs.sql）。
 
 ---
 
