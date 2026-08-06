@@ -42,5 +42,16 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Engagement Context: 会員登録機能がないため匿名セッションIDでお気に入りを管理する
+  // （FR-FAV-001, table_definitions.md 9.1）。未発行の訪問者には発行して1年保持する。
+  if (!request.cookies.get("mg_session_id")) {
+    response.cookies.set("mg_session_id", crypto.randomUUID(), {
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 365,
+      path: "/",
+    });
+  }
+
   return response;
 }

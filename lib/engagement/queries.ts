@@ -1,0 +1,176 @@
+import "server-only";
+import { createAdminClient } from "@/lib/supabase/admin";
+
+// FR-FAV-001: 現在のセッションがお気に入り登録済みの車両ID一覧
+export async function listFavoriteVehicleIds(sessionId: string) {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("favorites")
+    .select("vehicle_id")
+    .eq("session_id", sessionId);
+
+  return (data ?? []).map((f) => f.vehicle_id);
+}
+
+// FR-FAV-001: お気に入りの登録／解除をトグルする（一意制約 vehicle_id+session_id を利用）
+export async function toggleFavorite(sessionId: string, vehicleId: string) {
+  const supabase = createAdminClient();
+  const { data: existing } = await supabase
+    .from("favorites")
+    .select("id")
+    .eq("vehicle_id", vehicleId)
+    .eq("session_id", sessionId)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase.from("favorites").delete().eq("id", existing.id);
+    return false;
+  }
+
+  await supabase
+    .from("favorites")
+    .insert({ vehicle_id: vehicleId, session_id: sessionId });
+  return true;
+}
+
+// FR-FAV-002: お気に入り一覧（公開中の車両のみ、BR-DATA-002によりVehicle情報はコピーせず都度参照）
+export async function getPublicFavoriteVehicles(sessionId: string) {
+  const supabase = createAdminClient();
+  const vehicleIds = await listFavoriteVehicleIds(sessionId);
+  if (vehicleIds.length === 0) return [];
+
+  const { data } = await supabase
+    .from("vehicles")
+    .select(
+      "id, price, model_year, mileage_km, status, manufacturers(name), models(name)",
+    )
+    .in("id", vehicleIds)
+    .eq("status", "published")
+    .is("deleted_at", null);
+
+  const vehicles = (data ?? []) as unknown as Array<{
+    id: string;
+    price: number;
+    model_year: number | null;
+    mileage_km: number | null;
+    status: string;
+    manufacturers: { name: string } | null;
+    models: { name: string } | null;
+  }>;
+  if (vehicles.length === 0) return [];
+
+  const { data: seoMetas } = await supabase
+    .from("seo_metas")
+    .select("target_id, slug")
+    .eq("target_type", "vehicle")
+    .in(
+      "target_id",
+      vehicles.map((v) => v.id),
+    );
+  const slugByVehicleId = new Map(
+    (seoMetas ?? []).map((s) => [s.target_id, s.slug]),
+  );
+
+  return vehicles.map((v) => ({
+    ...v,
+    slug: slugByVehicleId.get(v.id) ?? null,
+  }));
+}
+
+// FR-FAV-004: お気に入り数を基にした人気ランキング（公開中の車両のみ）
+export async function getVehicleFavoriteRanking(limit = 10) {
+  const supabase = createAdminClient();
+  const { data: favorites } = await supabase
+    .from("favorites")
+    .select("vehicle_id");
+
+  if (!favorites || favorites.length === 0) return [];
+
+  const countByVehicleId = new Map<string, number>();
+  for (const f of favorites) {
+    countByVehicleId.set(
+      f.vehicle_id,
+      (countByVehicleId.get(f.vehicle_id) ?? 0) + 1,
+    );
+  }
+
+  const vehicleIds = Array.from(countByVehicleId.keys());
+  const { data } = await supabase
+    .from("vehicles")
+    .select(
+      "id, price, model_year, mileage_km, status, manufacturers(name), models(name)",
+    )
+    .in("id", vehicleIds)
+    .eq("status", "published")
+    .is("deleted_at", null);
+
+  const vehicles = (data ?? []) as unknown as Array<{
+    id: string;
+    price: number;
+    model_year: number | null;
+    mileage_km: number | null;
+    status: string;
+    manufacturers: { name: string } | null;
+    models: { name: string } | null;
+  }>;
+  if (vehicles.length === 0) return [];
+
+  const { data: seoMetas } = await supabase
+    .from("seo_metas")
+    .select("target_id, slug")
+    .eq("target_type", "vehicle")
+    .in(
+      "target_id",
+      vehicles.map((v) => v.id),
+    );
+  const slugByVehicleId = new Map(
+    (seoMetas ?? []).map((s) => [s.target_id, s.slug]),
+  );
+
+  return vehicles
+    .map((v) => ({
+      ...v,
+      slug: slugByVehicleId.get(v.id) ?? null,
+      favoriteCount: countByVehicleId.get(v.id) ?? 0,
+    }))
+    .sort((a, b) => b.favoriteCount - a.favoriteCount)
+    .slice(0, limit);
+}
+
+// FR-FAV-003: 管理画面向けのお気に入り登録数集計（全ステータス対象）
+export async function getAdminFavoriteCounts(limit = 20) {
+  const supabase = createAdminClient();
+  const { data: favorites } = await supabase
+    .from("favorites")
+    .select("vehicle_id");
+
+  if (!favorites || favorites.length === 0) return [];
+
+  const countByVehicleId = new Map<string, number>();
+  for (const f of favorites) {
+    countByVehicleId.set(
+      f.vehicle_id,
+      (countByVehicleId.get(f.vehicle_id) ?? 0) + 1,
+    );
+  }
+
+  const vehicleIds = Array.from(countByVehicleId.keys());
+  const { data } = await supabase
+    .from("vehicles")
+    .select("id, status, model_year, manufacturers(name), models(name)")
+    .in("id", vehicleIds)
+    .is("deleted_at", null);
+
+  const vehicles = (data ?? []) as unknown as Array<{
+    id: string;
+    status: string;
+    model_year: number | null;
+    manufacturers: { name: string } | null;
+    models: { name: string } | null;
+  }>;
+
+  return vehicles
+    .map((v) => ({ ...v, favoriteCount: countByVehicleId.get(v.id) ?? 0 }))
+    .sort((a, b) => b.favoriteCount - a.favoriteCount)
+    .slice(0, limit);
+}

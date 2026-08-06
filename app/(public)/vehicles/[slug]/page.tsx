@@ -3,8 +3,13 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getPublicVehicleBySlug } from "@/lib/inventory/queries";
 import { VehicleStatusBadge } from "@/components/ui/status-badge";
+import { FavoriteButton } from "@/components/engagement/favorite-button";
+import { getSessionId } from "@/lib/engagement/session";
+import { listFavoriteVehicleIds } from "@/lib/engagement/queries";
+import { listRelatedContents } from "@/lib/related/queries";
+import { RelatedContentList } from "@/components/related/related-content-list";
 
-// SCR-PUB-003: 車両詳細（FR-VEH-001, 002, 008。写真ギャラリー・関連コンテンツ等は今後実装）
+// SCR-PUB-003: 車両詳細（FR-VEH-001, 002, 005, 006, 008。写真ギャラリー等は今後実装）
 export default async function Page({
   params,
 }: {
@@ -16,6 +21,13 @@ export default async function Page({
   if (!vehicle) {
     notFound();
   }
+
+  const sessionId = await getSessionId();
+  const [favoriteIds, related] = await Promise.all([
+    sessionId ? listFavoriteVehicleIds(sessionId) : Promise.resolve([]),
+    listRelatedContents("vehicle", vehicle.id),
+  ]);
+  const isFavorited = favoriteIds.includes(vehicle.id);
 
   const markdownSections: Array<[string, string | null]> = [
     ["この車の魅力", vehicle.appeal_points],
@@ -37,6 +49,10 @@ export default async function Page({
       <p className="mt-2 text-2xl font-bold">
         ¥{vehicle.price.toLocaleString()}
       </p>
+
+      <div className="mt-4">
+        <FavoriteButton vehicleId={vehicle.id} initialFavorited={isFavorited} />
+      </div>
 
       <table className="mt-6 w-full border-collapse text-sm">
         <tbody>
@@ -70,6 +86,12 @@ export default async function Page({
             </div>
           </section>
         ))}
+
+      <RelatedContentList items={related} title="関連コンテンツ" />
+
+      <div className="mt-10 border-t border-neutral-200 pt-6">
+        <FavoriteButton vehicleId={vehicle.id} initialFavorited={isFavorited} />
+      </div>
     </main>
   );
 }

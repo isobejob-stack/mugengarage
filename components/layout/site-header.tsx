@@ -18,14 +18,22 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <a
-          href={LINE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="min-h-11 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white"
-        >
-          LINEで相談する
-        </a>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/favorites"
+            className="min-h-11 rounded-md border border-neutral-300 px-3 py-2 text-sm hover:border-neutral-500"
+          >
+            ♡ お気に入り
+          </Link>
+          <a
+            href={LINE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="min-h-11 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white"
+          >
+            LINEで相談する
+          </a>
+        </div>
       </div>
     </header>
   );

@@ -7,7 +7,12 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="text-2xl font-bold">在庫車両一覧</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">在庫車両一覧</h1>
+        <Link href="/vehicles/ranking" className="text-sm hover:underline">
+          人気ランキングを見る
+        </Link>
+      </div>
       <p className="mt-2 text-sm text-neutral-500">{vehicles.length}台</p>
 
       {vehicles.length === 0 ? (
