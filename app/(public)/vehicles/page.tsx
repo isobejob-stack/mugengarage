@@ -17,6 +17,21 @@ function toNumber(value: string | undefined) {
   return Number.isFinite(n) ? n : undefined;
 }
 
+// <input type="month">の "YYYY-MM" を車検満了日の比較用に日付文字列へ変換する
+function monthInputToDate(value: string | undefined, endOfMonth: boolean) {
+  if (!value) return undefined;
+  const match = /^(\d{4})-(\d{2})$/.exec(value);
+  if (!match) return undefined;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  if (!endOfMonth) {
+    return `${match[1]}-${match[2]}-01`;
+  }
+  // その月の末日（翌月0日目）
+  const lastDay = new Date(year, month, 0).getDate();
+  return `${match[1]}-${match[2]}-${String(lastDay).padStart(2, "0")}`;
+}
+
 function buildQueryString(params: SearchParams, overrides: SearchParams) {
   const merged = new URLSearchParams();
   for (const [key, value] of Object.entries({ ...params, ...overrides })) {
@@ -41,6 +56,9 @@ export default async function Page({
   const filters: VehicleSearchFilters = {
     manufacturerId: params.manufacturer || undefined,
     modelId: params.model || undefined,
+    seriesId: params.series || undefined,
+    generationId: params.generation || undefined,
+    gradeId: params.grade || undefined,
     priceMin: toNumber(params.price_min),
     priceMax: toNumber(params.price_max),
     modelYearMin: toNumber(params.year_min),
@@ -48,8 +66,37 @@ export default async function Page({
     mileageMax: toNumber(params.mileage_max),
     transmission: params.transmission || undefined,
     indoorStorageOnly: params.indoor === "1",
+    shakenExpiryFrom: monthInputToDate(params.shaken_from, false),
+    shakenExpiryTo: monthInputToDate(params.shaken_to, true),
+    displacementMin: toNumber(params.displacement_min),
+    displacementMax: toNumber(params.displacement_max),
+    horsepowerMin: toNumber(params.horsepower_min),
+    horsepowerMax: toNumber(params.horsepower_max),
+    ownerCountMax: toNumber(params.owner_count_max),
+    interiorColor: params.interior_color || undefined,
+    exteriorColor: params.exterior_color || undefined,
+    seatMaterial: params.seat_material || undefined,
+    drivetrain: params.drivetrain || undefined,
     sort: (params.sort as VehicleSearchFilters["sort"]) || undefined,
   };
+
+  // 詳細検索の条件が1つでも指定されていれば、再訪時に折りたたみを開いた状態にする
+  const hasAdvancedFilters = Boolean(
+    params.series ||
+      params.generation ||
+      params.grade ||
+      params.drivetrain ||
+      params.shaken_from ||
+      params.shaken_to ||
+      params.owner_count_max ||
+      params.displacement_min ||
+      params.displacement_max ||
+      params.horsepower_min ||
+      params.horsepower_max ||
+      params.interior_color ||
+      params.exterior_color ||
+      params.seat_material,
+  );
 
   const [{ vehicles, totalCount }, facets] = await Promise.all([
     searchPublicVehicles(filters, pagination),
@@ -193,6 +240,196 @@ export default async function Page({
             屋内保管のみ
           </label>
         </div>
+
+        {/* FR-SRCH-001: シリーズ・世代・グレード〜駆動方式までの詳細条件（画面が煩雑にならないよう折りたたみ） */}
+        <details
+          className="rounded-md border border-neutral-200 p-4"
+          open={hasAdvancedFilters}
+        >
+          <summary className="min-h-11 cursor-pointer py-2 text-base font-medium">
+            詳細検索（車種階層・車検・エンジン諸元・色ほか）
+          </summary>
+
+          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <label className="block">
+              <span className="text-sm font-medium">シリーズ</span>
+              <select
+                name="series"
+                defaultValue={params.series ?? ""}
+                className="input mt-1"
+              >
+                <option value="">指定なし</option>
+                {facets.series.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-sm font-medium">世代</span>
+              <select
+                name="generation"
+                defaultValue={params.generation ?? ""}
+                className="input mt-1"
+              >
+                <option value="">指定なし</option>
+                {facets.generations.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-sm font-medium">グレード</span>
+              <select
+                name="grade"
+                defaultValue={params.grade ?? ""}
+                className="input mt-1"
+              >
+                <option value="">指定なし</option>
+                {facets.grades.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-sm font-medium">駆動方式</span>
+              <select
+                name="drivetrain"
+                defaultValue={params.drivetrain ?? ""}
+                className="input mt-1"
+              >
+                <option value="">指定なし</option>
+                {facets.drivetrains.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <label className="block">
+              <span className="text-sm font-medium">車検残（この年月以降）</span>
+              <input
+                type="month"
+                name="shaken_from"
+                defaultValue={params.shaken_from ?? ""}
+                className="input mt-1"
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm font-medium">車検残（この年月以前）</span>
+              <input
+                type="month"
+                name="shaken_to"
+                defaultValue={params.shaken_to ?? ""}
+                className="input mt-1"
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm font-medium">オーナー数（上限）</span>
+              <input
+                type="number"
+                name="owner_count_max"
+                defaultValue={params.owner_count_max ?? ""}
+                className="input mt-1"
+              />
+            </label>
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <label className="block">
+              <span className="text-sm font-medium">排気量（下限・cc）</span>
+              <input
+                type="number"
+                name="displacement_min"
+                defaultValue={params.displacement_min ?? ""}
+                className="input mt-1"
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm font-medium">排気量（上限・cc）</span>
+              <input
+                type="number"
+                name="displacement_max"
+                defaultValue={params.displacement_max ?? ""}
+                className="input mt-1"
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm font-medium">馬力（下限・PS）</span>
+              <input
+                type="number"
+                name="horsepower_min"
+                defaultValue={params.horsepower_min ?? ""}
+                className="input mt-1"
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm font-medium">馬力（上限・PS）</span>
+              <input
+                type="number"
+                name="horsepower_max"
+                defaultValue={params.horsepower_max ?? ""}
+                className="input mt-1"
+              />
+            </label>
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <label className="block">
+              <span className="text-sm font-medium">内装色</span>
+              <select
+                name="interior_color"
+                defaultValue={params.interior_color ?? ""}
+                className="input mt-1"
+              >
+                <option value="">指定なし</option>
+                {facets.interiorColors.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-sm font-medium">外装色</span>
+              <select
+                name="exterior_color"
+                defaultValue={params.exterior_color ?? ""}
+                className="input mt-1"
+              >
+                <option value="">指定なし</option>
+                {facets.exteriorColors.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-sm font-medium">シート素材</span>
+              <select
+                name="seat_material"
+                defaultValue={params.seat_material ?? ""}
+                className="input mt-1"
+              >
+                <option value="">指定なし</option>
+                {facets.seatMaterials.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </details>
 
         <div className="flex gap-3">
           <button
