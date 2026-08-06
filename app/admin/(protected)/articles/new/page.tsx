@@ -1,10 +1,13 @@
+import { ArticleForm } from "@/components/content/article-form";
+
+// SCR-ADM-010: ブログ記事新規作成
 export default function Page() {
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="text-2xl font-bold">ブログ記事編集</h1>
-      <p className="mt-2 text-sm text-neutral-500">
-        SCR-ADM-010 ・ FR-BLOG-001〜005
-      </p>
+    <main className="mx-auto max-w-3xl px-4 py-8">
+      <h1 className="text-2xl font-bold">記事作成</h1>
+      <div className="mt-6">
+        <ArticleForm />
+      </div>
     </main>
   );
 }
