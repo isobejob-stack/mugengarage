@@ -19,3 +19,25 @@ export async function recordAuditLog(params: {
     changes: params.changes ?? null,
   });
 }
+
+export interface AuditLogListItem {
+  id: string;
+  target_type: string;
+  target_id: string;
+  action: AuditAction;
+  created_at: string;
+  admin_users: { name: string } | null;
+}
+
+// FR-ADM-005: 監査ログ一覧（管理用、新しい順）。
+// audit_logsは追記専用の観測ログのためページネーションは不要とし、直近100件のみ表示する。
+export async function listAuditLogs() {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("audit_logs")
+    .select("id, target_type, target_id, action, created_at, admin_users(name)")
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  return (data ?? []) as unknown as AuditLogListItem[];
+}
