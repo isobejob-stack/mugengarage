@@ -26,6 +26,10 @@ FR-IDそのものの正式な定義（各機能の詳細な受け入れ条件・
 - ただし、各FR-IDの正式な受け入れ基準・詳細仕様が必要になった際は、推測で実装せず、本Issueを参照した上で発注者に02_functional_requirements.mdの所在確認、または新規作成を依頼すること
 - 実装対象のFR-IDに疑義が生じた場合は、01_business_requirements.md 4章（ビジネス機能要件）・各database/api/screensドキュメントの記述を一次情報として扱う
 
+## 解決（2026-08-05）
+
+発注者より`02_functional_requirements.md`の提供を受け、`docs/requirements/02_functional_requirements.md`として配置した。FR-INV/VEH/SRCH/FAV/BLOG/ENC/TL/LIB/MNT/OWN/CRM/INQ/LINE/SNS/SEO/ADM/AI の全ドメインが定義済み。以降の実装ではFR-IDを一次情報として参照する。
+
 ## ステータス
 
-未解決（人間の判断待ち）
+解決済み

@@ -5,12 +5,12 @@
 
 ## 技術スタック（[docs/decisions/adr-001-tech-stack.md](docs/decisions/adr-001-tech-stack.md)）
 
-| レイヤー | 採用技術 |
-| --- | --- |
-| フロントエンド | Next.js 16（App Router） / TypeScript strict / Tailwind CSS |
-| フォーム・バリデーション | React Hook Form + Zod |
-| ホスティング | Vercel |
-| データベース・認証・ストレージ | Supabase（PostgreSQL / Supabase Auth / Supabase Storage） |
+| レイヤー                       | 採用技術                                                    |
+| ------------------------------ | ----------------------------------------------------------- |
+| フロントエンド                 | Next.js 16（App Router） / TypeScript strict / Tailwind CSS |
+| フォーム・バリデーション       | React Hook Form + Zod                                       |
+| ホスティング                   | Vercel                                                      |
+| データベース・認証・ストレージ | Supabase（PostgreSQL / Supabase Auth / Supabase Storage）   |
 
 ## ディレクトリ構成
 
@@ -72,5 +72,6 @@ npm run format:check   # Prettierチェックのみ
 
 ## 既知の未決事項
 
-- [docs/tasks/ISSUE-001](docs/tasks/ISSUE-001-missing-functional-requirements.md)：`02_functional_requirements.md` が未作成
-- [docs/tasks/ISSUE-002](docs/tasks/ISSUE-002-rls-policies-undefined.md)：Supabase RLSポリシーが未設計（全テーブルRLS有効・ポリシー未定義のため、実装前に方針決定が必要）
+- [docs/tasks/ISSUE-003](docs/tasks/ISSUE-003-production-domain-and-plan-upgrade.md)：本番公開前にVercel Proプラン移行＋独自ドメイン（`m-garage.com`予定）の取得・設定が必要（VercelのHobbyプランは商用利用不可のため）
+
+解決済みのIssueは[docs/tasks/](docs/tasks/)配下に履歴として残している（[ISSUE-001](docs/tasks/ISSUE-001-missing-functional-requirements.md): 02_functional_requirements.md取得済み、[ISSUE-002](docs/tasks/ISSUE-002-rls-policies-undefined.md): RLS方針決定済み）。

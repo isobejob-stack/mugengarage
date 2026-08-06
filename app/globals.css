@@ -24,3 +24,10 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@layer components {
+  /* 03_ui_rules.md 4章・5章: タップ領域44px以上、視認性の高い入力欄 */
+  .input {
+    @apply min-h-11 w-full rounded-md border border-neutral-300 px-3 text-base;
+  }
+}

@@ -1,10 +1,16 @@
-export default function Page() {
+import { getVehicleHierarchyOptions } from "@/lib/inventory/queries";
+import { VehicleForm } from "@/components/inventory/vehicle-form";
+
+// SCR-ADM-004: 車両登録フォーム
+export default async function Page() {
+  const options = await getVehicleHierarchyOptions();
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="text-2xl font-bold">車両登録フォーム</h1>
-      <p className="mt-2 text-sm text-neutral-500">
-        SCR-ADM-004 ・ FR-INV-001〜014, FR-VEH-004
-      </p>
+      <h1 className="text-2xl font-bold">車両登録</h1>
+      <div className="mt-6">
+        <VehicleForm options={options} />
+      </div>
     </main>
   );
 }
