@@ -43,7 +43,7 @@
 | FR-INV-009 | 写真アップロード・管理 | ✅ | 2026-08-06実装。`app/api/admin/vehicles/[id]/photos/**`、`components/inventory/vehicle-media-manager.tsx`。Storageバケット`vehicle-photos`は本番未作成のためユーザーによる手動SQL実行待ち |
 | FR-INV-010 | 動画登録 | ✅ | 2026-08-06実装。`app/api/admin/vehicles/[id]/videos/**`（外部URL方式、物理削除） |
 | FR-INV-011 | 車両別SEO設定 | ✅ | 2026-08-06実装。slug/Title/Description/OGP/canonical編集可能 |
-| FR-INV-012 | 車両別タグ付け | ❌ | P2参照 |
+| FR-INV-012 | 車両別タグ付け | ✅ | 2026-08-06実装 |
 | FR-INV-013 | グレード別テンプレート適用 | ✅ | `components/inventory/vehicle-form.tsx:82-96`（未入力項目にのみ自動入力） |
 | FR-INV-014 | 関連コンテンツ紐付け | 🟡 | `lib/related/*`基盤は存在するが、`vehicle-form.tsx`に`RelatedContentPicker`が組み込まれておらず、車両側から関連記事／図鑑を選ぶことができない（整備実績・年表・ライブラリ側からは車両を選べる＝一方向） |
 
@@ -79,7 +79,7 @@
 | FR-ID | 機能 | 状況 | 詳細 |
 |---|---|---|---|
 | FR-BLOG-001 | 記事作成・編集・削除（論理） | ✅ | 2026-08-06、削除機能実装済み |
-| FR-BLOG-002 | カテゴリ・タグ管理 | 🟡 | カテゴリ（自由記述1件）は✅。タグ（複数付与）はP2参照で❌ |
+| FR-BLOG-002 | カテゴリ・タグ管理 | ✅ | カテゴリ（自由記述1件）・タグ（複数付与、2026-08-06実装）ともに対応済み |
 | FR-BLOG-003 | 下書き保存 | ✅ | status="draft" |
 | FR-BLOG-004 | 公開予約 | 🟡 | P3参照 |
 | FR-BLOG-005 | 記事別SEO設定 | ✅ | 2026-08-06実装 |
