@@ -137,9 +137,13 @@ export async function PATCH(
     }
   }
 
+  // encyclopedia_entriesテーブル自体はseoカラムを持たないため、update対象から除外する
+  // （SEOメタ情報はseo_metasで別途管理）
+  const { seo: _seo, ...entryValues } = parsed.data;
+
   const { data: entry, error } = await supabase
     .from("encyclopedia_entries")
-    .update(parsed.data)
+    .update(entryValues)
     .eq("id", id)
     .select()
     .single();

@@ -95,7 +95,7 @@ export async function PATCH(
     });
   }
 
-  const { related, ...values } = parsed.data;
+  const { related, seo: _seo, ...values } = parsed.data;
   const supabase = createAdminClient();
   const { data: event, error } = await supabase
     .from("timeline_events")

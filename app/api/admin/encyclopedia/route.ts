@@ -50,9 +50,13 @@ export async function POST(request: NextRequest) {
     });
   }
 
+  // encyclopedia_entriesテーブル自体はseoカラムを持たないため、insert対象から除外する
+  // （SEOメタ情報はseo_metasで別途管理）
+  const { seo: _seo, ...entryValues } = parsed.data;
+
   const { data: entry, error } = await supabase
     .from("encyclopedia_entries")
-    .insert(parsed.data)
+    .insert(entryValues)
     .select()
     .single();
 

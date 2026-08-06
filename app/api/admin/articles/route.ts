@@ -5,6 +5,7 @@ import { apiError, apiInternalError } from "@/lib/api/error-response";
 import { articleFormSchema } from "@/lib/content/schema";
 import { recordAuditLog } from "@/lib/audit/log";
 import { listAdminArticles } from "@/lib/content/queries";
+import { replaceTaggings } from "@/lib/tags/queries";
 
 // FR-BLOG-001: 記事一覧取得（管理用）
 export async function GET() {
@@ -50,12 +51,16 @@ export async function POST(request: NextRequest) {
     });
   }
 
+  // articlesテーブル自体はtags/seoカラムを持たないため、insert対象から除外する
+  // （tagsはtaggings、seoはseo_metasで別途管理）
+  const { tags, seo: _seo, ...articleValues } = parsed.data;
+
   const { data: article, error } = await supabase
     .from("articles")
     .insert({
-      ...parsed.data,
+      ...articleValues,
       published_at:
-        parsed.data.status === "published" ? new Date().toISOString() : null,
+        articleValues.status === "published" ? new Date().toISOString() : null,
     })
     .select()
     .single();
@@ -63,6 +68,9 @@ export async function POST(request: NextRequest) {
   if (error || !article) {
     return apiInternalError(error);
   }
+
+  // FR-BLOG-002: タグの紐付け（BR-DATA-003: マスタデータとして管理）
+  await replaceTaggings("article", article.id, tags);
 
   await recordAuditLog({
     adminUserId: user.id,

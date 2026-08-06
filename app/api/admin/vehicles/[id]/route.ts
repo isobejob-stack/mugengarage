@@ -14,6 +14,7 @@ import {
   seoWriteErrorResponse,
 } from "@/lib/seo/service";
 import { replaceRelatedContents } from "@/lib/related/queries";
+import { replaceTaggings } from "@/lib/tags/queries";
 
 // FR-INV-002: 車両詳細取得（管理用、編集フォームの初期値）
 // FR-INV-011: SEO編集フォームの初期値として、slug・SEOメタ情報も併せて返す
@@ -90,7 +91,8 @@ export async function PATCH(
   }
 
   const currentSeo = await getSeoMeta("vehicle", id);
-  const { slug: newSlug, related, ...vehicleValues } = parsed.data;
+  const { slug: newSlug, related, tags, seo: _seo, ...vehicleValues } =
+    parsed.data;
 
   // FR-SEO-004: Slug変更の事前バリデーション（DB書き込み前にチェックする）
   if (newSlug !== undefined && newSlug !== currentSeo?.slug) {
@@ -117,6 +119,9 @@ export async function PATCH(
 
   // FR-INV-014: 関連記事／関連図鑑／関連ブログ／関連整備実績の紐付け（BR-DOM-004: 参照のみでコピーしない）
   await replaceRelatedContents("vehicle", id, related);
+
+  // FR-INV-012: タグの紐付け（BR-DATA-003: マスタデータとして管理）
+  await replaceTaggings("vehicle", id, tags);
 
   if (existing.price !== parsed.data.price) {
     await supabase.from("price_histories").insert({

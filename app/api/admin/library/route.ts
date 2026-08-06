@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const { related, ...values } = parsed.data;
+  const { related, seo: _seo, ...values } = parsed.data;
   const { data: entry, error } = await supabase
     .from("library_entries")
     .insert(values)

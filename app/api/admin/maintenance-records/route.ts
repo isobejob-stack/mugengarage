@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const { related, ...values } = parsed.data;
+  const { related, seo: _seo, ...values } = parsed.data;
   const { data: record, error } = await supabase
     .from("maintenance_records")
     .insert(values)

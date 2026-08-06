@@ -12,6 +12,7 @@ import {
   upsertSeoMetaFields,
   seoWriteErrorResponse,
 } from "@/lib/seo/service";
+import { replaceTaggings } from "@/lib/tags/queries";
 
 // FR-BLOG-001: 記事詳細取得（管理用、編集フォームの初期値）
 // FR-BLOG-005: SEO編集フォームの初期値として、SEOメタ情報も併せて返す
@@ -133,10 +134,14 @@ export async function PATCH(
   const nowPublishing =
     existing.status !== "published" && parsed.data.status === "published";
 
+  // articlesテーブル自体はtags/seoカラムを持たないため、update対象から除外する
+  // （tagsはtaggings、seoはseo_metasで別途管理）
+  const { tags, seo: _seo, ...articleValues } = parsed.data;
+
   const { data: article, error } = await supabase
     .from("articles")
     .update({
-      ...parsed.data,
+      ...articleValues,
       published_at: nowPublishing
         ? new Date().toISOString()
         : existing.published_at,
@@ -148,6 +153,9 @@ export async function PATCH(
   if (error || !article) {
     return apiInternalError(error);
   }
+
+  // FR-BLOG-002: タグの紐付け（BR-DATA-003: マスタデータとして管理）
+  await replaceTaggings("article", id, tags);
 
   // FR-BLOG-005: SEOメタ情報（Title/Description/OGP画像/canonical URL）のupsert
   if (seoParsed.data) {

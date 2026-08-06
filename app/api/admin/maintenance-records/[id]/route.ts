@@ -137,7 +137,7 @@ export async function PATCH(
     }
   }
 
-  const { related, ...values } = parsed.data;
+  const { related, seo: _seo, ...values } = parsed.data;
   const { data: record, error } = await supabase
     .from("maintenance_records")
     .update(values)
