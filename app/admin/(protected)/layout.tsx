@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { AdminNav } from "@/components/layout/admin-nav";
 
 // proxy.ts（旧middleware.ts相当）でも未認証リダイレクトを行うが、
 // フロント制御だけに頼らない多層防御としてServer Component側でも検証する
@@ -18,5 +19,10 @@ export default async function AdminProtectedLayout({
     redirect("/admin/login");
   }
 
-  return <div className="min-h-screen bg-neutral-50">{children}</div>;
+  return (
+    <div className="min-h-screen bg-neutral-50">
+      <AdminNav />
+      {children}
+    </div>
+  );
 }

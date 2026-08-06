@@ -1,10 +1,20 @@
-export default function Page() {
+import { listRelatedContentCandidates } from "@/lib/related/queries";
+import { LibraryEntryForm } from "@/components/library/library-entry-form";
+
+// SCR-ADM-016: ライブラリ項目新規作成
+export default async function Page() {
+  const candidates = await listRelatedContentCandidates([
+    "encyclopedia_entry",
+    "article",
+    "library_entry",
+  ]);
+
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="text-2xl font-bold">ライブラリ編集</h1>
-      <p className="mt-2 text-sm text-neutral-500">
-        SCR-ADM-016 ・ FR-LIB-001, FR-LIB-002
-      </p>
+    <main className="mx-auto max-w-3xl px-4 py-8">
+      <h1 className="text-2xl font-bold">ライブラリ項目作成</h1>
+      <div className="mt-6">
+        <LibraryEntryForm candidates={candidates} />
+      </div>
     </main>
   );
 }

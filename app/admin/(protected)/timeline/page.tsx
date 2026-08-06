@@ -1,8 +1,47 @@
-export default function Page() {
+import Link from "next/link";
+import { listAdminTimelineEvents } from "@/lib/timeline/queries";
+import { timelineCategoryLabels } from "@/lib/timeline/schema";
+
+// SCR-ADM-013: 年表管理一覧
+export default async function Page() {
+  const events = await listAdminTimelineEvents();
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="text-2xl font-bold">年表管理一覧</h1>
-      <p className="mt-2 text-sm text-neutral-500">SCR-ADM-013 ・ FR-TL-001</p>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Jaguar年表</h1>
+        <Link
+          href="/admin/timeline/new"
+          className="min-h-11 rounded-md bg-blue-600 px-4 py-2 font-medium text-white"
+        >
+          新規作成
+        </Link>
+      </div>
+
+      {events.length === 0 ? (
+        <p className="mt-8 text-neutral-500">年表イベントはまだありません。</p>
+      ) : (
+        <ul className="mt-6 flex flex-col gap-3">
+          {events.map((e) => (
+            <li key={e.id} className="rounded-md border border-neutral-200 p-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm text-neutral-500">
+                    {e.event_date}（{timelineCategoryLabels[e.category]}）
+                  </p>
+                  <p className="font-medium">{e.title}</p>
+                </div>
+                <Link
+                  href={`/admin/timeline/${e.id}/edit`}
+                  className="min-h-11 rounded-md border border-neutral-300 px-3 py-2 text-sm"
+                >
+                  編集
+                </Link>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </main>
   );
 }
