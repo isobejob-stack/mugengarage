@@ -77,6 +77,7 @@ export default async function Page({
     exteriorColor: params.exterior_color || undefined,
     seatMaterial: params.seat_material || undefined,
     drivetrain: params.drivetrain || undefined,
+    tagId: params.tag || undefined,
     sort: (params.sort as VehicleSearchFilters["sort"]) || undefined,
   };
 
@@ -95,7 +96,8 @@ export default async function Page({
       params.horsepower_max ||
       params.interior_color ||
       params.exterior_color ||
-      params.seat_material,
+      params.seat_material ||
+      params.tag,
   );
 
   const [{ vehicles, totalCount }, facets] = await Promise.all([
@@ -424,6 +426,25 @@ export default async function Page({
                 {facets.seatMaterials.map((m) => (
                   <option key={m} value={m}>
                     {m}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          {/* FR-SRCH-001: タグでの絞り込み（FR-INV-012で車両に付与されたタグ） */}
+          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <label className="block">
+              <span className="text-sm font-medium">タグ</span>
+              <select
+                name="tag"
+                defaultValue={params.tag ?? ""}
+                className="input mt-1"
+              >
+                <option value="">指定なし</option>
+                {facets.tags.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
                   </option>
                 ))}
               </select>

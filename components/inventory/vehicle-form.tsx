@@ -27,6 +27,8 @@ import {
 } from "@/components/inventory/vehicle-media-manager";
 import { RelatedContentPicker } from "@/components/related/related-content-picker";
 import type { RelatedContentCandidate } from "@/lib/related/types";
+import { TagPicker } from "@/components/tags/tag-picker";
+import type { Tag } from "@/lib/seo/types";
 
 type HierarchyOptions = {
   manufacturers: Manufacturer[];
@@ -45,6 +47,7 @@ export function VehicleForm({
   initialPhotos,
   initialVideos,
   candidates,
+  allTags,
 }: {
   options: HierarchyOptions;
   vehicleId?: string;
@@ -52,8 +55,10 @@ export function VehicleForm({
   initialPhotos?: PhotoWithUrl[];
   initialVideos?: VehicleVideo[];
   candidates?: RelatedContentCandidate[];
+  allTags?: Tag[];
 }) {
   const relatedCandidates = candidates ?? [];
+  const tagOptions = allTags ?? [];
   const router = useRouter();
   const isEdit = Boolean(vehicleId);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -421,6 +426,20 @@ export function VehicleForm({
               candidates={relatedCandidates}
               selected={watch("related")}
               onChange={(next) => setValue("related", next)}
+            />
+          </Field>
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-lg font-bold">タグ</h2>
+        <div className="mt-4">
+          {/* FR-INV-012: 自由なタグを複数付与できる（BR-DATA-003: マスタデータとして管理） */}
+          <Field label="タグ（任意）">
+            <TagPicker
+              availableTags={tagOptions}
+              selectedTagIds={watch("tags")}
+              onChange={(next) => setValue("tags", next)}
             />
           </Field>
         </div>

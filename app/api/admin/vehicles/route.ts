@@ -73,7 +73,14 @@ export async function POST(request: NextRequest) {
   await replaceRelatedContents("vehicle", vehicle.id, related);
 
   // FR-INV-012: タグの紐付け（BR-DATA-003: マスタデータとして管理）
-  await replaceTaggings("vehicle", vehicle.id, tags);
+  const { error: tagsError } = await replaceTaggings(
+    "vehicle",
+    vehicle.id,
+    tags,
+  );
+  if (tagsError) {
+    return apiInternalError(tagsError);
+  }
 
   const slug = buildVehicleSlug(model.slug, vehicle.id);
   await supabase.from("seo_metas").insert({

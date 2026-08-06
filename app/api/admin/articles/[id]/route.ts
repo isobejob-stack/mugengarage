@@ -155,7 +155,10 @@ export async function PATCH(
   }
 
   // FR-BLOG-002: タグの紐付け（BR-DATA-003: マスタデータとして管理）
-  await replaceTaggings("article", id, tags);
+  const { error: tagsError } = await replaceTaggings("article", id, tags);
+  if (tagsError) {
+    return apiInternalError(tagsError);
+  }
 
   // FR-BLOG-005: SEOメタ情報（Title/Description/OGP画像/canonical URL）のupsert
   if (seoParsed.data) {

@@ -121,7 +121,10 @@ export async function PATCH(
   await replaceRelatedContents("vehicle", id, related);
 
   // FR-INV-012: タグの紐付け（BR-DATA-003: マスタデータとして管理）
-  await replaceTaggings("vehicle", id, tags);
+  const { error: tagsError } = await replaceTaggings("vehicle", id, tags);
+  if (tagsError) {
+    return apiInternalError(tagsError);
+  }
 
   if (existing.price !== parsed.data.price) {
     await supabase.from("price_histories").insert({

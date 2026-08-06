@@ -70,7 +70,14 @@ export async function POST(request: NextRequest) {
   }
 
   // FR-BLOG-002: タグの紐付け（BR-DATA-003: マスタデータとして管理）
-  await replaceTaggings("article", article.id, tags);
+  const { error: tagsError } = await replaceTaggings(
+    "article",
+    article.id,
+    tags,
+  );
+  if (tagsError) {
+    return apiInternalError(tagsError);
+  }
 
   await recordAuditLog({
     adminUserId: user.id,

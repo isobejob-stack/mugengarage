@@ -11,6 +11,8 @@ export const vehicleFormSchema = z.object({
   seo: seoFormFieldsSchema.optional(),
   // FR-INV-014: 関連記事／関連図鑑／関連ブログ／関連整備実績の紐付け（BR-DOM-004: 参照のみでコピーしない）
   related: z.array(relatedTargetSchema),
+  // FR-INV-012: タグ付け（BR-DATA-003: ハードコードせず管理画面から追加できるマスタデータとして管理する）
+  tags: z.array(z.string().uuid()),
   manufacturer_id: z.string().uuid("メーカーを選択してください"),
   model_id: z.string().uuid("車種を選択してください"),
   series_id: z.string().uuid().nullable(),
@@ -65,6 +67,7 @@ export type VehicleFormValues = z.infer<typeof vehicleFormSchema>;
 
 export const emptyVehicleFormValues: VehicleFormValues = {
   related: [],
+  tags: [],
   manufacturer_id: "",
   model_id: "",
   series_id: null,

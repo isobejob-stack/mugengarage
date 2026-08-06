@@ -13,15 +13,20 @@ import {
 import { emptySeoFieldsValues } from "@/lib/seo/schema";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { SeoFieldsSection } from "@/components/ui/seo-fields-section";
+import { TagPicker } from "@/components/tags/tag-picker";
+import type { Tag } from "@/lib/seo/types";
 
 // SCR-ADM-010: ブログ記事編集フォーム
 export function ArticleForm({
   articleId,
   defaultValues,
+  allTags,
 }: {
   articleId?: string;
   defaultValues?: ArticleFormValues;
+  allTags?: Tag[];
 }) {
+  const tagOptions = allTags ?? [];
   const router = useRouter();
   const isEdit = Boolean(articleId);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -129,6 +134,15 @@ export function ArticleForm({
 
       <Field label="本文（Markdown）" error={errors.body?.message}>
         <textarea rows={14} className="input" {...register("body")} />
+      </Field>
+
+      {/* FR-BLOG-002: 記事にタグを設定できる（BR-DATA-003: マスタデータとして管理） */}
+      <Field label="タグ（任意）">
+        <TagPicker
+          availableTags={tagOptions}
+          selectedTagIds={watch("tags")}
+          onChange={(next) => setValue("tags", next)}
+        />
       </Field>
 
       <Field label="公開ステータス">

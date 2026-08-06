@@ -13,6 +13,7 @@ import {
   listRelatedContentCandidates,
   listRelatedContents,
 } from "@/lib/related/queries";
+import { listTags, listTagsForTaggable } from "@/lib/tags/queries";
 
 // SCR-ADM-004: 車両編集フォーム
 export default async function Page({
@@ -21,23 +22,35 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [vehicle, options, photos, videos, seoMeta, candidates, related] =
-    await Promise.all([
-      getAdminVehicleById(id),
-      getVehicleHierarchyOptions(),
-      getVehiclePhotos(id),
-      getVehicleVideos(id),
-      // FR-INV-011: SEO編集フォームの初期値として、slug・SEOメタ情報も併せて取得する
-      getSeoMeta("vehicle", id),
-      // FR-INV-014: 関連記事／関連図鑑／関連ブログ／関連整備実績の紐付け候補
-      listRelatedContentCandidates([
-        "article",
-        "encyclopedia_entry",
-        "library_entry",
-        "maintenance_record",
-      ]),
-      listRelatedContents("vehicle", id),
-    ]);
+  const [
+    vehicle,
+    options,
+    photos,
+    videos,
+    seoMeta,
+    candidates,
+    related,
+    allTags,
+    vehicleTags,
+  ] = await Promise.all([
+    getAdminVehicleById(id),
+    getVehicleHierarchyOptions(),
+    getVehiclePhotos(id),
+    getVehicleVideos(id),
+    // FR-INV-011: SEO編集フォームの初期値として、slug・SEOメタ情報も併せて取得する
+    getSeoMeta("vehicle", id),
+    // FR-INV-014: 関連記事／関連図鑑／関連ブログ／関連整備実績の紐付け候補
+    listRelatedContentCandidates([
+      "article",
+      "encyclopedia_entry",
+      "library_entry",
+      "maintenance_record",
+    ]),
+    listRelatedContents("vehicle", id),
+    // FR-INV-012: タグ選択候補・現在の紐付けタグ
+    listTags(),
+    listTagsForTaggable("vehicle", id),
+  ]);
 
   if (!vehicle) {
     notFound();
@@ -93,6 +106,7 @@ export default async function Page({
     other_notes: vehicle.other_notes,
     scheduled_publish_at: vehicle.scheduled_publish_at,
     related: related.map((r) => ({ type: r.type, id: r.id })),
+    tags: vehicleTags.map((t) => t.id),
     slug: seoMeta?.slug ?? undefined,
     seo: {
       title: seoMeta?.title ?? null,
@@ -113,6 +127,7 @@ export default async function Page({
           initialPhotos={photosWithUrl}
           initialVideos={videos}
           candidates={candidates}
+          allTags={allTags}
         />
       </div>
     </main>

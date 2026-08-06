@@ -12,6 +12,8 @@ export const articleFormSchema = z.object({
   status: z.enum(["draft", "published"]),
   category: z.string().nullable(),
   scheduled_publish_at: z.string().nullable(),
+  // FR-BLOG-002: タグ付け（BR-DATA-003: ハードコードせず管理画面から追加できるマスタデータとして管理する）
+  tags: z.array(z.string().uuid()),
   // FR-BLOG-005: SEOメタ情報（Title/Description/OGP画像/canonical URL）。編集画面でのみ入力対象とする
   seo: seoFormFieldsSchema.optional(),
 });
@@ -25,6 +27,7 @@ export const emptyArticleFormValues: ArticleFormValues = {
   status: "draft",
   category: null,
   scheduled_publish_at: null,
+  tags: [],
 };
 
 // タイトルからslugを自動提案する（管理者は編集可能、BR-URL-001の永続化方針を尊重し

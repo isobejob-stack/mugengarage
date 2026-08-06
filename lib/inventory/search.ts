@@ -2,6 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { PaginationParams } from "@/lib/api/pagination";
 import { toRange } from "@/lib/api/pagination";
+import { listTags, listTaggableIdsByTag } from "@/lib/tags/queries";
 
 // FR-SRCH-001: 車両一覧の絞り込み条件
 export interface VehicleSearchFilters {
@@ -29,6 +30,9 @@ export interface VehicleSearchFilters {
   exteriorColor?: string;
   seatMaterial?: string;
   drivetrain?: string;
+  // FR-SRCH-001: タグでの絞り込み（1件のみ指定可。taggingsはポリモーフィックな中間テーブルのため
+  // taggable_id経由で対象車両IDを取得してから絞り込む）
+  tagId?: string;
   sort?: "new" | "price_asc" | "price_desc";
 }
 
@@ -59,6 +63,7 @@ export async function getVehicleSearchFacetOptions() {
     { data: exteriorColors },
     { data: seatMaterials },
     { data: drivetrains },
+    tags,
   ] = await Promise.all([
     supabase
       .from("manufacturers")
@@ -115,6 +120,8 @@ export async function getVehicleSearchFacetOptions() {
       .eq("status", "published")
       .is("deleted_at", null)
       .not("drivetrain", "is", null),
+    // FR-SRCH-001: タグでの絞り込み用の選択肢（タグマスタ全件）
+    listTags(),
   ]);
 
   return {
@@ -128,6 +135,7 @@ export async function getVehicleSearchFacetOptions() {
     exteriorColors: distinctStringOptions(exteriorColors, "exterior_color"),
     seatMaterials: distinctStringOptions(seatMaterials, "seat_material"),
     drivetrains: distinctStringOptions(drivetrains, "drivetrain"),
+    tags: tags.map((t) => ({ id: t.id, name: t.name })),
   };
 }
 
@@ -215,6 +223,18 @@ export async function searchPublicVehicles(
   }
   if (filters.drivetrain) {
     query = query.eq("drivetrain", filters.drivetrain);
+  }
+  // FR-SRCH-001: タグでの絞り込み。taggingsはポリモーフィックな中間テーブルで
+  // vehiclesへの直接FKを持たないため、対象車両IDを先に取得してからinで絞り込む
+  if (filters.tagId) {
+    const taggedVehicleIds = await listTaggableIdsByTag(
+      "vehicle",
+      filters.tagId,
+    );
+    if (taggedVehicleIds.length === 0) {
+      return { vehicles: [], totalCount: 0 };
+    }
+    query = query.in("id", taggedVehicleIds);
   }
 
   switch (filters.sort) {
