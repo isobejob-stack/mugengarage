@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { seoFormFieldsSchema } from "@/lib/seo/schema";
 
 // FR-ENC-001: 図鑑項目の入力スキーマ（table_definitions.md 5.1準拠）
 export const encyclopediaEntryFormSchema = z.object({
@@ -19,6 +20,8 @@ export const encyclopediaEntryFormSchema = z.object({
     .min(1, "スラッグを入力してください")
     .regex(/^[a-z0-9-]+$/, "半角英数字とハイフンのみ使用できます"),
   body: z.string().min(1, "本文を入力してください"),
+  // FR-ENC-004: SEOメタ情報（Title/Description/OGP画像/canonical URL）。編集画面でのみ入力対象とする
+  seo: seoFormFieldsSchema.optional(),
 });
 
 export type EncyclopediaEntryFormValues = z.infer<

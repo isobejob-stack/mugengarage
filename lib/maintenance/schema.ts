@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { relatedTargetSchema } from "@/lib/related/schema";
+import { seoFormFieldsSchema } from "@/lib/seo/schema";
 
 // FR-MNT-001: 整備実績の入力スキーマ（table_definitions.md 6.2準拠）
 export const maintenanceRecordFormSchema = z.object({
@@ -13,6 +14,8 @@ export const maintenanceRecordFormSchema = z.object({
   cost: z.number().nullable(),
   body: z.string().min(1, "本文を入力してください"),
   related: z.array(relatedTargetSchema),
+  // FR-SEO-001: SEOメタ情報（Title/Description/OGP画像/canonical URL）。編集画面でのみ入力対象とする
+  seo: seoFormFieldsSchema.optional(),
 });
 
 export type MaintenanceRecordFormValues = z.infer<

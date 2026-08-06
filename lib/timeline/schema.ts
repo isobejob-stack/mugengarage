@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { relatedTargetSchema } from "@/lib/related/schema";
+import { seoFormFieldsSchema } from "@/lib/seo/schema";
 
 // FR-TL-001: 年表イベントの入力スキーマ（table_definitions.md 5.2準拠）
+// 年表イベントは個別公開ページを持たない（BR-DOM-003）ため、Slugの入力対象には含めない。
 export const timelineEventFormSchema = z.object({
   event_date: z.string().min(1, "日付を入力してください"),
   date_precision: z.enum(["year", "month", "day"]),
@@ -15,6 +17,8 @@ export const timelineEventFormSchema = z.object({
   title: z.string().min(1, "タイトルを入力してください"),
   body: z.string().nullable(),
   related: z.array(relatedTargetSchema),
+  // FR-SEO-001: SEOメタ情報（Title/Description/OGP画像/canonical URL）。編集画面でのみ入力対象とする
+  seo: seoFormFieldsSchema.optional(),
 });
 
 export type TimelineEventFormValues = z.infer<typeof timelineEventFormSchema>;

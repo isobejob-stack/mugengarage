@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { seoFormFieldsSchema } from "@/lib/seo/schema";
 
 // FR-BLOG-001〜004: ブログ記事の入力スキーマ（table_definitions.md 6.1準拠）
 export const articleFormSchema = z.object({
@@ -11,6 +12,8 @@ export const articleFormSchema = z.object({
   status: z.enum(["draft", "published"]),
   category: z.string().nullable(),
   scheduled_publish_at: z.string().nullable(),
+  // FR-BLOG-005: SEOメタ情報（Title/Description/OGP画像/canonical URL）。編集画面でのみ入力対象とする
+  seo: seoFormFieldsSchema.optional(),
 });
 
 export type ArticleFormValues = z.infer<typeof articleFormSchema>;

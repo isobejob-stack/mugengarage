@@ -13,6 +13,9 @@ import {
 import { slugify } from "@/lib/content/schema";
 import { RelatedContentPicker } from "@/components/related/related-content-picker";
 import type { RelatedContentCandidate } from "@/lib/related/types";
+import { emptySeoFieldsValues } from "@/lib/seo/schema";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { SeoFieldsSection } from "@/components/ui/seo-fields-section";
 
 // SCR-ADM-018: 整備実績編集フォーム
 export function MaintenanceRecordForm({
@@ -28,6 +31,9 @@ export function MaintenanceRecordForm({
   const isEdit = Boolean(recordId);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [slugTouched, setSlugTouched] = useState(isEdit);
+  const [pendingDelete, setPendingDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const {
     register,
@@ -56,6 +62,26 @@ export function MaintenanceRecordForm({
     if (!res.ok) {
       const body = await res.json().catch(() => null);
       setSubmitError(body?.error?.message ?? "保存に失敗しました");
+      return;
+    }
+
+    router.push("/admin/maintenance-records");
+    router.refresh();
+  };
+
+  // FR-MNT-001: 整備実績の論理削除
+  const handleDelete = async () => {
+    if (!recordId) return;
+    setDeleteError(null);
+    setIsDeleting(true);
+    const res = await fetch(`/api/admin/maintenance-records/${recordId}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      setDeleteError(body?.error?.message ?? "削除に失敗しました");
+      setIsDeleting(false);
       return;
     }
 
@@ -92,6 +118,11 @@ export function MaintenanceRecordForm({
             setValue("slug", e.target.value);
           }}
         />
+        {isEdit && (
+          <p className="mt-1 text-base text-neutral-600">
+            URLが変更されます。変更前のURLは自動的に新しいURLへリダイレクトされます。
+          </p>
+        )}
       </Field>
 
       <Field label="カテゴリ（任意）">
@@ -139,7 +170,40 @@ export function MaintenanceRecordForm({
         />
       </Field>
 
+      {isEdit && (
+        <SeoFieldsSection
+          value={watch("seo") ?? emptySeoFieldsValues}
+          onChange={(next) => setValue("seo", next)}
+          errors={{
+            title: errors.seo?.title?.message,
+            description: errors.seo?.description?.message,
+            og_image_url: errors.seo?.og_image_url?.message,
+            canonical_url: errors.seo?.canonical_url?.message,
+          }}
+        />
+      )}
+
       {submitError && <p className="text-sm text-red-600">{submitError}</p>}
+
+      {isEdit && (
+        <section className="rounded-md border border-red-200 bg-red-50 p-4">
+          <h2 className="text-base font-bold text-red-700">危険な操作</h2>
+          <p className="mt-1 text-base text-neutral-600">
+            この整備実績を削除すると公開ページから即座に非表示になります。この操作は元に戻せません。
+          </p>
+          {deleteError && (
+            <p className="mt-2 text-base text-red-600">{deleteError}</p>
+          )}
+          <button
+            type="button"
+            disabled={isDeleting}
+            onClick={() => setPendingDelete(true)}
+            className="mt-3 min-h-11 rounded-md border border-red-600 px-4 text-base font-medium text-red-600 disabled:opacity-60"
+          >
+            {isDeleting ? "削除中..." : "この整備実績を削除する"}
+          </button>
+        </section>
+      )}
 
       <div className="fixed inset-x-0 bottom-0 border-t bg-white p-4">
         <button
@@ -150,6 +214,19 @@ export function MaintenanceRecordForm({
           {isSubmitting ? "保存中..." : isEdit ? "更新する" : "保存する"}
         </button>
       </div>
+
+      <ConfirmDialog
+        open={pendingDelete}
+        title="整備実績を削除します"
+        description="この整備実績を削除します。公開ページから即座に非表示になります。この操作は元に戻せません。"
+        confirmLabel="削除する"
+        danger
+        onCancel={() => setPendingDelete(false)}
+        onConfirm={() => {
+          setPendingDelete(false);
+          void handleDelete();
+        }}
+      />
     </form>
   );
 }

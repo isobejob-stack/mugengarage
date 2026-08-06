@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getAdminArticleById } from "@/lib/content/queries";
 import { ArticleForm } from "@/components/content/article-form";
 import type { ArticleFormValues } from "@/lib/content/schema";
+import { getSeoMeta } from "@/lib/seo/queries";
 
 // SCR-ADM-010: ブログ記事編集
 export default async function Page({
@@ -10,7 +11,11 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const article = await getAdminArticleById(id);
+  const [article, seoMeta] = await Promise.all([
+    getAdminArticleById(id),
+    // FR-BLOG-005: SEO編集フォームの初期値として、SEOメタ情報も併せて取得する
+    getSeoMeta("article", id),
+  ]);
 
   if (!article) {
     notFound();
@@ -23,6 +28,12 @@ export default async function Page({
     status: article.status,
     category: article.category,
     scheduled_publish_at: article.scheduled_publish_at,
+    seo: {
+      title: seoMeta?.title ?? null,
+      description: seoMeta?.description ?? null,
+      og_image_url: seoMeta?.og_image_url ?? null,
+      canonical_url: seoMeta?.canonical_url ?? null,
+    },
   };
 
   return (

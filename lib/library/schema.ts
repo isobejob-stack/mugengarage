@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { relatedTargetSchema } from "@/lib/related/schema";
+import { seoFormFieldsSchema } from "@/lib/seo/schema";
 
 // FR-LIB-001: ライブラリ項目の入力スキーマ（table_definitions.md 5.3準拠）
 export const libraryEntryFormSchema = z.object({
@@ -12,6 +13,8 @@ export const libraryEntryFormSchema = z.object({
   category: z.string().nullable(),
   body: z.string().min(1, "本文を入力してください"),
   related: z.array(relatedTargetSchema),
+  // FR-SEO-001: SEOメタ情報（Title/Description/OGP画像/canonical URL）。編集画面でのみ入力対象とする
+  seo: seoFormFieldsSchema.optional(),
 });
 
 export type LibraryEntryFormValues = z.infer<typeof libraryEntryFormSchema>;

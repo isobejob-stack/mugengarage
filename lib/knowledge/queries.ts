@@ -59,6 +59,7 @@ export async function getPublicEncyclopediaEntryBySlug(slug: string) {
       .from("encyclopedia_entries")
       .select("title, slug")
       .eq("id", data.parent_id)
+      .is("deleted_at", null)
       .maybeSingle();
     parent = parentData ?? null;
   }

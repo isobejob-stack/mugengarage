@@ -5,6 +5,7 @@ import {
 } from "@/lib/knowledge/queries";
 import { EncyclopediaEntryForm } from "@/components/knowledge/encyclopedia-entry-form";
 import type { EncyclopediaEntryFormValues } from "@/lib/knowledge/schema";
+import { getSeoMeta } from "@/lib/seo/queries";
 
 // SCR-ADM-012: 図鑑項目編集
 export default async function Page({
@@ -13,9 +14,11 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [entry, candidateParents] = await Promise.all([
+  const [entry, candidateParents, seoMeta] = await Promise.all([
     getAdminEncyclopediaEntryById(id),
     listAdminEncyclopediaEntries(),
+    // FR-ENC-004: SEO編集フォームの初期値として、SEOメタ情報も併せて取得する
+    getSeoMeta("encyclopedia_entry", id),
   ]);
 
   if (!entry) {
@@ -28,6 +31,12 @@ export default async function Page({
     title: entry.title,
     slug: entry.slug,
     body: entry.body,
+    seo: {
+      title: seoMeta?.title ?? null,
+      description: seoMeta?.description ?? null,
+      og_image_url: seoMeta?.og_image_url ?? null,
+      canonical_url: seoMeta?.canonical_url ?? null,
+    },
   };
 
   return (

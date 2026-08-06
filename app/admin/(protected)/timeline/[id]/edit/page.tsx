@@ -6,6 +6,7 @@ import {
 } from "@/lib/related/queries";
 import { TimelineEventForm } from "@/components/timeline/timeline-event-form";
 import type { TimelineEventFormValues } from "@/lib/timeline/schema";
+import { getSeoMeta } from "@/lib/seo/queries";
 
 // SCR-ADM-014: 年表イベント編集
 export default async function Page({
@@ -14,10 +15,12 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [event, candidates, related] = await Promise.all([
+  const [event, candidates, related, seoMeta] = await Promise.all([
     getAdminTimelineEventById(id),
     listRelatedContentCandidates(["article", "encyclopedia_entry"]),
     listRelatedContents("timeline_event", id),
+    // FR-SEO-001: SEO編集フォームの初期値として、SEOメタ情報も併せて取得する
+    getSeoMeta("timeline_event", id),
   ]);
 
   if (!event) {
@@ -31,6 +34,12 @@ export default async function Page({
     title: event.title,
     body: event.body,
     related: related.map((r) => ({ type: r.type, id: r.id })),
+    seo: {
+      title: seoMeta?.title ?? null,
+      description: seoMeta?.description ?? null,
+      og_image_url: seoMeta?.og_image_url ?? null,
+      canonical_url: seoMeta?.canonical_url ?? null,
+    },
   };
 
   return (
