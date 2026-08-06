@@ -6,6 +6,7 @@ import type {
   Inquiry,
   Reminder,
 } from "@/lib/crm/types";
+import { getFavoritesByCustomerId } from "@/lib/engagement/queries";
 
 // FR-INQ-002: 問い合わせ一覧（管理用、新着順）
 export async function listAdminInquiries() {
@@ -124,4 +125,45 @@ export async function getCustomerTimeline(
   return entries.sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
+}
+
+// FR-CRM-005: 顧客がお気に入り登録した車両一覧（全ステータス対象、管理画面用）
+export async function getCustomerFavoriteVehicles(customerId: string) {
+  const supabase = createAdminClient();
+  // favoritesはEngagement Context所有のため、直接selectせず専用関数を経由する
+  const favorites = await getFavoritesByCustomerId(customerId);
+
+  if (favorites.length === 0) return [];
+
+  const { data: vehicles } = await supabase
+    .from("vehicles")
+    .select(
+      "id, price, model_year, mileage_km, status, manufacturers(name), models(name)",
+    )
+    .in(
+      "id",
+      favorites.map((f) => f.vehicle_id),
+    )
+    .is("deleted_at", null);
+
+  const vehicleList = (vehicles ?? []) as unknown as Array<{
+    id: string;
+    price: number;
+    model_year: number | null;
+    mileage_km: number | null;
+    status: string;
+    manufacturers: { name: string } | null;
+    models: { name: string } | null;
+  }>;
+
+  const favoritedAtByVehicleId = new Map(
+    favorites.map((f) => [f.vehicle_id, f.created_at]),
+  );
+
+  return vehicleList
+    .map((v) => ({ ...v, favoritedAt: favoritedAtByVehicleId.get(v.id)! }))
+    .sort(
+      (a, b) =>
+        new Date(b.favoritedAt).getTime() - new Date(a.favoritedAt).getTime(),
+    );
 }

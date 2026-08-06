@@ -1,11 +1,17 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getAdminCustomerById, getCustomerTimeline } from "@/lib/crm/queries";
+import {
+  getAdminCustomerById,
+  getCustomerFavoriteVehicles,
+  getCustomerTimeline,
+} from "@/lib/crm/queries";
 import { inquiryCategoryLabels } from "@/lib/crm/schema";
 import { CustomerEditForm } from "@/components/crm/customer-edit-form";
 import { CustomerNoteForm } from "@/components/crm/customer-note-form";
 import { ReminderForm } from "@/components/crm/reminder-form";
 import { ReminderToggle } from "@/components/crm/reminder-toggle";
+import { VehicleStatusBadge } from "@/components/ui/status-badge";
+import type { VehicleStatus } from "@/lib/inventory/types";
 
 const channelLabels: Record<string, string> = {
   line: "LINE",
@@ -21,9 +27,10 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [customer, timeline] = await Promise.all([
+  const [customer, timeline, favoriteVehicles] = await Promise.all([
     getAdminCustomerById(id),
     getCustomerTimeline(id),
+    getCustomerFavoriteVehicles(id),
   ]);
 
   if (!customer) {
@@ -47,6 +54,46 @@ export default async function Page({
             }}
           />
         </div>
+      </section>
+
+      <section className="mt-6 rounded-md border border-neutral-200 p-4">
+        <h2 className="text-lg font-bold">
+          お気に入り登録車両
+          {favoriteVehicles.length > 0 && `（${favoriteVehicles.length}件）`}
+        </h2>
+        {favoriteVehicles.length === 0 ? (
+          <p className="mt-4 text-neutral-500">
+            お気に入り登録した車両はまだありません。
+          </p>
+        ) : (
+          <ul className="mt-4 flex flex-col gap-2">
+            {favoriteVehicles.map((v) => (
+              <li key={v.id}>
+                <Link
+                  href={`/admin/vehicles/${v.id}/edit`}
+                  className="flex flex-col gap-1 rounded-md border border-neutral-200 p-3 hover:border-neutral-400"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="font-medium">
+                      {v.manufacturers?.name} {v.models?.name}
+                      {v.model_year ? `（${v.model_year}年）` : ""}
+                    </span>
+                    <VehicleStatusBadge status={v.status as VehicleStatus} />
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-neutral-500">
+                    <span>
+                      お気に入り登録日:{" "}
+                      {new Date(v.favoritedAt).toLocaleDateString("ja-JP")}
+                    </span>
+                    <span className="text-base font-bold text-neutral-900">
+                      ¥{v.price.toLocaleString()}
+                    </span>
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="mt-6 rounded-md border border-neutral-200 p-4">

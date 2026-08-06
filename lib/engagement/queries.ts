@@ -77,6 +77,19 @@ export async function getPublicFavoriteVehicles(sessionId: string) {
   }));
 }
 
+// FR-CRM-005: 顧客IDに紐づくお気に入り一覧（vehicle_idとcreated_at）。
+// favoritesはEngagement Contextの所有データのため、他コンテキストからの
+// 読み取りもこの関数を通してのみ行う（bounded_context.md）。
+export async function getFavoritesByCustomerId(customerId: string) {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("favorites")
+    .select("vehicle_id, created_at")
+    .eq("customer_id", customerId);
+
+  return (data ?? []) as Array<{ vehicle_id: string; created_at: string }>;
+}
+
 // FR-FAV-004: お気に入り数を基にした人気ランキング（公開中の車両のみ）
 export async function getVehicleFavoriteRanking(limit = 10) {
   const supabase = createAdminClient();
@@ -135,6 +148,23 @@ export async function getVehicleFavoriteRanking(limit = 10) {
     }))
     .sort((a, b) => b.favoriteCount - a.favoriteCount)
     .slice(0, limit);
+}
+
+// FR-CRM-005: 顧客が確定したタイミングで、同じ匿名セッションのfavoritesに
+// customer_idを紐付ける（event_flow.md 3.4 #3）。favoritesはEngagement Contextの
+// 所有データのため、更新はこの関数を通してのみ行う（bounded_context.md）。
+// 既に別のcustomer_idが紐づいている行は上書きしない（同一端末を複数人が
+// 使い回すケースで前の顧客の紐付けを消さないため）。
+export async function linkFavoritesToCustomer(
+  sessionId: string,
+  customerId: string,
+) {
+  const supabase = createAdminClient();
+  return supabase
+    .from("favorites")
+    .update({ customer_id: customerId })
+    .eq("session_id", sessionId)
+    .is("customer_id", null);
 }
 
 // FR-FAV-003: 管理画面向けのお気に入り登録数集計（全ステータス対象）
