@@ -13,6 +13,9 @@ export function SiteFooter() {
           <Link href="/about" className="hover:underline">
             店舗情報・アクセス
           </Link>
+          <Link href="/owners-archive" className="hover:underline">
+            オーナーズアーカイブ
+          </Link>
           <Link href="/contact" className="hover:underline">
             お問い合わせ
           </Link>

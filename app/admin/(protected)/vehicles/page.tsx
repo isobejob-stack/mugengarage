@@ -39,6 +39,14 @@ export default async function Page() {
                 </div>
                 <div className="flex items-center gap-3">
                   <VehicleStatusBadge status={v.status as VehicleStatus} />
+                  {v.status === "sold" && (
+                    <Link
+                      href={`/admin/owners-archive/${v.id}/edit`}
+                      className="min-h-11 rounded-md border border-neutral-300 px-3 py-2 text-sm"
+                    >
+                      アーカイブ編集
+                    </Link>
+                  )}
                   <Link
                     href={`/admin/vehicles/${v.id}/edit`}
                     className="min-h-11 rounded-md border border-neutral-300 px-3 py-2 text-sm"

@@ -5,6 +5,7 @@ import { apiError, apiInternalError } from "@/lib/api/error-response";
 import { vehicleFormSchema } from "@/lib/inventory/schema";
 import { recordAuditLog } from "@/lib/audit/log";
 import { getAdminVehicleById } from "@/lib/inventory/queries";
+import { ensureOwnerArchiveEntry } from "@/lib/archive/queries";
 
 // FR-INV-002: 車両詳細取得（管理用、編集フォームの初期値）
 export async function GET(
@@ -72,6 +73,11 @@ export async function PATCH(
       new_price: parsed.data.price,
       changed_by: user.id,
     });
+  }
+
+  // FR-OWN-001: 「売約済」に変わったタイミングでアーカイブを自動作成する（BR-DEL-003）
+  if (existing.status !== "sold" && parsed.data.status === "sold") {
+    await ensureOwnerArchiveEntry(id);
   }
 
   await recordAuditLog({
