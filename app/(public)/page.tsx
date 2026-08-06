@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listPublicVehicles } from "@/lib/inventory/queries";
 import { LINE_URL } from "@/lib/site-config";
+import { LineConsultationMenu } from "@/components/layout/line-consultation-menu";
 
 // SCR-PUB-001: トップページ（FR-INV-005, FR-LINE-001, FR-SEO-001）
 export default async function Page() {
@@ -64,6 +65,11 @@ export default async function Page() {
           </ul>
         )}
       </section>
+
+      {/* FR-LINE-002: 相談カテゴリ表示（購入／修理／売却／部品／Jaguar全般／カーライフ相談） */}
+      <div className="mt-10">
+        <LineConsultationMenu />
+      </div>
 
       <section className="mt-10">
         <h2 className="text-lg font-bold">Jaguarを知る</h2>

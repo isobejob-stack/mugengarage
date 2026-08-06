@@ -18,7 +18,7 @@ import { VehicleMediaGallery } from "@/components/inventory/vehicle-media-galler
 import { getSeoMeta } from "@/lib/seo/queries";
 import { buildPublicPath } from "@/lib/seo/paths";
 import { buildVehicleStructuredData } from "@/lib/seo/structured-data";
-import { SITE_URL } from "@/lib/site-config";
+import { SITE_URL, buildLineConsultationUrl } from "@/lib/site-config";
 
 function buildVehicleDisplayName(vehicle: {
   manufacturers: { name: string } | null;
@@ -133,7 +133,7 @@ export default async function Page({
   );
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
+    <main className="mx-auto max-w-3xl px-4 py-8 pb-24 sm:pb-28">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: structuredDataJson }}
@@ -147,8 +147,18 @@ export default async function Page({
         ¥{vehicle.price.toLocaleString()}
       </p>
 
-      <div className="mt-4">
+      <div className="mt-4 flex flex-wrap items-center gap-3">
         <FavoriteButton vehicleId={vehicle.id} initialFavorited={isFavorited} />
+        {/* FR-LINE-002: 車両詳細ページでは「購入」カテゴリに固定した相談導線を表示する。
+            レビュー指摘対応（必須修正3）: プリフィル文言に車両名を含め、ボタン文言と送信内容を一致させる */}
+        <a
+          href={buildLineConsultationUrl("purchase", vehicleName)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex min-h-11 items-center justify-center rounded-md bg-green-600 px-5 py-2 text-sm font-medium text-white"
+        >
+          この車をLINEで相談する
+        </a>
       </div>
 
       <div className="mt-6">
@@ -196,6 +206,28 @@ export default async function Page({
 
       <div className="mt-10 border-t border-neutral-200 pt-6">
         <FavoriteButton vehicleId={vehicle.id} initialFavorited={isFavorited} />
+      </div>
+
+      {/* レビュー指摘対応（必須修正4）: 01_public_ui_spec.md 5章（SCR-PUB-003, FR-VEH-007）
+          「LINE相談CTAは常に画面下部に固定表示することを推奨」に基づく画面下部固定バー。
+          冒頭のインラインCTAは早期離脱者への導線として維持したまま併存させる。
+          ヘッダーは固定表示ではないため干渉なし。ライトボックス（z-50）より低いz-indexとし、
+          モーダル表示中はこのバーの上にライトボックスが正しく重なるようにする。
+          fixedを使用（sticky+100vwのフルブリードは縦スクロールバー幅分の横スクロールが
+          発生するため不採用）。<main>側にバー高さ分のpadding-bottomを確保済み。 */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-white pb-[env(safe-area-inset-bottom)]"
+      >
+        <div className="mx-auto flex h-14 max-w-3xl items-center justify-center px-4 sm:h-16">
+          <a
+            href={buildLineConsultationUrl("purchase", vehicleName)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex min-h-11 w-full max-w-xs items-center justify-center rounded-md bg-green-600 px-5 py-2 text-sm font-medium text-white"
+          >
+            この車をLINEで相談する
+          </a>
+        </div>
       </div>
     </main>
   );
