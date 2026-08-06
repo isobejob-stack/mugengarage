@@ -13,6 +13,7 @@ const adminNavItems = [
   { label: "ライブラリ", href: "/admin/library" },
   { label: "整備実績", href: "/admin/maintenance-records" },
   { label: "問い合わせ", href: "/admin/inquiries" },
+  { label: "顧客", href: "/admin/customers" },
 ] as const;
 
 // 全管理画面共通のナビゲーション（03_ui_rules.md 7章：ステータスバッジ等と同様に横断コンポーネント化）

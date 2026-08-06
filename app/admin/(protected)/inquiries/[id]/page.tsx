@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { getAdminInquiryById } from "@/lib/crm/queries";
 import { inquiryCategoryLabels } from "@/lib/crm/schema";
 import { InquiryStatusSelect } from "@/components/crm/inquiry-status-select";
@@ -41,6 +42,12 @@ export default async function Page({
               <p>{inquiry.customers.name}</p>
               {inquiry.customers.phone && <p>{inquiry.customers.phone}</p>}
               {inquiry.customers.email && <p>{inquiry.customers.email}</p>}
+              <Link
+                href={`/admin/customers/${inquiry.customers.id}`}
+                className="mt-1 inline-block text-sm text-blue-600 hover:underline"
+              >
+                顧客詳細を見る
+              </Link>
             </div>
           ) : (
             <p className="mt-1 text-neutral-400">未登録</p>
