@@ -5,6 +5,7 @@ import { getPublicMaintenanceRecordBySlug } from "@/lib/maintenance/queries";
 import { listRelatedContents } from "@/lib/related/queries";
 import { RelatedContentList } from "@/components/related/related-content-list";
 import { buildLineConsultationUrl } from "@/lib/site-config";
+import { Button } from "@/components/ui/button";
 
 // SCR-PUB-014: 整備実績詳細（故障事例・費用感・作業ポイント、関連車種・図鑑・ブログ）
 export default async function Page({
@@ -24,32 +25,37 @@ export default async function Page({
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
       {record.category && (
-        <p className="text-sm text-neutral-500">{record.category}</p>
+        <p className="text-sm text-foreground-muted">{record.category}</p>
       )}
-      <h1 className="mt-1 text-2xl font-bold">{record.title}</h1>
+      <h1 className="mt-1 font-serif text-2xl font-bold text-charcoal-900">
+        {record.title}
+      </h1>
 
       {/* FR-LINE-002: 整備実績詳細ページでは「修理」カテゴリに固定した相談導線を表示する。
           レビュー指摘対応（必須修正3）: プリフィル文言に整備実績タイトルを含め、ボタン文言と送信内容を一致させる */}
       <div className="mt-4">
-        <a
+        <Button
           href={buildLineConsultationUrl("repair", record.title)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex min-h-11 w-fit items-center justify-center rounded-md bg-green-600 px-5 py-2 text-sm font-medium text-white"
+          variant="line"
+          size="md"
         >
           同じような症状をLINEで相談する
-        </a>
+        </Button>
       </div>
 
       {record.issue_description && (
-        <section className="mt-6 rounded-md border border-neutral-200 p-4">
-          <h2 className="text-sm font-medium text-neutral-500">故障事例</h2>
-          <p className="mt-1 whitespace-pre-wrap">{record.issue_description}</p>
+        <section className="mt-6 rounded-xl border border-neutral-200 bg-cream-50 p-4 shadow-soft">
+          <h2 className="text-sm font-medium text-foreground-muted">
+            故障事例
+          </h2>
+          <p className="mt-1 whitespace-pre-wrap text-charcoal-900">
+            {record.issue_description}
+          </p>
         </section>
       )}
 
       {record.cost !== null && (
-        <p className="mt-4 text-sm text-neutral-600">
+        <p className="mt-4 text-sm text-foreground-muted">
           費用目安：{record.cost.toLocaleString("ja-JP")}円
         </p>
       )}

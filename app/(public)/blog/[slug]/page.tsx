@@ -19,11 +19,13 @@ export default async function Page({
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
       {article.category && (
-        <p className="text-sm text-neutral-500">{article.category}</p>
+        <p className="text-sm text-foreground-muted">{article.category}</p>
       )}
-      <h1 className="mt-1 text-2xl font-bold">{article.title}</h1>
+      <h1 className="mt-1 font-serif text-2xl font-bold text-charcoal-900">
+        {article.title}
+      </h1>
       {article.published_at && (
-        <p className="mt-1 text-sm text-neutral-400">
+        <p className="mt-1 text-sm text-foreground-muted">
           {new Date(article.published_at).toLocaleDateString("ja-JP")}
         </p>
       )}

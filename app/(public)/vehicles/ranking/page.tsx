@@ -7,13 +7,15 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="text-2xl font-bold">人気ランキング</h1>
-      <p className="mt-2 text-neutral-600">
+      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+        人気ランキング
+      </h1>
+      <p className="mt-2 text-foreground-muted">
         お気に入り登録数の多い車両をランキング形式で紹介します。
       </p>
 
       {ranking.length === 0 ? (
-        <p className="mt-8 text-neutral-500">
+        <p className="mt-8 text-foreground-muted">
           まだランキングを表示できるデータがありません。
         </p>
       ) : (
@@ -23,21 +25,21 @@ export default async function Page() {
               <li key={v.id}>
                 <Link
                   href={`/vehicles/${v.slug}`}
-                  className="flex items-center gap-4 rounded-md border border-neutral-200 p-4 hover:border-neutral-400"
+                  className="flex items-center gap-4 rounded-2xl border border-neutral-200 bg-white p-4 shadow-soft transition-all duration-300 ease-premium hover:-translate-y-1 hover:border-primary-200 hover:shadow-medium"
                 >
-                  <span className="text-xl font-bold text-neutral-400">
+                  <span className="font-serif text-2xl font-bold text-accent-500">
                     {i + 1}
                   </span>
                   <div className="flex-1">
-                    <p className="font-medium">
+                    <p className="font-medium text-charcoal-900">
                       {v.manufacturers?.name} {v.models?.name}
                       {v.model_year ? `（${v.model_year}年）` : ""}
                     </p>
-                    <p className="mt-1 text-lg font-bold">
+                    <p className="mt-1 font-mono text-lg font-bold tabular-nums text-primary-700">
                       ¥{v.price.toLocaleString()}
                     </p>
                   </div>
-                  <span className="text-sm text-neutral-500">
+                  <span className="text-sm text-foreground-muted">
                     ♥ {v.favoriteCount}
                   </span>
                 </Link>

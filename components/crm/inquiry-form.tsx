@@ -9,6 +9,7 @@ import {
   inquiryCategoryLabels,
   type InquiryFormValues,
 } from "@/lib/crm/schema";
+import { Button } from "@/components/ui/button";
 
 // SCR-PUB-017: 問い合わせフォーム
 export function InquiryForm() {
@@ -43,7 +44,7 @@ export function InquiryForm() {
 
   if (submitted) {
     return (
-      <div className="rounded-md border border-green-200 bg-green-50 p-6">
+      <div className="rounded-2xl border border-green-200 bg-green-50 p-6 shadow-soft">
         <p className="font-medium text-green-800">
           お問い合わせありがとうございます。担当者より折り返しご連絡いたします。
         </p>
@@ -81,13 +82,9 @@ export function InquiryForm() {
 
       {submitError && <p className="text-sm text-red-600">{submitError}</p>}
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="min-h-11 rounded-md bg-blue-600 px-5 py-2 font-medium text-white disabled:opacity-60"
-      >
+      <Button type="submit" variant="primary" size="md" disabled={isSubmitting}>
         {isSubmitting ? "送信中..." : "送信する"}
-      </button>
+      </Button>
     </form>
   );
 }
@@ -103,7 +100,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-base font-medium">{label}</span>
+      <span className="text-base font-medium text-charcoal-900">{label}</span>
       <div className="mt-1">{children}</div>
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
     </label>

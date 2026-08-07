@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listPublicLibraryEntries } from "@/lib/library/queries";
 import { kanaRowOf } from "@/lib/library/schema";
+import { Card, CardBody, CardTitle, CardMeta } from "@/components/ui/card";
 
 // SCR-PUB-011: ライブラリ一覧（五十音インデックス・カテゴリ絞り込み）
 export default async function Page({
@@ -34,34 +35,32 @@ export default async function Page({
     return qs ? `/library?${qs}` : "/library";
   };
 
+  const pillClass = (active: boolean) =>
+    `flex min-h-11 items-center rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200 ease-standard ${
+      active
+        ? "border-primary-600 bg-primary-600 text-white"
+        : "border-neutral-300 bg-white text-charcoal-800 hover:border-primary-400 hover:bg-primary-50"
+    }`;
+
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl font-bold">ライブラリ</h1>
-      <p className="mt-2 text-neutral-600">
+      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+        ライブラリ
+      </h1>
+      <p className="mt-2 text-foreground-muted">
         Jaguar関連の用語・知識を辞典形式でまとめています。
       </p>
 
       {rows.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
-          <Link
-            href={buildHref({ category })}
-            className={`min-h-11 rounded-full border px-4 py-2 text-sm ${
-              !row
-                ? "border-neutral-900 bg-neutral-900 text-white"
-                : "border-neutral-300"
-            }`}
-          >
+          <Link href={buildHref({ category })} className={pillClass(!row)}>
             すべて
           </Link>
           {rows.map((r) => (
             <Link
               key={r}
               href={buildHref({ row: r, category })}
-              className={`min-h-11 rounded-full border px-4 py-2 text-sm ${
-                row === r
-                  ? "border-neutral-900 bg-neutral-900 text-white"
-                  : "border-neutral-300"
-              }`}
+              className={pillClass(row === r)}
             >
               {r}
             </Link>
@@ -71,25 +70,14 @@ export default async function Page({
 
       {categories.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
-          <Link
-            href={buildHref({ row })}
-            className={`min-h-11 rounded-full border px-4 py-2 text-sm ${
-              !category
-                ? "border-neutral-900 bg-neutral-900 text-white"
-                : "border-neutral-300"
-            }`}
-          >
+          <Link href={buildHref({ row })} className={pillClass(!category)}>
             全カテゴリ
           </Link>
           {categories.map((c) => (
             <Link
               key={c}
               href={buildHref({ row, category: c })}
-              className={`min-h-11 rounded-full border px-4 py-2 text-sm ${
-                category === c
-                  ? "border-neutral-900 bg-neutral-900 text-white"
-                  : "border-neutral-300"
-              }`}
+              className={pillClass(category === c)}
             >
               {c}
             </Link>
@@ -98,22 +86,17 @@ export default async function Page({
       )}
 
       {filtered.length === 0 ? (
-        <p className="mt-8 text-neutral-500">項目はまだありません。</p>
+        <p className="mt-8 text-foreground-muted">項目はまだありません。</p>
       ) : (
-        <ul className="mt-8 grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <ul className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {filtered.map((e) => (
             <li key={e.id}>
-              <Link
-                href={`/library/${e.slug}`}
-                className="block rounded-md border border-neutral-200 p-3 hover:border-neutral-400"
-              >
-                {e.title}
-                {e.category && (
-                  <span className="ml-2 text-sm text-neutral-500">
-                    {e.category}
-                  </span>
-                )}
-              </Link>
+              <Card href={`/library/${e.slug}`}>
+                <CardBody className="p-4">
+                  <CardTitle>{e.title}</CardTitle>
+                  {e.category && <CardMeta>{e.category}</CardMeta>}
+                </CardBody>
+              </Card>
             </li>
           ))}
         </ul>

@@ -23,9 +23,11 @@ export default async function Page({
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
       {entry.category && (
-        <p className="text-sm text-neutral-500">{entry.category}</p>
+        <p className="text-sm text-foreground-muted">{entry.category}</p>
       )}
-      <h1 className="mt-1 text-2xl font-bold">{entry.title}</h1>
+      <h1 className="mt-1 font-serif text-2xl font-bold text-charcoal-900">
+        {entry.title}
+      </h1>
 
       <div className="prose mt-6 max-w-none">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{entry.body}</ReactMarkdown>

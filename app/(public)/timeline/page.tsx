@@ -36,8 +36,10 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl font-bold">Jaguar年表</h1>
-      <p className="mt-2 text-neutral-600">
+      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+        Jaguar年表
+      </h1>
+      <p className="mt-2 text-foreground-muted">
         Jaguarブランドの歴史を時系列でたどります。
       </p>
 
@@ -45,10 +47,10 @@ export default async function Page({
         <div className="mt-4 flex flex-wrap gap-2">
           <Link
             href="/timeline"
-            className={`min-h-11 rounded-full border px-4 py-2 text-sm ${
+            className={`flex min-h-11 items-center rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200 ease-standard ${
               !decade
-                ? "border-neutral-900 bg-neutral-900 text-white"
-                : "border-neutral-300"
+                ? "border-primary-600 bg-primary-600 text-white"
+                : "border-neutral-300 bg-white text-charcoal-800 hover:border-primary-400 hover:bg-primary-50"
             }`}
           >
             すべて
@@ -57,10 +59,10 @@ export default async function Page({
             <Link
               key={d}
               href={`/timeline?decade=${encodeURIComponent(d)}`}
-              className={`min-h-11 rounded-full border px-4 py-2 text-sm ${
+              className={`flex min-h-11 items-center rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200 ease-standard ${
                 decade === d
-                  ? "border-neutral-900 bg-neutral-900 text-white"
-                  : "border-neutral-300"
+                  ? "border-primary-600 bg-primary-600 text-white"
+                  : "border-neutral-300 bg-white text-charcoal-800 hover:border-primary-400 hover:bg-primary-50"
               }`}
             >
               {d}
@@ -70,7 +72,7 @@ export default async function Page({
       )}
 
       {filtered.length === 0 ? (
-        <p className="mt-8 text-neutral-500">イベントはまだありません。</p>
+        <p className="mt-8 text-foreground-muted">イベントはまだありません。</p>
       ) : (
         <ol className="mt-8 flex flex-col gap-8 border-l border-neutral-200 pl-6">
           {filtered.map((e, i) => (
@@ -78,12 +80,14 @@ export default async function Page({
               <span
                 className={`absolute top-1 -left-[29px] h-3 w-3 rounded-full ${timelineCategoryColors[e.category]}`}
               />
-              <p className="text-sm text-neutral-500">
+              <p className="text-sm text-foreground-muted">
                 {e.event_date}
                 {" ・ "}
                 {timelineCategoryLabels[e.category]}
               </p>
-              <h2 className="mt-1 text-lg font-bold">{e.title}</h2>
+              <h2 className="mt-1 font-serif text-lg font-bold text-charcoal-900">
+                {e.title}
+              </h2>
               {e.body && (
                 <div className="prose mt-2 max-w-none text-sm">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
