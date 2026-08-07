@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardBody } from "@/components/ui/card";
 import { slugifyTagName } from "@/lib/tags/schema";
 import type { Tag } from "@/lib/seo/types";
 
@@ -71,80 +73,93 @@ export function TagsManager({ initialTags }: { initialTags: Tag[] }) {
 
   return (
     <div className="mt-6 flex flex-col gap-8">
-      <form
-        onSubmit={submit}
-        className="flex flex-wrap items-end gap-3 rounded-md border border-neutral-200 p-4"
-      >
-        <label className="block">
-          <span className="text-sm font-medium">タグ名</span>
-          <input
-            type="text"
-            className="input mt-1"
-            value={name}
-            onChange={(e) => {
-              const value = e.target.value;
-              setName(value);
-              if (!slugTouched) setSlug(slugifyTagName(value));
-            }}
-          />
-        </label>
-        <label className="block">
-          <span className="text-sm font-medium">スラッグ</span>
-          <input
-            type="text"
-            className="input mt-1"
-            value={slug}
-            onChange={(e) => {
-              setSlugTouched(true);
-              setSlug(e.target.value);
-            }}
-          />
-        </label>
-        <button
-          type="submit"
-          disabled={submitting}
-          className="min-h-11 rounded-md bg-blue-600 px-4 text-sm font-medium text-white disabled:opacity-60"
-        >
-          {submitting ? "作成中..." : "タグを追加"}
-        </button>
-      </form>
+      <Card>
+        <CardBody>
+          <form
+            onSubmit={submit}
+            className="flex flex-wrap items-end gap-3"
+          >
+            <label className="block">
+              <span className="text-base font-medium text-charcoal-900">タグ名</span>
+              <input
+                type="text"
+                className="input mt-1"
+                value={name}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setName(value);
+                  if (!slugTouched) setSlug(slugifyTagName(value));
+                }}
+              />
+            </label>
+            <label className="block">
+              <span className="text-base font-medium text-charcoal-900">スラッグ</span>
+              <input
+                type="text"
+                className="input mt-1"
+                value={slug}
+                onChange={(e) => {
+                  setSlugTouched(true);
+                  setSlug(e.target.value);
+                }}
+              />
+            </label>
+            <Button type="submit" variant="primary" disabled={submitting}>
+              {submitting ? "作成中..." : "タグを追加"}
+            </Button>
+          </form>
+        </CardBody>
+      </Card>
 
-      {submitError && <p className="text-sm text-red-600">{submitError}</p>}
-      {deleteError && <p className="text-sm text-red-600">{deleteError}</p>}
+      {submitError && (
+        <p className="text-base text-red-600" role="alert">
+          {submitError}
+        </p>
+      )}
+      {deleteError && (
+        <p className="text-base text-red-600" role="alert">
+          {deleteError}
+        </p>
+      )}
 
       {tags.length === 0 ? (
-        <p className="text-neutral-500">タグはまだ登録されていません。</p>
+        <p className="text-base text-foreground-muted">タグはまだ登録されていません。</p>
       ) : (
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-neutral-200 text-left text-neutral-500">
-              <th className="py-2 pr-4 font-medium">タグ名</th>
-              <th className="py-2 pr-4 font-medium">スラッグ</th>
-              <th className="py-2 pr-4 font-medium">作成日時</th>
-              <th className="py-2 font-medium" />
-            </tr>
-          </thead>
-          <tbody>
-            {tags.map((tag) => (
-              <tr key={tag.id} className="border-b border-neutral-200">
-                <td className="py-2 pr-4">{tag.name}</td>
-                <td className="py-2 pr-4 font-mono">{tag.slug}</td>
-                <td className="py-2 pr-4 text-neutral-500">
-                  {new Date(tag.created_at).toLocaleString("ja-JP")}
-                </td>
-                <td className="py-2 text-right">
-                  <button
-                    type="button"
-                    onClick={() => setPendingDeleteId(tag.id)}
-                    className="min-h-11 rounded-md border border-red-600 px-3 text-red-600"
-                  >
-                    削除
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <Card>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-base">
+              <thead>
+                <tr className="border-b border-neutral-200 bg-cream-50 text-left text-foreground-muted">
+                  <th className="px-4 py-3 font-medium">タグ名</th>
+                  <th className="px-4 py-3 font-medium">スラッグ</th>
+                  <th className="px-4 py-3 font-medium">作成日時</th>
+                  <th className="px-4 py-3 font-medium" />
+                </tr>
+              </thead>
+              <tbody>
+                {tags.map((tag) => (
+                  <tr key={tag.id} className="border-b border-neutral-100 last:border-0">
+                    <td className="px-4 py-3 text-charcoal-900">{tag.name}</td>
+                    <td className="px-4 py-3 font-mono text-charcoal-700">{tag.slug}</td>
+                    <td className="px-4 py-3 text-foreground-muted">
+                      {new Date(tag.created_at).toLocaleString("ja-JP")}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => setPendingDeleteId(tag.id)}
+                      >
+                        削除
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       )}
 
       <ConfirmDialog

@@ -6,6 +6,7 @@ import {
   type VehicleVideo,
 } from "@/lib/inventory/types";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Button, buttonClassName } from "@/components/ui/button";
 
 export type PhotoWithUrl = {
   id: string;
@@ -269,10 +270,18 @@ export function VehicleMediaManager({
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h3 className="text-base font-bold">写真</h3>
+        <h3 className="font-serif text-lg font-bold text-charcoal-900">
+          写真
+        </h3>
 
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <label className="inline-flex min-h-11 cursor-pointer items-center rounded-md border border-neutral-300 px-4 text-base font-medium">
+          <label
+            className={buttonClassName({
+              variant: "outline",
+              size: "md",
+              className: "cursor-pointer",
+            })}
+          >
             写真を選択してアップロード
             <input
               ref={fileInputRef}
@@ -285,15 +294,16 @@ export function VehicleMediaManager({
           </label>
 
           {selectedPhotoIds.size > 0 && (
-            <button
+            <Button
               type="button"
-              className="min-h-11 rounded-md border border-red-600 px-4 text-base font-medium text-red-600"
+              variant="destructive"
+              size="md"
               onClick={() =>
                 setPendingDeletePhotoIds(Array.from(selectedPhotoIds))
               }
             >
               選択した写真を削除（{selectedPhotoIds.size}件）
-            </button>
+            </Button>
           )}
         </div>
 
@@ -301,11 +311,11 @@ export function VehicleMediaManager({
           <div className="mt-3 w-full max-w-sm">
             <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-200">
               <div
-                className="h-2 rounded-full bg-blue-600 transition-all"
+                className="h-2 rounded-full bg-primary-600 transition-all duration-200 ease-standard"
                 style={{ width: `${uploadProgress}%` }}
               />
             </div>
-            <p className="mt-1 text-base text-neutral-600">
+            <p className="mt-1 text-base text-foreground-muted">
               アップロード中... {uploadProgress}%
             </p>
           </div>
@@ -318,11 +328,13 @@ export function VehicleMediaManager({
         )}
 
         {photoError && (
-          <p className="mt-2 text-base text-red-600">{photoError}</p>
+          <p className="mt-2 text-base text-red-600" role="alert">
+            {photoError}
+          </p>
         )}
 
         {photos.length === 0 ? (
-          <p className="mt-4 text-base text-neutral-500">
+          <p className="mt-4 text-base text-foreground-muted">
             写真はまだ登録されていません
           </p>
         ) : (
@@ -330,7 +342,7 @@ export function VehicleMediaManager({
             {photos.map((photo, index) => (
               <li
                 key={photo.id}
-                className="relative rounded-md border border-neutral-200 p-2"
+                className="relative rounded-lg border border-neutral-200 p-2"
               >
                 {index === 0 && (
                   <span className="absolute inset-x-0 top-0 z-10 rounded-t-md bg-black/70 px-2 py-1 text-center text-sm font-bold text-white">
@@ -338,9 +350,10 @@ export function VehicleMediaManager({
                   </span>
                 )}
 
-                <label className="absolute top-3 left-3 z-20 inline-flex h-11 w-11 items-center justify-center rounded bg-white shadow-md">
+                <label className="absolute top-3 left-3 z-20 inline-flex h-11 w-11 items-center justify-center rounded bg-white shadow-medium">
                   <input
                     type="checkbox"
+                    className="h-5 w-5 accent-primary-600"
                     checked={selectedPhotoIds.has(photo.id)}
                     onChange={() => togglePhotoSelection(photo.id)}
                     aria-label="この写真を選択"
@@ -362,7 +375,7 @@ export function VehicleMediaManager({
                         disabled={index === 0 || reordering}
                         onClick={() => movePhoto(index, -1)}
                         aria-label="前に並び替え"
-                        className="flex min-h-11 min-w-11 items-center justify-center rounded border border-neutral-300 disabled:opacity-40"
+                        className="flex min-h-11 min-w-11 items-center justify-center rounded border border-neutral-300 text-charcoal-900 transition-colors duration-200 ease-standard hover:border-primary-400 hover:bg-primary-50 disabled:opacity-40"
                       >
                         ↑
                       </button>
@@ -371,18 +384,19 @@ export function VehicleMediaManager({
                         disabled={index === photos.length - 1 || reordering}
                         onClick={() => movePhoto(index, 1)}
                         aria-label="後に並び替え"
-                        className="flex min-h-11 min-w-11 items-center justify-center rounded border border-neutral-300 disabled:opacity-40"
+                        className="flex min-h-11 min-w-11 items-center justify-center rounded border border-neutral-300 text-charcoal-900 transition-colors duration-200 ease-standard hover:border-primary-400 hover:bg-primary-50 disabled:opacity-40"
                       >
                         ↓
                       </button>
                     </div>
-                    <button
+                    <Button
                       type="button"
+                      variant="destructive"
+                      size="sm"
                       onClick={() => setPendingDeletePhotoIds([photo.id])}
-                      className="flex min-h-11 min-w-11 items-center justify-center rounded border border-red-600 text-base text-red-600"
                     >
                       削除
-                    </button>
+                    </Button>
                   </div>
 
                   <div className="flex gap-1">
@@ -390,7 +404,7 @@ export function VehicleMediaManager({
                       type="button"
                       disabled={index === 0 || reordering}
                       onClick={() => movePhotoToStart(index)}
-                      className="min-h-11 flex-1 rounded border border-neutral-300 text-base disabled:opacity-40"
+                      className="min-h-11 flex-1 rounded border border-neutral-300 text-base text-charcoal-900 transition-colors duration-200 ease-standard hover:border-primary-400 hover:bg-primary-50 disabled:opacity-40"
                     >
                       先頭へ
                     </button>
@@ -398,7 +412,7 @@ export function VehicleMediaManager({
                       type="button"
                       disabled={index === photos.length - 1 || reordering}
                       onClick={() => movePhotoToEnd(index)}
-                      className="min-h-11 flex-1 rounded border border-neutral-300 text-base disabled:opacity-40"
+                      className="min-h-11 flex-1 rounded border border-neutral-300 text-base text-charcoal-900 transition-colors duration-200 ease-standard hover:border-primary-400 hover:bg-primary-50 disabled:opacity-40"
                     >
                       末尾へ
                     </button>
@@ -411,32 +425,32 @@ export function VehicleMediaManager({
       </div>
 
       <div>
-        <h3 className="text-base font-bold">動画（YouTube等の外部URL）</h3>
+        <h3 className="font-serif text-lg font-bold text-charcoal-900">
+          動画（YouTube等の外部URL）
+        </h3>
 
         <form onSubmit={submitVideo} className="mt-3 flex flex-wrap gap-3">
           <input
             type="url"
             required
             placeholder="https://www.youtube.com/watch?v=..."
-            className="input min-h-11 flex-1"
+            className="input flex-1"
             value={videoUrl}
             onChange={(e) => setVideoUrl(e.target.value)}
           />
-          <button
-            type="submit"
-            disabled={videoSubmitting}
-            className="min-h-11 rounded-md bg-blue-600 px-4 text-base font-medium text-white disabled:opacity-60"
-          >
+          <Button type="submit" disabled={videoSubmitting} variant="primary">
             {videoSubmitting ? "登録中..." : "追加する"}
-          </button>
+          </Button>
         </form>
 
         {videoError && (
-          <p className="mt-2 text-base text-red-600">{videoError}</p>
+          <p className="mt-2 text-base text-red-600" role="alert">
+            {videoError}
+          </p>
         )}
 
         {videos.length === 0 ? (
-          <p className="mt-4 text-base text-neutral-500">
+          <p className="mt-4 text-base text-foreground-muted">
             動画はまだ登録されていません
           </p>
         ) : (
@@ -444,23 +458,25 @@ export function VehicleMediaManager({
             {videos.map((video) => (
               <li
                 key={video.id}
-                className="flex items-center justify-between gap-3 rounded-md border border-neutral-200 p-3"
+                className="flex items-center justify-between gap-3 rounded-lg border border-neutral-200 p-3"
               >
                 <a
                   href={video.video_url}
                   target="_blank"
                   rel="noreferrer"
-                  className="truncate text-base text-blue-600 underline"
+                  className="truncate text-base text-primary-700 underline"
                 >
                   {video.video_url}
                 </a>
-                <button
+                <Button
                   type="button"
+                  variant="destructive"
+                  size="sm"
+                  className="shrink-0"
                   onClick={() => setPendingDeleteVideoId(video.id)}
-                  className="min-h-11 min-w-11 shrink-0 rounded border border-red-600 px-3 text-base text-red-600"
                 >
                   削除
-                </button>
+                </Button>
               </li>
             ))}
           </ul>

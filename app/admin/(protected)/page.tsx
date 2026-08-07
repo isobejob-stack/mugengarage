@@ -1,6 +1,8 @@
-import Link from "next/link";
 import { listAdminInquiries } from "@/lib/crm/queries";
 import { getAdminFavoriteCounts } from "@/lib/engagement/queries";
+import { Card, CardBody } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 const shortcuts = [
   { label: "車両を登録する", href: "/admin/vehicles/new" },
@@ -23,46 +25,73 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="text-2xl font-bold">ダッシュボード</h1>
+      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+        ダッシュボード
+      </h1>
 
-      <Link
-        href="/admin/inquiries"
-        className="mt-6 block rounded-md border border-neutral-200 p-4 hover:border-neutral-400"
-      >
-        <p className="text-sm text-neutral-500">未対応の問い合わせ</p>
-        <p className="mt-1 text-3xl font-bold">{unhandledCount}件</p>
-      </Link>
+      <Card href="/admin/inquiries" className="mt-6 hover:-translate-y-0.5">
+        <CardBody className="flex flex-row items-center justify-between gap-4 p-6">
+          <div>
+            <p className="text-base text-foreground-muted">
+              未対応の問い合わせ
+            </p>
+            <p
+              className={`mt-1 text-4xl font-bold tabular-nums ${
+                unhandledCount > 0 ? "text-red-600" : "text-charcoal-900"
+              }`}
+            >
+              {unhandledCount}件
+            </p>
+          </div>
+          <StatusBadge
+            label={unhandledCount > 0 ? "対応が必要です" : "対応済み"}
+            tone={unhandledCount > 0 ? "danger" : "success"}
+          />
+        </CardBody>
+      </Card>
 
       {favoriteCounts.length > 0 && (
         <>
-          <h2 className="mt-8 text-lg font-bold">お気に入り登録数（上位）</h2>
-          <ul className="mt-3 flex flex-col gap-2">
-            {favoriteCounts.map((v) => (
-              <li
-                key={v.id}
-                className="flex items-center justify-between rounded-md border border-neutral-200 p-3 text-sm"
-              >
-                <span>
-                  {v.manufacturers?.name} {v.models?.name}
-                  {v.model_year ? `（${v.model_year}年）` : ""}
-                </span>
-                <span className="text-neutral-500">♥ {v.favoriteCount}</span>
-              </li>
-            ))}
-          </ul>
+          <h2 className="mt-8 font-serif text-lg font-bold text-charcoal-900">
+            お気に入り登録数（上位）
+          </h2>
+          <Card className="mt-3">
+            <CardBody className="p-4">
+              <ul className="flex flex-col divide-y divide-neutral-100">
+                {favoriteCounts.map((v) => (
+                  <li
+                    key={v.id}
+                    className="flex items-center justify-between gap-4 py-3 text-base first:pt-0 last:pb-0"
+                  >
+                    <span className="text-charcoal-900">
+                      {v.manufacturers?.name} {v.models?.name}
+                      {v.model_year ? `（${v.model_year}年）` : ""}
+                    </span>
+                    <span className="font-mono font-semibold text-primary-700">
+                      ♥ {v.favoriteCount}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </CardBody>
+          </Card>
         </>
       )}
 
-      <h2 className="mt-8 text-lg font-bold">よく使う操作</h2>
+      <h2 className="mt-8 font-serif text-lg font-bold text-charcoal-900">
+        よく使う操作
+      </h2>
       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
         {shortcuts.map((s) => (
-          <Link
+          <Button
             key={s.href}
             href={s.href}
-            className="min-h-11 rounded-md border border-neutral-300 px-4 py-3 text-center font-medium hover:border-neutral-500"
+            variant="outline"
+            size="md"
+            className="w-full justify-center"
           >
             {s.label}
-          </Link>
+          </Button>
         ))}
       </div>
     </main>

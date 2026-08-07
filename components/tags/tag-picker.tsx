@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { slugifyTagName } from "@/lib/tags/schema";
 import type { Tag } from "@/lib/seo/types";
+import { Button } from "@/components/ui/button";
 
 // FR-INV-012 / FR-BLOG-002: 車両・記事編集フォームでのタグ選択UI。
 // 既存タグからの複数選択に加え、その場での新規タグ作成にも対応する
@@ -61,19 +62,19 @@ export function TagPicker({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex max-h-48 flex-wrap gap-2 overflow-y-auto rounded-md border border-neutral-200 p-3">
+      <div className="flex max-h-48 flex-wrap gap-2 overflow-y-auto rounded-lg border border-neutral-200 bg-white p-3">
         {tags.length === 0 && (
-          <p className="text-sm text-neutral-400">
+          <p className="text-base text-foreground-muted">
             タグはまだ登録されていません
           </p>
         )}
         {tags.map((tag) => (
           <label
             key={tag.id}
-            className={`flex items-center gap-1 rounded-full border px-3 py-1 text-sm ${
+            className={`flex min-h-11 items-center gap-1 rounded-full border px-3 py-1 text-base transition-colors duration-200 ease-standard ${
               selectedSet.has(tag.id)
-                ? "border-blue-600 bg-blue-50 text-blue-700"
-                : "border-neutral-300 text-neutral-600"
+                ? "border-primary-600 bg-primary-50 text-primary-700"
+                : "border-neutral-300 text-charcoal-700 hover:border-primary-300"
             }`}
           >
             <input
@@ -101,17 +102,21 @@ export function TagPicker({
             }
           }}
         />
-        <button
+        <Button
           type="button"
+          variant="outline"
           disabled={creating || !newTagName.trim()}
           onClick={() => void createTag()}
-          className="min-h-11 rounded-md border border-neutral-300 px-4 text-sm font-medium disabled:opacity-60"
         >
           {creating ? "作成中..." : "タグを追加"}
-        </button>
+        </Button>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p className="text-base text-red-600" role="alert">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

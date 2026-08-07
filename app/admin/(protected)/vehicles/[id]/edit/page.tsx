@@ -118,7 +118,9 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="text-2xl font-bold">車両編集</h1>
+      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+        車両編集
+      </h1>
       <div className="mt-6">
         <VehicleForm
           options={options}

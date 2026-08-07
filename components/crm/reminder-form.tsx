@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { reminderFormSchema, type ReminderFormValues } from "@/lib/crm/schema";
+import { Button } from "@/components/ui/button";
 
 // FR-CRM-004: リマインダー追加フォーム
 export function ReminderForm({ customerId }: { customerId: string }) {
@@ -48,15 +49,13 @@ export function ReminderForm({ customerId }: { customerId: string }) {
       />
       <input type="date" className="input w-40" {...register("due_date")} />
       {submitError && (
-        <p className="w-full text-sm text-red-600">{submitError}</p>
+        <p className="w-full text-base text-red-600" role="alert">
+          {submitError}
+        </p>
       )}
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="min-h-11 rounded-md border border-neutral-300 px-4 py-2 text-sm disabled:opacity-60"
-      >
+      <Button type="submit" disabled={isSubmitting} variant="outline" size="md">
         {isSubmitting ? "追加中..." : "リマインダーを追加"}
-      </button>
+      </Button>
     </form>
   );
 }

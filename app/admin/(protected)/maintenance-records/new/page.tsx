@@ -11,7 +11,9 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl font-bold">整備実績作成</h1>
+      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+        整備実績作成
+      </h1>
       <div className="mt-6">
         <MaintenanceRecordForm candidates={candidates} />
       </div>

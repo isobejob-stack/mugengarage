@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { customerFormSchema, type CustomerFormValues } from "@/lib/crm/schema";
+import { Button } from "@/components/ui/button";
 
 // FR-CRM-001: 顧客情報編集フォーム
 export function CustomerEditForm({
@@ -45,35 +46,51 @@ export function CustomerEditForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
       <label className="block">
-        <span className="text-sm font-medium">お名前</span>
+        <span className="text-base font-medium text-charcoal-900">
+          お名前
+        </span>
         <input type="text" className="input mt-1" {...register("name")} />
         {errors.name && (
-          <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+          <p className="mt-1 text-base text-red-600" role="alert">
+            {errors.name.message}
+          </p>
         )}
       </label>
       <label className="block">
-        <span className="text-sm font-medium">電話番号</span>
+        <span className="text-base font-medium text-charcoal-900">
+          電話番号
+        </span>
         <input type="text" className="input mt-1" {...register("phone")} />
       </label>
       <label className="block">
-        <span className="text-sm font-medium">メールアドレス</span>
+        <span className="text-base font-medium text-charcoal-900">
+          メールアドレス
+        </span>
         <input type="text" className="input mt-1" {...register("email")} />
         {errors.email && (
-          <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+          <p className="mt-1 text-base text-red-600" role="alert">
+            {errors.email.message}
+          </p>
         )}
       </label>
       <label className="block">
-        <span className="text-sm font-medium">備考</span>
+        <span className="text-base font-medium text-charcoal-900">備考</span>
         <textarea rows={3} className="input mt-1" {...register("notes")} />
       </label>
-      {submitError && <p className="text-sm text-red-600">{submitError}</p>}
-      <button
+      {submitError && (
+        <p className="text-base text-red-600" role="alert">
+          {submitError}
+        </p>
+      )}
+      <Button
         type="submit"
         disabled={isSubmitting}
-        className="min-h-11 self-start rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+        variant="primary"
+        size="md"
+        className="self-start"
       >
         {isSubmitting ? "保存中..." : "保存する"}
-      </button>
+      </Button>
     </form>
   );
 }

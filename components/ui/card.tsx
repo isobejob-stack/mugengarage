@@ -22,17 +22,27 @@ type CardAsLinkProps = CardOwnProps &
 
 export type CardProps = CardAsDivProps | CardAsLinkProps;
 
-const CARD_CLASSES =
-  "group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-1 hover:shadow-medium hover:border-primary-200";
+const CARD_BASE_CLASSES =
+  "group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-soft transition-all duration-300 ease-premium";
+
+// ホバーリフト演出はクリック可能（href指定）な場合のみ付与する。
+// 静的なコンテナ（テーブルのラッパー、フォームのセクション等）に付けると、
+// 操作できないのに操作できそうに見える誤ったアフォーダンスになるため（UIUXレビュー指摘）。
+const CARD_INTERACTIVE_CLASSES =
+  "hover:-translate-y-1 hover:shadow-medium hover:border-primary-200";
 
 function cx(...classes: Array<string | undefined | false>): string {
   return classes.filter(Boolean).join(" ");
 }
 
-// Card: コンテナ。href を渡すとリンクカード（車両一覧・図鑑一覧等）になる。
+// Card: コンテナ。href を渡すとリンクカード（車両一覧・図鑑一覧等）になり、ホバー演出も付く。
 export function Card(props: CardProps): ReactNode {
   const { className, children, href, ...rest } = props;
-  const classes = cx(CARD_CLASSES, className);
+  const classes = cx(
+    CARD_BASE_CLASSES,
+    href !== undefined && CARD_INTERACTIVE_CLASSES,
+    className,
+  );
 
   if (href !== undefined) {
     const linkRest = rest as Omit<

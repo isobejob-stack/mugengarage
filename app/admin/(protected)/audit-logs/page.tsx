@@ -1,5 +1,6 @@
 import { listAuditLogs, type AuditLogListItem } from "@/lib/audit/log";
 import type { AuditAction } from "@/lib/audit/types";
+import { Card } from "@/components/ui/card";
 
 // FR-ADM-005: 操作日時・操作者・操作対象（種別・ID）・アクション種別を一覧表示する。
 // audit_logsは追記専用の観測ログであり、編集・削除機能は持たず一覧表示のみ行う。
@@ -47,38 +48,53 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="text-2xl font-bold">監査ログ</h1>
-      <p className="mt-2 text-sm text-neutral-500">SCR-ADM-023 ・ FR-ADM-005</p>
+      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+        監査ログ
+      </h1>
+      <p className="mt-2 text-base text-foreground-muted">
+        SCR-ADM-023 ・ FR-ADM-005
+      </p>
 
       {logs.length === 0 ? (
-        <p className="mt-8 text-neutral-500">監査ログはまだありません。</p>
+        <p className="mt-8 text-base text-foreground-muted">
+          監査ログはまだありません。
+        </p>
       ) : (
-        <table className="mt-6 w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-neutral-200 text-left text-neutral-500">
-              <th className="py-2 pr-4 font-medium">操作日時</th>
-              <th className="py-2 pr-4 font-medium">操作者</th>
-              <th className="py-2 pr-4 font-medium">操作対象</th>
-              <th className="py-2 font-medium">アクション</th>
-            </tr>
-          </thead>
-          <tbody>
-            {logs.map((log) => (
-              <tr key={log.id} className="border-b border-neutral-200">
-                <td className="py-2 pr-4 text-neutral-500">
-                  {new Date(log.created_at).toLocaleString("ja-JP")}
-                </td>
-                <td className="py-2 pr-4">{actorLabel(log)}</td>
-                <td className="py-2 pr-4 font-mono">
-                  {targetTypeLabel(log.target_type)} / {log.target_id}
-                </td>
-                <td className="py-2">
-                  {ACTION_LABELS[log.action] ?? log.action}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <Card className="mt-6">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-base">
+              <thead>
+                <tr className="border-b border-neutral-200 bg-cream-50 text-left text-foreground-muted">
+                  <th className="py-3 pl-4 pr-4 font-semibold">操作日時</th>
+                  <th className="py-3 pr-4 font-semibold">操作者</th>
+                  <th className="py-3 pr-4 font-semibold">操作対象</th>
+                  <th className="py-3 pr-4 font-semibold">アクション</th>
+                </tr>
+              </thead>
+              <tbody>
+                {logs.map((log) => (
+                  <tr
+                    key={log.id}
+                    className="border-b border-neutral-100 last:border-b-0"
+                  >
+                    <td className="py-3 pl-4 pr-4 text-foreground-muted">
+                      {new Date(log.created_at).toLocaleString("ja-JP")}
+                    </td>
+                    <td className="py-3 pr-4 text-charcoal-900">
+                      {actorLabel(log)}
+                    </td>
+                    <td className="py-3 pr-4 font-mono text-charcoal-900">
+                      {targetTypeLabel(log.target_type)} / {log.target_id}
+                    </td>
+                    <td className="py-3 pr-4 text-charcoal-900">
+                      {ACTION_LABELS[log.action] ?? log.action}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       )}
     </main>
   );

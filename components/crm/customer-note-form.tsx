@@ -8,6 +8,7 @@ import {
   customerNoteFormSchema,
   type CustomerNoteFormValues,
 } from "@/lib/crm/schema";
+import { Button } from "@/components/ui/button";
 
 // FR-CRM-003: 顧客メモ追加フォーム
 export function CustomerNoteForm({ customerId }: { customerId: string }) {
@@ -49,14 +50,20 @@ export function CustomerNoteForm({ customerId }: { customerId: string }) {
         placeholder="メモを入力"
         {...register("body")}
       />
-      {submitError && <p className="text-sm text-red-600">{submitError}</p>}
-      <button
+      {submitError && (
+        <p className="text-base text-red-600" role="alert">
+          {submitError}
+        </p>
+      )}
+      <Button
         type="submit"
         disabled={isSubmitting}
-        className="min-h-11 self-start rounded-md border border-neutral-300 px-4 py-2 text-sm disabled:opacity-60"
+        variant="outline"
+        size="md"
+        className="self-start"
       >
         {isSubmitting ? "追加中..." : "メモを追加"}
-      </button>
+      </Button>
     </form>
   );
 }

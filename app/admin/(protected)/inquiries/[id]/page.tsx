@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getAdminInquiryById } from "@/lib/crm/queries";
 import { inquiryCategoryLabels } from "@/lib/crm/schema";
 import { InquiryStatusSelect } from "@/components/crm/inquiry-status-select";
+import { Card, CardBody } from "@/components/ui/card";
 
 const channelLabels: Record<string, string> = {
   line: "LINE",
@@ -26,51 +27,61 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="text-2xl font-bold">問い合わせ詳細</h1>
+      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+        問い合わせ詳細
+      </h1>
 
-      <div className="mt-6 rounded-md border border-neutral-200 p-4">
-        <p className="text-sm text-neutral-500">
-          {channelLabels[inquiry.channel]}・
-          {inquiryCategoryLabels[inquiry.category]}・
-          {new Date(inquiry.received_at).toLocaleString("ja-JP")}
-        </p>
-
-        <div className="mt-4">
-          <p className="text-sm font-medium text-neutral-500">顧客情報</p>
-          {inquiry.customers ? (
-            <div className="mt-1">
-              <p>{inquiry.customers.name}</p>
-              {inquiry.customers.phone && <p>{inquiry.customers.phone}</p>}
-              {inquiry.customers.email && <p>{inquiry.customers.email}</p>}
-              <Link
-                href={`/admin/customers/${inquiry.customers.id}`}
-                className="mt-1 inline-block text-sm text-blue-600 hover:underline"
-              >
-                顧客詳細を見る
-              </Link>
-            </div>
-          ) : (
-            <p className="mt-1 text-neutral-400">未登録</p>
-          )}
-        </div>
-
-        <div className="mt-4">
-          <p className="text-sm font-medium text-neutral-500">
-            お問い合わせ内容
+      <Card className="mt-6">
+        <CardBody className="p-6">
+          <p className="text-base text-foreground-muted">
+            {channelLabels[inquiry.channel]}・
+            {inquiryCategoryLabels[inquiry.category]}・
+            {new Date(inquiry.received_at).toLocaleString("ja-JP")}
           </p>
-          <p className="mt-1 whitespace-pre-wrap">{inquiry.message}</p>
-        </div>
 
-        <div className="mt-6">
-          <p className="text-sm font-medium text-neutral-500">対応ステータス</p>
-          <div className="mt-1 max-w-xs">
-            <InquiryStatusSelect
-              inquiryId={inquiry.id}
-              initialStatus={inquiry.response_status}
-            />
+          <div className="mt-4">
+            <p className="text-base font-medium text-foreground-muted">
+              顧客情報
+            </p>
+            {inquiry.customers ? (
+              <div className="mt-1 text-base text-charcoal-900">
+                <p>{inquiry.customers.name}</p>
+                {inquiry.customers.phone && <p>{inquiry.customers.phone}</p>}
+                {inquiry.customers.email && <p>{inquiry.customers.email}</p>}
+                <Link
+                  href={`/admin/customers/${inquiry.customers.id}`}
+                  className="mt-1 inline-block text-base text-primary-700 hover:underline"
+                >
+                  顧客詳細を見る
+                </Link>
+              </div>
+            ) : (
+              <p className="mt-1 text-base text-foreground-muted">未登録</p>
+            )}
           </div>
-        </div>
-      </div>
+
+          <div className="mt-4">
+            <p className="text-base font-medium text-foreground-muted">
+              お問い合わせ内容
+            </p>
+            <p className="mt-1 whitespace-pre-wrap text-base text-charcoal-900">
+              {inquiry.message}
+            </p>
+          </div>
+
+          <div className="mt-6">
+            <p className="text-base font-medium text-foreground-muted">
+              対応ステータス
+            </p>
+            <div className="mt-1 max-w-xs">
+              <InquiryStatusSelect
+                inquiryId={inquiry.id}
+                initialStatus={inquiry.response_status}
+              />
+            </div>
+          </div>
+        </CardBody>
+      </Card>
     </main>
   );
 }

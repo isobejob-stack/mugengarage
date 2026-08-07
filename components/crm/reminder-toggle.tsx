@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 // FR-CRM-004: リマインダーの完了・未完了切り替え
 export function ReminderToggle({
@@ -26,13 +27,14 @@ export function ReminderToggle({
   };
 
   return (
-    <button
+    <Button
       type="button"
       onClick={handleClick}
       disabled={pending}
-      className="min-h-11 rounded-md border border-neutral-300 px-3 py-1 text-sm disabled:opacity-60"
+      variant="outline"
+      size="sm"
     >
       {isCompleted ? "未完了に戻す" : "完了にする"}
-    </button>
+    </Button>
   );
 }

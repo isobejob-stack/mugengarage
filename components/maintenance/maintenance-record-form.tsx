@@ -16,6 +16,7 @@ import type { RelatedContentCandidate } from "@/lib/related/types";
 import { emptySeoFieldsValues } from "@/lib/seo/schema";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { SeoFieldsSection } from "@/components/ui/seo-fields-section";
+import { Button } from "@/components/ui/button";
 
 // SCR-ADM-018: 整備実績編集フォーム
 export function MaintenanceRecordForm({
@@ -119,7 +120,7 @@ export function MaintenanceRecordForm({
           }}
         />
         {isEdit && (
-          <p className="mt-1 text-base text-neutral-600">
+          <p className="mt-1 text-base text-foreground-muted">
             URLが変更されます。変更前のURLは自動的に新しいURLへリダイレクトされます。
           </p>
         )}
@@ -183,36 +184,46 @@ export function MaintenanceRecordForm({
         />
       )}
 
-      {submitError && <p className="text-sm text-red-600">{submitError}</p>}
+      {submitError && (
+        <p className="text-base text-red-600" role="alert">
+          {submitError}
+        </p>
+      )}
 
       {isEdit && (
-        <section className="rounded-md border border-red-200 bg-red-50 p-4">
-          <h2 className="text-base font-bold text-red-700">危険な操作</h2>
-          <p className="mt-1 text-base text-neutral-600">
+        <section className="rounded-lg border border-red-200 bg-red-50 p-4">
+          <h2 className="font-serif text-lg font-bold text-red-700">危険な操作</h2>
+          <p className="mt-1 text-base text-foreground-muted">
             この整備実績を削除すると公開ページから即座に非表示になります。この操作は元に戻せません。
           </p>
           {deleteError && (
-            <p className="mt-2 text-base text-red-600">{deleteError}</p>
+            <p className="mt-2 text-base text-red-600" role="alert">
+              {deleteError}
+            </p>
           )}
-          <button
+          <Button
             type="button"
             disabled={isDeleting}
             onClick={() => setPendingDelete(true)}
-            className="mt-3 min-h-11 rounded-md border border-red-600 px-4 text-base font-medium text-red-600 disabled:opacity-60"
+            variant="destructive"
+            size="md"
+            className="mt-3"
           >
             {isDeleting ? "削除中..." : "この整備実績を削除する"}
-          </button>
+          </Button>
         </section>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 border-t bg-white p-4">
-        <button
+      <div className="fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-white p-4 shadow-medium pb-[env(safe-area-inset-bottom)]">
+        <Button
           type="submit"
           disabled={isSubmitting}
-          className="mx-auto block min-h-11 w-full max-w-md rounded-md bg-blue-600 font-medium text-white disabled:opacity-60"
+          variant="primary"
+          size="lg"
+          className="mx-auto block w-full max-w-md justify-center"
         >
           {isSubmitting ? "保存中..." : isEdit ? "更新する" : "保存する"}
-        </button>
+        </Button>
       </div>
 
       <ConfirmDialog
@@ -242,9 +253,13 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-base font-medium">{label}</span>
+      <span className="text-base font-medium text-charcoal-900">{label}</span>
       <div className="mt-1">{children}</div>
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {error && (
+        <p className="mt-1 text-base text-red-600" role="alert">
+          {error}
+        </p>
+      )}
     </label>
   );
 }

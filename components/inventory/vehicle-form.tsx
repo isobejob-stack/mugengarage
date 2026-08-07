@@ -21,6 +21,7 @@ import type {
   VehicleVideo,
 } from "@/lib/inventory/types";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Button } from "@/components/ui/button";
 import {
   VehicleMediaManager,
   type PhotoWithUrl,
@@ -186,7 +187,9 @@ export function VehicleForm({
       className="flex flex-col gap-10 pb-24"
     >
       <section>
-        <h2 className="text-lg font-bold">基本情報</h2>
+        <h2 className="font-serif text-lg font-bold text-charcoal-900">
+          基本情報
+        </h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="メーカー" error={errors.manufacturer_id?.message}>
             <select
@@ -363,7 +366,9 @@ export function VehicleForm({
       </section>
 
       <section>
-        <h2 className="text-lg font-bold">自由入力コンテンツ（Markdown）</h2>
+        <h2 className="font-serif text-lg font-bold text-charcoal-900">
+          自由入力コンテンツ（Markdown）
+        </h2>
         <div className="mt-4 flex flex-col gap-4">
           <TextAreaField
             label="販売コメント"
@@ -405,7 +410,9 @@ export function VehicleForm({
       </section>
 
       <section>
-        <h2 className="text-lg font-bold">写真・動画</h2>
+        <h2 className="font-serif text-lg font-bold text-charcoal-900">
+          写真・動画
+        </h2>
         <div className="mt-4">
           {isEdit && vehicleId ? (
             <VehicleMediaManager
@@ -414,7 +421,7 @@ export function VehicleForm({
               initialVideos={initialVideos ?? []}
             />
           ) : (
-            <p className="text-base text-neutral-600">
+            <p className="text-base text-foreground-muted">
               写真・動画の登録は、車両を登録した後に編集画面から行えます。まずは基本情報を入力して登録してください。
             </p>
           )}
@@ -422,7 +429,9 @@ export function VehicleForm({
       </section>
 
       <section>
-        <h2 className="text-lg font-bold">関連コンテンツ</h2>
+        <h2 className="font-serif text-lg font-bold text-charcoal-900">
+          関連コンテンツ
+        </h2>
         <div className="mt-4">
           {/* FR-INV-014: 関連記事／関連図鑑／関連ブログ／関連整備実績の紐付け（BR-DOM-004: 参照のみでコピーしない） */}
           <Field label="関連コンテンツ（記事・図鑑・ライブラリ・整備実績、任意）">
@@ -436,7 +445,9 @@ export function VehicleForm({
       </section>
 
       <section>
-        <h2 className="text-lg font-bold">タグ</h2>
+        <h2 className="font-serif text-lg font-bold text-charcoal-900">
+          タグ
+        </h2>
         <div className="mt-4">
           {/* FR-INV-012: 自由なタグを複数付与できる（BR-DATA-003: マスタデータとして管理） */}
           <Field label="タグ（任意）">
@@ -450,7 +461,9 @@ export function VehicleForm({
       </section>
 
       <section>
-        <h2 className="text-lg font-bold">公開設定</h2>
+        <h2 className="font-serif text-lg font-bold text-charcoal-900">
+          公開設定
+        </h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="公開ステータス">
             <select className="input" {...register("status")}>
@@ -462,12 +475,20 @@ export function VehicleForm({
             </select>
           </Field>
           <div className="flex items-end gap-6">
-            <label className="flex items-center gap-2">
-              <input type="checkbox" {...register("is_recommended")} />
+            <label className="flex min-h-11 items-center gap-2 text-base text-charcoal-900">
+              <input
+                type="checkbox"
+                className="h-5 w-5 accent-primary-600"
+                {...register("is_recommended")}
+              />
               おすすめ
             </label>
-            <label className="flex items-center gap-2">
-              <input type="checkbox" {...register("is_new_arrival")} />
+            <label className="flex min-h-11 items-center gap-2 text-base text-charcoal-900">
+              <input
+                type="checkbox"
+                className="h-5 w-5 accent-primary-600"
+                {...register("is_new_arrival")}
+              />
               新着
             </label>
           </div>
@@ -484,7 +505,7 @@ export function VehicleForm({
               })}
               value={toDatetimeLocalValue(watch("scheduled_publish_at"))}
             />
-            <p className="mt-1 text-base text-neutral-600">
+            <p className="mt-1 text-base text-foreground-muted">
               指定日時になると自動的に公開ステータスに変わります（公開ステータスが「非公開」の場合のみ有効です）。
             </p>
           </Field>
@@ -493,7 +514,9 @@ export function VehicleForm({
 
       {isEdit && (
         <section>
-          <h2 className="text-lg font-bold">SEO・URL設定</h2>
+          <h2 className="font-serif text-lg font-bold text-charcoal-900">
+            SEO・URL設定
+          </h2>
           <div className="mt-4 flex flex-col gap-4">
             {/* FR-SEO-004: vehiclesテーブル自体はslugを持たないため、seo_metas.slugを編集対象とする */}
             <Field label="スラッグ（URL）" error={errors.slug?.message}>
@@ -504,7 +527,7 @@ export function VehicleForm({
                 value={watch("slug") ?? ""}
               />
             </Field>
-            <p className="text-base text-neutral-600">
+            <p className="text-base text-foreground-muted">
               URLが変更されます。変更前のURLは自動的に新しいURLへリダイレクトされます。
             </p>
             <SeoFieldsSection
@@ -521,36 +544,48 @@ export function VehicleForm({
         </section>
       )}
 
-      {submitError && <p className="text-sm text-red-600">{submitError}</p>}
+      {submitError && (
+        <p className="text-base text-red-600" role="alert">
+          {submitError}
+        </p>
+      )}
 
       {isEdit && (
-        <section className="rounded-md border border-red-200 bg-red-50 p-4">
-          <h2 className="text-base font-bold text-red-700">危険な操作</h2>
-          <p className="mt-1 text-base text-neutral-600">
+        <section className="rounded-lg border border-red-200 bg-red-50 p-4">
+          <h2 className="font-serif text-lg font-bold text-red-700">
+            危険な操作
+          </h2>
+          <p className="mt-1 text-base text-foreground-muted">
             この車両を削除すると公開ページから即座に非表示になります。この操作は元に戻せません。
           </p>
           {deleteError && (
-            <p className="mt-2 text-base text-red-600">{deleteError}</p>
+            <p className="mt-2 text-base text-red-600" role="alert">
+              {deleteError}
+            </p>
           )}
-          <button
+          <Button
             type="button"
             disabled={isDeleting}
             onClick={() => setPendingDelete(true)}
-            className="mt-3 min-h-11 rounded-md border border-red-600 px-4 text-base font-medium text-red-600 disabled:opacity-60"
+            variant="destructive"
+            size="md"
+            className="mt-3"
           >
             {isDeleting ? "削除中..." : "この車両を削除する"}
-          </button>
+          </Button>
         </section>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 border-t bg-white p-4">
-        <button
+      <div className="fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-white p-4 shadow-medium pb-[env(safe-area-inset-bottom)]">
+        <Button
           type="submit"
           disabled={isSubmitting}
-          className="mx-auto block min-h-11 w-full max-w-md rounded-md bg-blue-600 font-medium text-white disabled:opacity-60"
+          variant="primary"
+          size="lg"
+          className="mx-auto w-full max-w-md justify-center"
         >
           {isSubmitting ? "保存中..." : isEdit ? "更新する" : "登録する"}
-        </button>
+        </Button>
       </div>
 
       <ConfirmDialog
@@ -592,9 +627,13 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-base font-medium">{label}</span>
+      <span className="text-base font-medium text-charcoal-900">{label}</span>
       <div className="mt-1">{children}</div>
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {error && (
+        <p className="mt-1 text-base text-red-600" role="alert">
+          {error}
+        </p>
+      )}
     </label>
   );
 }

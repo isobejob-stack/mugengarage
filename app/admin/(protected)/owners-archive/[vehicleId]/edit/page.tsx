@@ -29,8 +29,10 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl font-bold">オーナーズアーカイブ管理</h1>
-      <p className="mt-2 text-neutral-600">
+      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+        オーナーズアーカイブ管理
+      </h1>
+      <p className="mt-2 text-base text-foreground-muted">
         {vehicle.model_year ? `${vehicle.model_year}年 ` : ""}
         車両ID: {vehicleId}
       </p>

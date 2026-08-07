@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
 
 // 削除・ステータス変更等の取り消しにくい操作の前に必ず挟む確認ダイアログ
 // （03_ui_rules.md 7章・8章）。影響範囲を文言で明示すること。
@@ -36,27 +37,21 @@ export function ConfirmDialog({
     <dialog
       ref={dialogRef}
       onCancel={onCancel}
-      className="w-full max-w-sm rounded-lg p-6 backdrop:bg-black/40"
+      className="w-full max-w-sm rounded-2xl border border-neutral-200 bg-white p-6 shadow-medium backdrop:bg-black/40"
     >
-      <h2 className="text-lg font-bold">{title}</h2>
-      <p className="mt-2 text-sm text-neutral-600">{description}</p>
+      <h2 className="font-serif text-lg font-bold text-charcoal-900">{title}</h2>
+      <p className="mt-2 text-base text-foreground-muted">{description}</p>
       <div className="mt-6 flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="min-h-11 min-w-11 rounded-md px-4 py-2 text-neutral-700"
-        >
+        <Button type="button" variant="outline" onClick={onCancel}>
           {cancelLabel}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant={danger ? "destructive" : "primary"}
           onClick={onConfirm}
-          className={`min-h-11 min-w-11 rounded-md px-4 py-2 font-medium text-white ${
-            danger ? "bg-red-600" : "bg-blue-600"
-          }`}
         >
           {confirmLabel}
-        </button>
+        </Button>
       </div>
     </dialog>
   );

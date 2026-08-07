@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
 
 const loginSchema = z.object({
   email: z
@@ -42,60 +43,78 @@ export default function Page() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4 py-8">
-      <h1 className="text-2xl font-bold">ログイン</h1>
-      <p className="mt-2 text-sm text-neutral-500">
-        M-GARAGE Platform 管理画面
-      </p>
+    <main className="flex min-h-screen items-center justify-center bg-cream-50 px-4 py-8">
+      <div className="w-full max-w-sm rounded-2xl border border-neutral-200 bg-white p-8 shadow-medium">
+        <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+          ログイン
+        </h1>
+        <p className="mt-2 text-base text-foreground-muted">
+          M-GARAGE Platform 管理画面
+        </p>
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="mt-8 flex flex-col gap-5"
-      >
-        <div>
-          <label htmlFor="email" className="block text-base font-medium">
-            メールアドレス
-          </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            className="mt-1 min-h-11 w-full rounded-md border border-neutral-300 px-3 text-base"
-            {...register("email")}
-          />
-          {errors.email && (
-            <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-          )}
-        </div>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="mt-8 flex flex-col gap-5"
+        >
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-base font-medium text-charcoal-900"
+            >
+              メールアドレス
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              className="input mt-1"
+              {...register("email")}
+            />
+            {errors.email && (
+              <p className="mt-1 text-base text-red-600" role="alert">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
 
-        <div>
-          <label htmlFor="password" className="block text-base font-medium">
-            パスワード
-          </label>
-          <input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            className="mt-1 min-h-11 w-full rounded-md border border-neutral-300 px-3 text-base"
-            {...register("password")}
-          />
-          {errors.password && (
-            <p className="mt-1 text-sm text-red-600">
-              {errors.password.message}
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-base font-medium text-charcoal-900"
+            >
+              パスワード
+            </label>
+            <input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              className="input mt-1"
+              {...register("password")}
+            />
+            {errors.password && (
+              <p className="mt-1 text-base text-red-600" role="alert">
+                {errors.password.message}
+              </p>
+            )}
+          </div>
+
+          {loginError && (
+            <p className="text-base text-red-600" role="alert">
+              {loginError}
             </p>
           )}
-        </div>
 
-        {loginError && <p className="text-sm text-red-600">{loginError}</p>}
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="min-h-11 rounded-md bg-blue-600 font-medium text-white disabled:opacity-60"
-        >
-          {isSubmitting ? "ログイン中..." : "ログイン"}
-        </button>
-      </form>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            variant="primary"
+            size="lg"
+            className="w-full justify-center"
+          >
+            {isSubmitting ? "ログイン中..." : "ログイン"}
+          </Button>
+        </form>
+      </div>
     </main>
   );
 }

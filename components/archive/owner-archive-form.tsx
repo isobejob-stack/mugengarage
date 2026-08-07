@@ -8,6 +8,7 @@ import {
   ownerArchiveEntryFormSchema,
   type OwnerArchiveEntryFormValues,
 } from "@/lib/archive/schema";
+import { Button } from "@/components/ui/button";
 
 // SCR-ADM-019: オーナーズアーカイブ編集フォーム
 export function OwnerArchiveForm({
@@ -68,21 +69,31 @@ export function OwnerArchiveForm({
         <textarea rows={4} className="input" {...register("owner_comment")} />
       </Field>
 
-      <label className="flex items-center gap-2 text-base font-medium">
-        <input type="checkbox" {...register("is_published")} />
+      <label className="flex min-h-11 items-center gap-2 text-base font-medium text-charcoal-900">
+        <input
+          type="checkbox"
+          className="h-5 w-5 accent-primary-600"
+          {...register("is_published")}
+        />
         アーカイブページで公開する
       </label>
 
-      {submitError && <p className="text-sm text-red-600">{submitError}</p>}
+      {submitError && (
+        <p className="text-base text-red-600" role="alert">
+          {submitError}
+        </p>
+      )}
 
-      <div className="fixed inset-x-0 bottom-0 border-t bg-white p-4">
-        <button
+      <div className="fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-white p-4 shadow-medium pb-[env(safe-area-inset-bottom)]">
+        <Button
           type="submit"
           disabled={isSubmitting}
-          className="mx-auto block min-h-11 w-full max-w-md rounded-md bg-blue-600 font-medium text-white disabled:opacity-60"
+          variant="primary"
+          size="lg"
+          className="mx-auto w-full max-w-md justify-center"
         >
           {isSubmitting ? "保存中..." : "更新する"}
-        </button>
+        </Button>
       </div>
     </form>
   );
@@ -97,7 +108,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-base font-medium">{label}</span>
+      <span className="text-base font-medium text-charcoal-900">{label}</span>
       <div className="mt-1">{children}</div>
     </label>
   );

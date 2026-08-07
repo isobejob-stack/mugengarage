@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { listAdminInquiries } from "@/lib/crm/queries";
+import { Card, CardBody } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { inquiryCategoryLabels } from "@/lib/crm/schema";
 
@@ -28,29 +28,30 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="text-2xl font-bold">問い合わせ</h1>
+      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+        問い合わせ
+      </h1>
 
       {inquiries.length === 0 ? (
-        <p className="mt-8 text-neutral-500">問い合わせはまだありません。</p>
+        <p className="mt-8 text-base text-foreground-muted">
+          問い合わせはまだありません。
+        </p>
       ) : (
         <ul className="mt-6 flex flex-col gap-3">
           {inquiries.map((i) => (
             <li key={i.id}>
-              <Link
-                href={`/admin/inquiries/${i.id}`}
-                className="block rounded-md border border-neutral-200 p-4 hover:border-neutral-400"
-              >
-                <div className="flex items-center justify-between gap-4">
+              <Card href={`/admin/inquiries/${i.id}`}>
+                <CardBody className="flex flex-row items-center justify-between gap-4 p-4">
                   <div>
-                    <p className="font-medium">
+                    <p className="text-lg font-semibold text-charcoal-900">
                       {i.customers?.name ?? "（顧客未登録）"}
-                      <span className="ml-2 text-sm text-neutral-500">
-                        {channelLabels[i.channel]}・
-                        {inquiryCategoryLabels[i.category]}
-                      </span>
+                    </p>
+                    <p className="text-base text-foreground-muted">
+                      {channelLabels[i.channel]}・
+                      {inquiryCategoryLabels[i.category]}
                     </p>
                     {i.message && (
-                      <p className="mt-1 line-clamp-1 text-sm text-neutral-500">
+                      <p className="mt-1 line-clamp-1 text-base text-foreground-muted">
                         {i.message}
                       </p>
                     )}
@@ -59,8 +60,8 @@ export default async function Page() {
                     label={statusLabels[i.response_status]}
                     tone={statusTones[i.response_status]}
                   />
-                </div>
-              </Link>
+                </CardBody>
+              </Card>
             </li>
           ))}
         </ul>
