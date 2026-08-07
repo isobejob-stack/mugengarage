@@ -5,6 +5,7 @@ import { LINE_URL } from "@/lib/site-config";
 import { LineConsultationMenu } from "@/components/layout/line-consultation-menu";
 import { Button } from "@/components/ui/button";
 import { Card, CardImage, CardBody, CardTitle, CardMeta, CardPrice } from "@/components/ui/card";
+import { VehicleFeatureBadges } from "@/components/ui/status-badge";
 
 const ENCYCLOPEDIA_LINKS = [
   {
@@ -79,6 +80,10 @@ export default async function Page() {
               v.slug ? (
                 <li key={v.id}>
                   <Card href={`/vehicles/${v.slug}`}>
+                    <VehicleFeatureBadges
+                      isRecommended={v.is_recommended}
+                      isNewArrival={v.is_new_arrival}
+                    />
                     <CardImage
                       src={featuredPhotoUrls[index] ?? undefined}
                       alt={`${v.manufacturers?.name ?? ""} ${v.models?.name ?? ""}`}

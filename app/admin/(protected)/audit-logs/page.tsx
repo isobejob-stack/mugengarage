@@ -11,6 +11,7 @@ const ACTION_LABELS: Record<AuditAction, string> = {
   delete: "削除",
   publish: "公開",
   unpublish: "非公開",
+  restore: "復元",
 };
 
 const TARGET_TYPE_LABELS: Record<string, string> = {

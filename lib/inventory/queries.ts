@@ -96,13 +96,69 @@ export async function getAdminVehicleById(id: string) {
   return data;
 }
 
+// ISSUE-004課題1 / BR-DEL-002: 論理削除された車両の一覧（管理画面の「削除済み」タブ・復元用）
+export async function listDeletedVehicles() {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("vehicles")
+    .select(
+      "id, status, price, model_year, display_order, updated_at, deleted_at, manufacturers(name), models(name)",
+    )
+    .not("deleted_at", "is", null)
+    .order("deleted_at", { ascending: false });
+
+  return (data ?? []) as unknown as Array<{
+    id: string;
+    status: string;
+    price: number;
+    model_year: number | null;
+    display_order: number;
+    updated_at: string;
+    deleted_at: string;
+    manufacturers: { name: string } | null;
+    models: { name: string } | null;
+  }>;
+}
+
+// ISSUE-004課題1 / BR-DEL-002: 復元対象の存在チェック用（論理削除済みのものだけを対象にする）
+export async function getDeletedVehicleById(id: string) {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("vehicles")
+    .select("*")
+    .eq("id", id)
+    .not("deleted_at", "is", null)
+    .maybeSingle<Vehicle>();
+
+  return data;
+}
+
+// ISSUE-004課題1 / BR-DEL-002: 論理削除された車両の復元（deleted_atをnullに戻す）。
+// 業務判断（不明点があったため、勝手に決めずコメントで根拠を明記する）:
+// ステータス（status）は復元時に一切変更しない。BR-DEL-003により売約済み（sold）の車両は
+// そもそも削除できない仕様のため、削除された車両のstatusはsold以外（draft/published等）で
+// 確定しており、復元後は削除直前のstatusがそのまま維持されるのが自然な「Undo」の挙動と判断した。
+// 例えば削除前がpublishedだった車両は復元と同時に再び公開状態になる（自動でdraftに落とす等はしない）。
+export async function restoreVehicle(id: string) {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("vehicles")
+    .update({ deleted_at: null })
+    .eq("id", id)
+    .not("deleted_at", "is", null)
+    .select()
+    .single();
+
+  return { data: data as Vehicle | null, error };
+}
+
 // FR-SRCH-002: 公開中車両の一覧（status=published かつ論理削除されていないもの）
 export async function listPublicVehicles() {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("vehicles")
     .select(
-      "id, price, model_year, mileage_km, status, manufacturers(name), models(name)",
+      "id, price, model_year, mileage_km, status, is_recommended, is_new_arrival, manufacturers(name), models(name)",
     )
     .eq("status", "published")
     .is("deleted_at", null)
@@ -114,6 +170,8 @@ export async function listPublicVehicles() {
     model_year: number | null;
     mileage_km: number | null;
     status: string;
+    is_recommended: boolean;
+    is_new_arrival: boolean;
     manufacturers: { name: string } | null;
     models: { name: string } | null;
   }>;

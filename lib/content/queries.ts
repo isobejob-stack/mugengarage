@@ -26,6 +26,45 @@ export async function getAdminArticleById(id: string) {
   return data;
 }
 
+// ISSUE-004課題1 / BR-DEL-002: 論理削除された記事の一覧（管理画面の「削除済み」タブ・復元用）
+export async function listDeletedArticles() {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("articles")
+    .select("id, title, slug, status, category, published_at, updated_at, deleted_at")
+    .not("deleted_at", "is", null)
+    .order("deleted_at", { ascending: false });
+
+  return data ?? [];
+}
+
+// ISSUE-004課題1 / BR-DEL-002: 復元対象の存在チェック用（論理削除済みのものだけを対象にする）
+export async function getDeletedArticleById(id: string) {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("articles")
+    .select("*")
+    .eq("id", id)
+    .not("deleted_at", "is", null)
+    .maybeSingle<Article>();
+
+  return data;
+}
+
+// ISSUE-004課題1 / BR-DEL-002: 論理削除された記事の復元（deleted_atをnullに戻す）
+export async function restoreArticle(id: string) {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("articles")
+    .update({ deleted_at: null })
+    .eq("id", id)
+    .not("deleted_at", "is", null)
+    .select()
+    .single();
+
+  return { data: data as Article | null, error };
+}
+
 // 公開記事一覧（新着順、pagination.md: ブログ記事一覧デフォルト10件）
 export async function listPublicArticles() {
   const supabase = createAdminClient();

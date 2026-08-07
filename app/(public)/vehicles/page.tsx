@@ -19,6 +19,7 @@ import {
   CardMeta,
   CardPrice,
 } from "@/components/ui/card";
+import { VehicleFeatureBadges } from "@/components/ui/status-badge";
 
 type SearchParams = Record<string, string | undefined>;
 
@@ -494,6 +495,10 @@ export default async function Page({
             v.slug ? (
               <li key={v.id}>
                 <Card href={`/vehicles/${v.slug}`}>
+                  <VehicleFeatureBadges
+                    isRecommended={v.is_recommended}
+                    isNewArrival={v.is_new_arrival}
+                  />
                   <CardImage
                     src={photoUrls[index]}
                     alt={`${v.manufacturers?.name ?? ""} ${v.models?.name ?? ""}`}

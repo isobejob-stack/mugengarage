@@ -44,3 +44,21 @@ export function VehicleStatusBadge({ status }: { status: VehicleStatus }) {
   const preset = VEHICLE_STATUS_PRESET[status];
   return <StatusBadge label={preset.label} tone={preset.tone} />;
 }
+
+// FR-INV-005（表示側）: 公開ページの車両カード写真上に重ねる「おすすめ／新着」表示。
+// Cardはrelative指定済みのため、CardImageの直後にこのまま置けばオーバーレイになる。
+export function VehicleFeatureBadges({
+  isRecommended,
+  isNewArrival,
+}: {
+  isRecommended: boolean;
+  isNewArrival: boolean;
+}) {
+  if (!isRecommended && !isNewArrival) return null;
+  return (
+    <div className="absolute left-2 top-2 z-10 flex gap-1">
+      {isRecommended && <StatusBadge label="おすすめ" tone="warning" />}
+      {isNewArrival && <StatusBadge label="新着" tone="info" />}
+    </div>
+  );
+}
