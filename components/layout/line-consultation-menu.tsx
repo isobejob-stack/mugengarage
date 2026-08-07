@@ -9,10 +9,13 @@ import {
 export function LineConsultationMenu() {
   return (
     <section aria-labelledby="line-consultation-menu-heading">
-      <h2 id="line-consultation-menu-heading" className="text-lg font-bold">
+      <h2
+        id="line-consultation-menu-heading"
+        className="font-serif text-lg font-bold text-charcoal-900"
+      >
         カテゴリから相談する
       </h2>
-      <p className="mt-1 text-sm text-neutral-600">
+      <p className="mt-1 text-sm text-foreground-muted">
         ご相談内容に近いカテゴリをお選びください。
       </p>
       <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -22,7 +25,7 @@ export function LineConsultationMenu() {
               href={buildLineConsultationUrl(category.id)}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex min-h-11 items-center justify-center rounded-md border border-l-4 border-neutral-300 border-l-green-600 bg-white px-4 py-3 text-center text-sm font-medium text-neutral-800 hover:border-green-600 hover:bg-green-50"
+              className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-l-4 border-neutral-200 border-l-[#06C755] bg-white px-4 py-3 text-center text-sm font-medium text-charcoal-800 shadow-soft transition-all duration-200 ease-standard hover:-translate-y-0.5 hover:border-[#06C755] hover:bg-[#06C755]/5 hover:shadow-medium active:translate-y-0"
             >
               {category.label}
             </a>

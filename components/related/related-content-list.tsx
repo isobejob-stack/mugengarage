@@ -1,7 +1,8 @@
-import Link from "next/link";
 import type { RelatedContentItem } from "@/lib/related/types";
+import { Card, CardBody, CardTitle } from "@/components/ui/card";
 
 // FR-VEH-005 / FR-TL-003 / FR-LIB-002 / FR-MNT-002: 公開ページの関連コンテンツ表示
+// 共有Cardコンポーネントのビジュアル言語（角丸・影・ホバーリフト）に合わせる。
 export function RelatedContentList({
   items,
   title = "関連コンテンツ",
@@ -12,17 +13,18 @@ export function RelatedContentList({
   if (items.length === 0) return null;
 
   return (
-    <section className="mt-10">
-      <h2 className="text-lg font-bold">{title}</h2>
-      <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+    <section className="mt-16">
+      <h2 className="font-serif text-lg font-bold text-charcoal-900">
+        {title}
+      </h2>
+      <ul className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {items.map((item) => (
           <li key={`${item.type}:${item.id}`}>
-            <Link
-              href={item.url}
-              className="block rounded-md border border-neutral-200 p-3 hover:border-neutral-400"
-            >
-              {item.label}
-            </Link>
+            <Card href={item.url}>
+              <CardBody>
+                <CardTitle>{item.label}</CardTitle>
+              </CardBody>
+            </Card>
           </li>
         ))}
       </ul>

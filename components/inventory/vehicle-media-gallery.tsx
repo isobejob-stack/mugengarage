@@ -48,7 +48,7 @@ export function VehicleMediaGallery({
     <div className="flex flex-col gap-8">
       {photos.length > 0 && (
         <section>
-          <h2 className="text-lg font-bold">写真</h2>
+          <h2 className="font-serif text-lg font-bold text-charcoal-900">写真</h2>
           <div className="relative mt-3">
             <div
               className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth px-4 pb-2"
@@ -72,13 +72,13 @@ export function VehicleMediaGallery({
                       setLightboxIndex(index);
                     }}
                     aria-label={`${buildAlt(index)}を拡大表示`}
-                    className="rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                    className="rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element -- Supabase Storageの公開URLを直接表示するため */}
                     <img
                       src={photo.public_url}
                       alt={buildAlt(index)}
-                      className="h-64 w-auto rounded-md object-cover sm:h-80"
+                      className="h-64 w-auto rounded-2xl object-cover shadow-soft sm:h-80"
                     />
                   </button>
                 </div>
@@ -92,7 +92,7 @@ export function VehicleMediaGallery({
                   onClick={() => scrollToIndex(activeIndex - 1)}
                   disabled={activeIndex === 0}
                   aria-label="前の写真へ"
-                  className="absolute top-1/2 left-2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-2xl text-white disabled:opacity-30 md:flex"
+                  className="absolute top-1/2 left-2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-2xl text-white shadow-medium disabled:opacity-30 md:flex"
                 >
                   ‹
                 </button>
@@ -101,7 +101,7 @@ export function VehicleMediaGallery({
                   onClick={() => scrollToIndex(activeIndex + 1)}
                   disabled={activeIndex === photos.length - 1}
                   aria-label="次の写真へ"
-                  className="absolute top-1/2 right-2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-2xl text-white disabled:opacity-30 md:flex"
+                  className="absolute top-1/2 right-2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-2xl text-white shadow-medium disabled:opacity-30 md:flex"
                 >
                   ›
                 </button>
@@ -123,7 +123,7 @@ export function VehicleMediaGallery({
                   <img
                     src={photo.public_url}
                     alt={buildAlt(index)}
-                    className="h-16 w-16 rounded border border-neutral-200 object-cover md:h-20 md:w-full"
+                    className="h-16 w-16 rounded-lg border border-neutral-200 object-cover shadow-soft md:h-20 md:w-full"
                   />
                 </a>
               ))}
@@ -134,14 +134,14 @@ export function VehicleMediaGallery({
 
       {videos.length > 0 && (
         <section>
-          <h2 className="text-lg font-bold">動画</h2>
+          <h2 className="font-serif text-lg font-bold text-charcoal-900">動画</h2>
           <div className="mt-3 flex flex-col gap-4">
             {videos.map((video) => {
               const embedUrl = toEmbeddableVideoUrl(video.video_url);
               return (
                 <div key={video.id}>
                   {embedUrl ? (
-                    <div className="aspect-video w-full overflow-hidden rounded-md">
+                    <div className="aspect-video w-full overflow-hidden rounded-2xl shadow-soft">
                       <iframe
                         src={embedUrl}
                         title="車両動画"

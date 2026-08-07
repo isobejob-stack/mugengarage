@@ -63,10 +63,12 @@ export function FavoriteButton({
       type="button"
       onClick={handleClick}
       aria-pressed={favorited}
-      className={`min-h-11 rounded-md border px-4 py-2 text-sm font-medium ${
+      // 共有Buttonコンポーネントのoutline variantをベースに、お気に入り状態の色のみ差し替える
+      // （03_ui_rules.md 4章: 重要ボタンはタップ領域44px以上・コントラストを高く保つ）
+      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border px-5 py-3 text-base font-medium shadow-soft transition-all duration-200 ease-standard active:scale-[0.98] ${
         favorited
-          ? "border-red-600 bg-red-50 text-red-600"
-          : "border-neutral-300 text-neutral-700"
+          ? "border-red-300 bg-red-50 text-red-600 hover:bg-red-100 active:bg-red-100"
+          : "border-neutral-300 bg-white text-charcoal-900 hover:border-primary-400 hover:bg-primary-50 active:bg-primary-100"
       } ${className}`}
     >
       {favorited ? "♥ お気に入り登録済み" : "♡ お気に入りに登録"}

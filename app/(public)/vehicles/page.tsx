@@ -4,10 +4,21 @@ import {
   searchPublicVehicles,
   type VehicleSearchFilters,
 } from "@/lib/inventory/search";
+import { getLeadVehiclePhotoPaths } from "@/lib/inventory/queries";
+import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
 import {
   parsePaginationParams,
   buildPaginationMeta,
 } from "@/lib/api/pagination";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardImage,
+  CardBody,
+  CardTitle,
+  CardMeta,
+  CardPrice,
+} from "@/components/ui/card";
 
 type SearchParams = Record<string, string | undefined>;
 
@@ -106,10 +117,19 @@ export default async function Page({
   ]);
   const meta = buildPaginationMeta(pagination, totalCount);
 
+  // 一覧表示用に、各車両の先頭写真のみを1クエリでまとめて取得する（N+1クエリ回避）
+  const leadPhotoPaths = await getLeadVehiclePhotoPaths(vehicles.map((v) => v.id));
+  const photoUrls = vehicles.map((v) => {
+    const path = leadPhotoPaths.get(v.id);
+    return path ? getVehiclePhotoPublicUrl(path) : undefined;
+  });
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">在庫車両一覧</h1>
+        <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+          在庫車両一覧
+        </h1>
         <Link href="/vehicles/ranking" className="text-sm hover:underline">
           人気ランキングを見る
         </Link>
@@ -453,18 +473,12 @@ export default async function Page({
         </details>
 
         <div className="flex gap-3">
-          <button
-            type="submit"
-            className="min-h-11 rounded-md bg-blue-600 px-4 py-2 font-medium text-white"
-          >
+          <Button type="submit" variant="primary" size="md">
             この条件で検索
-          </button>
-          <Link
-            href="/vehicles"
-            className="min-h-11 rounded-md border border-neutral-300 px-4 py-2 text-sm"
-          >
+          </Button>
+          <Button href="/vehicles" variant="outline" size="md">
             条件をクリア
-          </Link>
+          </Button>
         </div>
       </form>
 
@@ -475,27 +489,28 @@ export default async function Page({
           条件に一致する車両が見つかりませんでした。
         </p>
       ) : (
-        <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {vehicles.map((v) =>
+        <ul className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 md:gap-8">
+          {vehicles.map((v, index) =>
             v.slug ? (
               <li key={v.id}>
-                <Link
-                  href={`/vehicles/${v.slug}`}
-                  className="block rounded-md border border-neutral-200 p-4 hover:border-neutral-400"
-                >
-                  <p className="font-medium">
-                    {v.manufacturers?.name} {v.models?.name}
-                    {v.model_year ? `（${v.model_year}年）` : ""}
-                  </p>
-                  <p className="mt-1 text-sm text-neutral-500">
-                    {v.mileage_km !== null
-                      ? `走行距離 ${v.mileage_km.toLocaleString()}km`
-                      : ""}
-                  </p>
-                  <p className="mt-2 text-lg font-bold">
-                    ¥{v.price.toLocaleString()}
-                  </p>
-                </Link>
+                <Card href={`/vehicles/${v.slug}`}>
+                  <CardImage
+                    src={photoUrls[index]}
+                    alt={`${v.manufacturers?.name ?? ""} ${v.models?.name ?? ""}`}
+                  />
+                  <CardBody>
+                    <CardTitle>
+                      {v.manufacturers?.name} {v.models?.name}
+                      {v.model_year ? `（${v.model_year}年）` : ""}
+                    </CardTitle>
+                    {v.mileage_km !== null && (
+                      <CardMeta>
+                        走行距離 {v.mileage_km.toLocaleString()}km
+                      </CardMeta>
+                    )}
+                    <CardPrice>¥{v.price.toLocaleString()}</CardPrice>
+                  </CardBody>
+                </Card>
               </li>
             ) : null,
           )}

@@ -9,6 +9,7 @@ import {
 } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
 import { VehicleStatusBadge } from "@/components/ui/status-badge";
+import { Button } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/engagement/favorite-button";
 import { getSessionId } from "@/lib/engagement/session";
 import { listFavoriteVehicleIds } from "@/lib/engagement/queries";
@@ -139,11 +140,11 @@ export default async function Page({
         dangerouslySetInnerHTML={{ __html: structuredDataJson }}
       />
       <VehicleStatusBadge status={vehicle.status} />
-      <h1 className="mt-2 text-2xl font-bold">
+      <h1 className="mt-3 font-serif text-3xl font-bold text-charcoal-900">
         {vehicle.manufacturers?.name} {vehicle.models?.name}
         {vehicle.model_year ? `（${vehicle.model_year}年）` : ""}
       </h1>
-      <p className="mt-2 text-2xl font-bold">
+      <p className="mt-2 font-mono text-3xl font-bold tabular-nums text-primary-700">
         ¥{vehicle.price.toLocaleString()}
       </p>
 
@@ -151,17 +152,12 @@ export default async function Page({
         <FavoriteButton vehicleId={vehicle.id} initialFavorited={isFavorited} />
         {/* FR-LINE-002: 車両詳細ページでは「購入」カテゴリに固定した相談導線を表示する。
             レビュー指摘対応（必須修正3）: プリフィル文言に車両名を含め、ボタン文言と送信内容を一致させる */}
-        <a
-          href={buildLineConsultationUrl("purchase", vehicleName)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex min-h-11 items-center justify-center rounded-md bg-green-600 px-5 py-2 text-sm font-medium text-white"
-        >
+        <Button href={buildLineConsultationUrl("purchase", vehicleName)} variant="line" size="md">
           この車をLINEで相談する
-        </a>
+        </Button>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-8">
         <VehicleMediaGallery
           photos={photosWithUrl}
           videos={videos}
@@ -169,8 +165,23 @@ export default async function Page({
         />
       </div>
 
-      <table className="mt-6 w-full border-collapse text-sm">
-        <tbody>
+      <section className="mt-14">
+        <h2 className="font-serif text-lg font-bold text-charcoal-900">
+          車両情報
+        </h2>
+        {/* product-design-manager/graphic-designer策定方針「ショールーム的な高級感」に基づき、
+            細罫線のみのtableから、ラベル＋値をカード風に並べる2カラムグリッドへ変更。
+            データ構造（label/value props）はRowコンポーネントとして維持する。
+            UIUXレビュー指摘（事業責任者協議事項）: 01_public_ui_spec.mdが求める
+            「メーカー〜VINまでの全項目」のうち従来6項目しか表示していなかったため、
+            既存データベースに値がある残りの項目もあわせて表示するようにした。 */}
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {vehicle.model_year !== null && (
+            <Row label="年式" value={`${vehicle.model_year}年`} />
+          )}
+          {vehicle.registration_year !== null && (
+            <Row label="登録年" value={`${vehicle.registration_year}年`} />
+          )}
           {vehicle.mileage_km !== null && (
             <Row
               label="走行距離"
@@ -178,8 +189,27 @@ export default async function Page({
             />
           )}
           {vehicle.engine && <Row label="エンジン" value={vehicle.engine} />}
+          {vehicle.engine_model_code && (
+            <Row label="エンジン型式" value={vehicle.engine_model_code} />
+          )}
+          {vehicle.displacement_cc !== null && (
+            <Row
+              label="排気量"
+              value={`${vehicle.displacement_cc.toLocaleString()}cc`}
+            />
+          )}
+          {vehicle.horsepower !== null && (
+            <Row label="馬力" value={`${vehicle.horsepower}ps`} />
+          )}
+          {vehicle.torque && <Row label="トルク" value={vehicle.torque} />}
           {vehicle.transmission && (
             <Row label="ミッション" value={vehicle.transmission} />
+          )}
+          {vehicle.drivetrain && (
+            <Row label="駆動方式" value={vehicle.drivetrain} />
+          )}
+          {vehicle.body_type && (
+            <Row label="ボディタイプ" value={vehicle.body_type} />
           )}
           {vehicle.exterior_color && (
             <Row label="外装色" value={vehicle.exterior_color} />
@@ -187,16 +217,43 @@ export default async function Page({
           {vehicle.interior_color && (
             <Row label="内装色" value={vehicle.interior_color} />
           )}
-          {vehicle.vin && <Row label="VIN" value={vehicle.vin} />}
-        </tbody>
-      </table>
+          {vehicle.seat_material && (
+            <Row label="シート素材" value={vehicle.seat_material} />
+          )}
+          {vehicle.owner_count !== null && (
+            <Row label="オーナー数" value={`${vehicle.owner_count}人`} />
+          )}
+          {vehicle.shaken_expiry && (
+            <Row label="車検満了日" value={vehicle.shaken_expiry} />
+          )}
+          {vehicle.indoor_storage !== null && (
+            <Row
+              label="保管状況"
+              value={vehicle.indoor_storage ? "屋内保管" : "屋外保管"}
+            />
+          )}
+          {vehicle.accident_history !== null && (
+            <Row
+              label="事故歴"
+              value={vehicle.accident_history ? "あり" : "なし"}
+            />
+          )}
+          {vehicle.vin && (
+            <div className="col-span-2 sm:col-span-3">
+              <Row label="VIN" value={vehicle.vin} breakAll />
+            </div>
+          )}
+        </div>
+      </section>
 
       {markdownSections
         .filter(([, body]) => Boolean(body))
         .map(([title, body]) => (
-          <section key={title} className="mt-8">
-            <h2 className="text-lg font-bold">{title}</h2>
-            <div className="prose mt-2 max-w-none">
+          <section key={title} className="mt-14">
+            <h2 className="font-serif text-lg font-bold text-charcoal-900">
+              {title}
+            </h2>
+            <div className="prose mt-3 max-w-none">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{body}</ReactMarkdown>
             </div>
           </section>
@@ -204,7 +261,7 @@ export default async function Page({
 
       <RelatedContentList items={related} title="関連コンテンツ" />
 
-      <div className="mt-10 border-t border-neutral-200 pt-6">
+      <div className="mt-16 border-t border-neutral-200 pt-8">
         <FavoriteButton vehicleId={vehicle.id} initialFavorited={isFavorited} />
       </div>
 
@@ -215,31 +272,45 @@ export default async function Page({
           モーダル表示中はこのバーの上にライトボックスが正しく重なるようにする。
           fixedを使用（sticky+100vwのフルブリードは縦スクロールバー幅分の横スクロールが
           発生するため不採用）。<main>側にバー高さ分のpadding-bottomを確保済み。 */}
-      <div
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-white pb-[env(safe-area-inset-bottom)]"
-      >
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-white/95 shadow-strong backdrop-blur-sm pb-[env(safe-area-inset-bottom)]">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-center px-4 sm:h-16">
-          <a
+          <Button
             href={buildLineConsultationUrl("purchase", vehicleName)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex min-h-11 w-full max-w-xs items-center justify-center rounded-md bg-green-600 px-5 py-2 text-sm font-medium text-white"
+            variant="line"
+            size="md"
+            className="w-full max-w-xs"
           >
             この車をLINEで相談する
-          </a>
+          </Button>
         </div>
       </div>
     </main>
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+// スペック1件分の表示。カード風の背景・角丸・薄い罫線で「ショールーム的な高級感」を演出する。
+// 既存のlabel/value propsは維持したまま、表示方法（table row → gridアイテム）のみ変更している。
+// UIUXレビュー指摘: VIN等スペースを含まない連続文字列がgridトラックを押し広げ横スクロールを
+// 引き起こしうるため、breakAll（VIN専用）とデフォルトのbreak-words（日本語の色名等）で対応する。
+function Row({
+  label,
+  value,
+  breakAll = false,
+}: {
+  label: string;
+  value: string;
+  breakAll?: boolean;
+}) {
   return (
-    <tr className="border-b border-neutral-200">
-      <th className="w-32 py-2 text-left font-medium text-neutral-500">
-        {label}
-      </th>
-      <td className="py-2">{value}</td>
-    </tr>
+    <div className="rounded-xl border border-neutral-200 bg-cream-50 px-4 py-3 shadow-soft">
+      <p className="text-base font-medium text-foreground-muted">{label}</p>
+      <p
+        className={`mt-1 text-base font-semibold text-charcoal-900 ${
+          breakAll ? "break-all" : "break-words"
+        }`}
+      >
+        {value}
+      </p>
+    </div>
   );
 }

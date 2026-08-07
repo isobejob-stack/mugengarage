@@ -180,6 +180,29 @@ export async function getVehiclePhotos(vehicleId: string) {
   return data ?? [];
 }
 
+// 一覧表示用: 複数車両の先頭写真（storage_path）のみを1クエリでまとめて取得する
+// （車両ごとにgetVehiclePhotosを呼ぶN+1クエリを避けるため。レビュー指摘対応）
+export async function getLeadVehiclePhotoPaths(vehicleIds: string[]) {
+  if (vehicleIds.length === 0) return new Map<string, string>();
+
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("vehicle_photos")
+    .select("vehicle_id, storage_path, display_order")
+    .in("vehicle_id", vehicleIds)
+    .is("deleted_at", null)
+    .order("display_order", { ascending: true })
+    .returns<Pick<VehiclePhoto, "vehicle_id" | "storage_path" | "display_order">[]>();
+
+  const result = new Map<string, string>();
+  for (const row of data ?? []) {
+    if (!result.has(row.vehicle_id)) {
+      result.set(row.vehicle_id, row.storage_path);
+    }
+  }
+  return result;
+}
+
 // FR-INV-010: 車両動画一覧（表示順）。table_definitions.md 4.9
 export async function getVehicleVideos(vehicleId: string) {
   const supabase = createAdminClient();

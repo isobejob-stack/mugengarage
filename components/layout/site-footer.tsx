@@ -1,32 +1,39 @@
 import Link from "next/link";
 import { LINE_URL } from "@/lib/site-config";
+import { Button } from "@/components/ui/button";
 
 // 03_ui_rules.md 7章: フッターでもLINE相談CTAを再掲する
 export function SiteFooter() {
   return (
-    <footer className="mt-16 border-t border-neutral-200 bg-neutral-50">
-      <div className="mx-auto max-w-5xl px-4 py-8 text-sm text-neutral-600">
-        <p className="font-medium text-neutral-900">エムガレージ</p>
-        <p className="mt-1">クラシックJaguar専門店</p>
+    <footer className="mt-16 border-t border-neutral-200 bg-cream-100">
+      <div className="mx-auto max-w-5xl px-4 py-10 text-sm text-charcoal-700">
+        <p className="font-serif text-base font-medium text-charcoal-900">
+          エムガレージ
+        </p>
+        <p className="mt-1 text-foreground-muted">クラシックJaguar専門店</p>
 
-        <div className="mt-4 flex flex-wrap gap-4">
-          <Link href="/about" className="hover:underline">
+        <div className="mt-6 flex flex-wrap items-center gap-4">
+          <Link
+            href="/about"
+            className="text-charcoal-700 transition-colors duration-200 ease-standard hover:text-primary-700 hover:underline"
+          >
             店舗情報・アクセス
           </Link>
-          <Link href="/owners-archive" className="hover:underline">
+          <Link
+            href="/owners-archive"
+            className="text-charcoal-700 transition-colors duration-200 ease-standard hover:text-primary-700 hover:underline"
+          >
             オーナーズアーカイブ
           </Link>
-          <Link href="/contact" className="hover:underline">
+          <Link
+            href="/contact"
+            className="text-charcoal-700 transition-colors duration-200 ease-standard hover:text-primary-700 hover:underline"
+          >
             お問い合わせ
           </Link>
-          <a
-            href={LINE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-green-700 hover:underline"
-          >
+          <Button href={LINE_URL} variant="line" size="md">
             LINEで相談する
-          </a>
+          </Button>
         </div>
       </div>
     </footer>
