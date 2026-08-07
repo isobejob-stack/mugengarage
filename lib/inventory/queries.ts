@@ -61,6 +61,30 @@ export async function getVehicleHierarchyOptions() {
   };
 }
 
+// FR-INV-001 / BR-DATA-003:
+// メーカーの新規作成（車両登録フォームの「その他（手入力）」から呼ばれる）。
+// name/slugの重複はmanufacturersテーブルのUNIQUE制約で防ぐ（呼び出し側でerror.code==="23505"を判定する）
+export async function createManufacturer(values: { name: string; slug: string }) {
+  const supabase = createAdminClient();
+  return supabase
+    .from("manufacturers")
+    .insert(values)
+    .select()
+    .single<Manufacturer>();
+}
+
+// FR-INV-001 / BR-DATA-003:
+// 車種の新規作成（同上）。models.slugはメーカーをまたいでテーブル全体でUNIQUE制約を持つ点に注意
+// （table_definitions.md 4.2 / supabase/migrations/20260805090300_create_models_table.sql）。
+export async function createModel(values: {
+  manufacturer_id: string;
+  name: string;
+  slug: string;
+}) {
+  const supabase = createAdminClient();
+  return supabase.from("models").insert(values).select().single<Model>();
+}
+
 // FR-INV-002: 管理画面の車両一覧（全ステータス、論理削除除く）
 export async function listAdminVehicles() {
   const supabase = createAdminClient();

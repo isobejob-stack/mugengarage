@@ -29,6 +29,7 @@ import {
 import { RelatedContentPicker } from "@/components/related/related-content-picker";
 import type { RelatedContentCandidate } from "@/lib/related/types";
 import { TagPicker } from "@/components/tags/tag-picker";
+import { ManufacturerModelFields } from "@/components/inventory/manufacturer-model-fields";
 import type { Tag } from "@/lib/seo/types";
 import {
   toDatetimeLocalValue,
@@ -91,10 +92,6 @@ export function VehicleForm({
   const seriesId = watch("series_id");
   const generationId = watch("generation_id");
 
-  const models = useMemo(
-    () => options.models.filter((m) => m.manufacturer_id === manufacturerId),
-    [options.models, manufacturerId],
-  );
   const seriesList = useMemo(
     () => options.series.filter((s) => s.model_id === modelId),
     [options.series, modelId],
@@ -191,47 +188,29 @@ export function VehicleForm({
           基本情報
         </h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="メーカー" error={errors.manufacturer_id?.message}>
-            <select
-              className="input"
-              {...register("manufacturer_id")}
-              onChange={(e) => {
-                setValue("manufacturer_id", e.target.value);
-                setValue("model_id", "");
-                setValue("series_id", null);
-                setValue("generation_id", null);
-                setValue("grade_id", null);
-              }}
-            >
-              <option value="">選択してください</option>
-              {options.manufacturers.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-
-          <Field label="車種" error={errors.model_id?.message}>
-            <select
-              className="input"
-              {...register("model_id")}
-              disabled={!manufacturerId}
-              onChange={(e) => {
-                setValue("model_id", e.target.value);
-                setValue("series_id", null);
-                setValue("generation_id", null);
-                setValue("grade_id", null);
-              }}
-            >
-              <option value="">選択してください</option>
-              {models.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-          </Field>
+          {/* FR-INV-001 / BR-DATA-003: 既存メーカー・車種からの選択に加え、「その他（手入力）」で
+              その場に新規メーカー・新規車種を作成できる（components/inventory/manufacturer-model-fields.tsx） */}
+          <ManufacturerModelFields
+            manufacturers={options.manufacturers}
+            models={options.models}
+            manufacturerId={manufacturerId}
+            modelId={modelId}
+            manufacturerError={errors.manufacturer_id?.message}
+            modelError={errors.model_id?.message}
+            onManufacturerChange={(id) => {
+              setValue("manufacturer_id", id);
+              setValue("model_id", "");
+              setValue("series_id", null);
+              setValue("generation_id", null);
+              setValue("grade_id", null);
+            }}
+            onModelChange={(id) => {
+              setValue("model_id", id);
+              setValue("series_id", null);
+              setValue("generation_id", null);
+              setValue("grade_id", null);
+            }}
+          />
 
           <Field label="シリーズ（任意）">
             <select

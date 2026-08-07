@@ -128,3 +128,64 @@ export type VehicleVideoFormValues = z.infer<typeof vehicleVideoFormSchema>;
 export const vehiclePhotoReorderSchema = z.object({
   photoIds: z.array(z.string().uuid()).min(1, "並び替え対象の写真がありません"),
 });
+
+// FR-INV-001 / BR-DATA-003:
+// メーカーはハードコードせず、車両登録フォームの「その他（手入力）」からその場で追加できる
+// マスタデータとして管理する（components/tags/tag-picker.tsx / lib/tags/schema.tsと同じ考え方）。
+export const manufacturerFormSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "メーカー名を入力してください")
+    .max(50, "メーカー名は50文字以内で入力してください"),
+  slug: z
+    .string()
+    .trim()
+    .min(1, "スラッグを入力してください")
+    .regex(/^[a-z0-9-]+$/, "半角英数字とハイフンのみ使用できます"),
+});
+
+export type ManufacturerFormValues = z.infer<typeof manufacturerFormSchema>;
+
+// メーカー名からslugを自動提案する（lib/tags/schema.tsのslugifyTagNameと同一ロジック）。
+// 半角英数字以外は失われるため、日本語のメーカー名では空文字になり得る。
+// その場合は呼び出し側（フォーム）でAPIから返るVALIDATION_ERRORをそのまま表示し、
+// 管理者が入力し直す想定（tag-picker.tsxと同じ割り切り）。
+export function slugifyManufacturerName(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+// FR-INV-001 / BR-DATA-003:
+// 車種もメーカーと同様、車両登録フォームの「その他（手入力）」からその場で追加できる
+// マスタデータとして管理する。models.slugはメーカーをまたいでテーブル全体でUNIQUE制約を持つ
+// （supabase/migrations/20260805090300_create_models_table.sql）。
+export const modelFormSchema = z.object({
+  manufacturer_id: z.string().uuid("メーカーを選択してください"),
+  name: z
+    .string()
+    .trim()
+    .min(1, "車種名を入力してください")
+    .max(50, "車種名は50文字以内で入力してください"),
+  slug: z
+    .string()
+    .trim()
+    .min(1, "スラッグを入力してください")
+    .regex(/^[a-z0-9-]+$/, "半角英数字とハイフンのみ使用できます"),
+});
+
+export type ModelFormValues = z.infer<typeof modelFormSchema>;
+
+// 車種名からslugを自動提案する（slugifyManufacturerNameと同一ロジック）
+export function slugifyModelName(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}

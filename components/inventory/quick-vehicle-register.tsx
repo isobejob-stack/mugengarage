@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { emptyVehicleFormValues } from "@/lib/inventory/schema";
 import type { Manufacturer, Model } from "@/lib/inventory/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { VehicleMediaManager } from "@/components/inventory/vehicle-media-manager";
+import { ManufacturerModelFields } from "@/components/inventory/manufacturer-model-fields";
 
 // FR-INV-001 / FR-INV-009: 現地即時登録フロー（SCR-ADM-004の派生）
 // ステップ1: メーカー・車種・参考価格のみの最小フォームでPOST /api/admin/vehiclesを呼ぶ
@@ -27,11 +28,6 @@ export function QuickVehicleRegister({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [createdVehicleId, setCreatedVehicleId] = useState<string | null>(
     null,
-  );
-
-  const availableModels = useMemo(
-    () => models.filter((m) => m.manufacturer_id === manufacturerId),
-    [models, manufacturerId],
   );
 
   const canSubmit = manufacturerId !== "" && modelId !== "" && !submitting;
@@ -112,39 +108,20 @@ export function QuickVehicleRegister({
       onSubmit={(e) => void handleSubmit(e)}
       className="flex flex-col gap-5"
     >
-      <Field label="メーカー" required>
-        <select
-          className="input"
-          value={manufacturerId}
-          onChange={(e) => {
-            setManufacturerId(e.target.value);
-            setModelId("");
-          }}
-        >
-          <option value="">選択してください</option>
-          {manufacturers.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.name}
-            </option>
-          ))}
-        </select>
-      </Field>
-
-      <Field label="車種" required>
-        <select
-          className="input"
-          value={modelId}
-          disabled={!manufacturerId}
-          onChange={(e) => setModelId(e.target.value)}
-        >
-          <option value="">選択してください</option>
-          {availableModels.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.name}
-            </option>
-          ))}
-        </select>
-      </Field>
+      {/* FR-INV-001 / BR-DATA-003: 既存メーカー・車種からの選択に加え、「その他（手入力）」で
+          その場に新規メーカー・新規車種を作成できる（components/inventory/manufacturer-model-fields.tsx） */}
+      <ManufacturerModelFields
+        manufacturers={manufacturers}
+        models={models}
+        manufacturerId={manufacturerId}
+        modelId={modelId}
+        required
+        onManufacturerChange={(id) => {
+          setManufacturerId(id);
+          setModelId("");
+        }}
+        onModelChange={(id) => setModelId(id)}
+      />
 
       <Field label="参考価格（円・任意）">
         <input
