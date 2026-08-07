@@ -287,6 +287,9 @@ export function VehicleMediaManager({
               type="file"
               multiple
               accept="image/*"
+              // 現地でのクイック登録（/admin/vehicles/quick-new）でのスマートフォン撮影を想定し、
+              // タップ時にカメラアプリが直接開きやすくする。デスクトップでは無視される安全な属性。
+              capture="environment"
               onChange={handleFileChange}
               className="hidden"
             />
