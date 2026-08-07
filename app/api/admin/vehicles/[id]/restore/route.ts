@@ -5,8 +5,8 @@ import { recordAuditLog } from "@/lib/audit/log";
 import { getDeletedVehicleById, restoreVehicle } from "@/lib/inventory/queries";
 
 // ISSUE-004課題1 / BR-DEL-002: 論理削除された車両の復元。
-// deleted_at をnullに戻すのみで、statusは変更しない（判断根拠は lib/inventory/queries.ts の
-// restoreVehicle のコメントを参照）。
+// deleted_atをnullに戻す。statusの扱い（publishedだった場合はdraftへ落とす）は
+// lib/inventory/queries.ts の restoreVehicle のコメントを参照。
 export async function PATCH(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -25,7 +25,10 @@ export async function PATCH(
     });
   }
 
-  const { data: vehicle, error } = await restoreVehicle(id);
+  const { data: vehicle, error, restoredStatus } = await restoreVehicle(
+    id,
+    existing.status,
+  );
   if (error || !vehicle) {
     return apiInternalError(error);
   }
@@ -35,6 +38,10 @@ export async function PATCH(
     targetType: "vehicle",
     targetId: id,
     action: "restore",
+    changes: {
+      previous_status: existing.status,
+      restored_status: restoredStatus,
+    },
   });
 
   return NextResponse.json({ data: vehicle });

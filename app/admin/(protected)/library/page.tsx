@@ -12,9 +12,14 @@ export default async function Page() {
         <h1 className="font-serif text-2xl font-bold text-charcoal-900">
           ライブラリ
         </h1>
-        <Button href="/admin/library/new" variant="primary" size="md">
-          新規作成
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button href="/admin/library/deleted" variant="ghost" size="sm">
+            削除済みを見る
+          </Button>
+          <Button href="/admin/library/new" variant="primary" size="md">
+            新規作成
+          </Button>
+        </div>
       </div>
 
       {entries.length === 0 ? (

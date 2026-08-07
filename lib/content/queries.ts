@@ -52,17 +52,22 @@ export async function getDeletedArticleById(id: string) {
 }
 
 // ISSUE-004課題1 / BR-DEL-002: 論理削除された記事の復元（deleted_atをnullに戻す）
-export async function restoreArticle(id: string) {
+// 開発部長レビュー指摘（重大）: lib/inventory/queries.ts の restoreVehicle と同じ理由で、
+// 削除前がpublishedだった記事は復元時にdraftへ落とす（誤操作での即時再公開を防ぐ）。
+export async function restoreArticle(id: string, previousStatus: Article["status"]) {
   const supabase = createAdminClient();
+  const restoredStatus =
+    previousStatus === "published" ? "draft" : previousStatus;
+
   const { data, error } = await supabase
     .from("articles")
-    .update({ deleted_at: null })
+    .update({ deleted_at: null, status: restoredStatus })
     .eq("id", id)
     .not("deleted_at", "is", null)
     .select()
     .single();
 
-  return { data: data as Article | null, error };
+  return { data: data as Article | null, error, restoredStatus };
 }
 
 // 公開記事一覧（新着順、pagination.md: ブログ記事一覧デフォルト10件）

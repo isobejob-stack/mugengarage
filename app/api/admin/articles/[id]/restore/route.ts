@@ -23,7 +23,10 @@ export async function PATCH(
     });
   }
 
-  const { data: article, error } = await restoreArticle(id);
+  const { data: article, error, restoredStatus } = await restoreArticle(
+    id,
+    existing.status,
+  );
   if (error || !article) {
     return apiInternalError(error);
   }
@@ -33,6 +36,10 @@ export async function PATCH(
     targetType: "article",
     targetId: id,
     action: "restore",
+    changes: {
+      previous_status: existing.status,
+      restored_status: restoredStatus,
+    },
   });
 
   return NextResponse.json({ data: article });

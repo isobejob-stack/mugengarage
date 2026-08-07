@@ -29,7 +29,8 @@ export function StatusBadge({
 // 車両公開ステータス（05_glossary.md 4章）のラベル・トーン対応
 import type { VehicleStatus } from "@/lib/inventory/types";
 
-const VEHICLE_STATUS_PRESET: Record<
+// 「削除済み車両」一覧のように、バッジではなくラベル文字列だけ欲しい場面向けにexportする
+export const VEHICLE_STATUS_PRESET: Record<
   VehicleStatus,
   { label: string; tone: StatusBadgeTone }
 > = {

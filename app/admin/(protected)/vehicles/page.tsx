@@ -14,9 +14,14 @@ export default async function Page() {
         <h1 className="font-serif text-2xl font-bold text-charcoal-900">
           車両一覧
         </h1>
-        <Button href="/admin/vehicles/new" variant="primary" size="md">
-          新規登録
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button href="/admin/vehicles/deleted" variant="ghost" size="sm">
+            削除済みを見る
+          </Button>
+          <Button href="/admin/vehicles/new" variant="primary" size="md">
+            新規登録
+          </Button>
+        </div>
       </div>
 
       {vehicles.length === 0 ? (

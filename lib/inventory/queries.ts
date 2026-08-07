@@ -134,22 +134,30 @@ export async function getDeletedVehicleById(id: string) {
 }
 
 // ISSUE-004課題1 / BR-DEL-002: 論理削除された車両の復元（deleted_atをnullに戻す）。
-// 業務判断（不明点があったため、勝手に決めずコメントで根拠を明記する）:
-// ステータス（status）は復元時に一切変更しない。BR-DEL-003により売約済み（sold）の車両は
-// そもそも削除できない仕様のため、削除された車両のstatusはsold以外（draft/published等）で
-// 確定しており、復元後は削除直前のstatusがそのまま維持されるのが自然な「Undo」の挙動と判断した。
-// 例えば削除前がpublishedだった車両は復元と同時に再び公開状態になる（自動でdraftに落とす等はしない）。
-export async function restoreVehicle(id: string) {
+// 開発部長レビュー指摘（重大）: 削除前のstatusをそのまま復元すると、削除前がpublished
+// （公開中）だった場合に確認なしで即座に再公開されてしまう。03_ui_rules.md 7章は公開
+// ステータス変更を「取り消しにくい操作」として慎重に扱うことを求めており、価格変更ですら
+// ConfirmDialogを挟んでいる水準に対して、これは安全策が不足していた。
+// そのため、削除前がpublishedだった車両は復元時にdraft（非公開）へ落とし、運用者が内容を
+// 再確認してから改めて公開操作を行う運用とする。それ以外のstatus（draft/negotiating/
+// coming_soon。soldはBR-DEL-003によりそもそも削除不可）はそのまま維持する。
+export async function restoreVehicle(
+  id: string,
+  previousStatus: Vehicle["status"],
+) {
   const supabase = createAdminClient();
+  const restoredStatus =
+    previousStatus === "published" ? "draft" : previousStatus;
+
   const { data, error } = await supabase
     .from("vehicles")
-    .update({ deleted_at: null })
+    .update({ deleted_at: null, status: restoredStatus })
     .eq("id", id)
     .not("deleted_at", "is", null)
     .select()
     .single();
 
-  return { data: data as Vehicle | null, error };
+  return { data: data as Vehicle | null, error, restoredStatus };
 }
 
 // FR-SRCH-002: 公開中車両の一覧（status=published かつ論理削除されていないもの）
