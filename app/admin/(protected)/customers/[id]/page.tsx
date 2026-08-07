@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import {
   getAdminCustomerById,
   getCustomerFavoriteVehicles,
@@ -20,6 +21,51 @@ const channelLabels: Record<string, string> = {
   email: "メール",
   form: "フォーム",
 };
+
+// UIUXレビュー指摘: セクションが同じ見た目のCardで5つ並ぶため、
+// アイコンで種類を一目で判別できるようにする（55歳以上の非エンジニア運用者向け配慮）。
+function SectionHeading({
+  icon,
+  children,
+}: {
+  icon: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <h2 className="flex items-center gap-2 font-serif text-lg font-bold text-charcoal-900">
+      <span aria-hidden="true" className="text-primary-600">
+        {icon}
+      </span>
+      {children}
+    </h2>
+  );
+}
+
+function Icon({ path }: { path: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-5 w-5"
+    >
+      <path d={path} />
+    </svg>
+  );
+}
+
+const ICON_PATHS = {
+  customer: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0",
+  favorite:
+    "M12 20.5s-7.5-4.6-9.5-8.7C1 8.3 2.6 5 6 5c2 0 3.3 1 4 2 0.7-1 2-2 4-2 3.4 0 5 3.3 3.5 6.8-2 4.1-9.5 8.7-9.5 8.7Z",
+  note: "M6 3h9l3 3v15H6zM15 3v3h3M9 12h6M9 16h6",
+  reminder:
+    "M12 3a5 5 0 0 0-5 5v3.5L5 15h14l-2-3.5V8a5 5 0 0 0-5-5ZM10 19a2 2 0 0 0 4 0",
+  timeline: "M12 8v4l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z",
+} as const;
 
 // SCR-ADM-006: 顧客詳細（問い合わせ・メモ・リマインダーを時系列表示、FR-CRM-002〜005）
 export default async function Page({
@@ -47,9 +93,9 @@ export default async function Page({
       <section className="mt-6">
         <Card>
           <CardBody>
-            <h2 className="font-serif text-lg font-bold text-charcoal-900">
+            <SectionHeading icon={<Icon path={ICON_PATHS.customer} />}>
               顧客情報
-            </h2>
+            </SectionHeading>
             <div className="mt-4">
               <CustomerEditForm
                 customerId={customer.id}
@@ -68,10 +114,10 @@ export default async function Page({
       <section className="mt-6">
         <Card>
           <CardBody>
-            <h2 className="font-serif text-lg font-bold text-charcoal-900">
+            <SectionHeading icon={<Icon path={ICON_PATHS.favorite} />}>
               お気に入り登録車両
               {favoriteVehicles.length > 0 && `（${favoriteVehicles.length}件）`}
-            </h2>
+            </SectionHeading>
             {favoriteVehicles.length === 0 ? (
               <p className="mt-4 text-base text-foreground-muted">
                 お気に入り登録した車両はまだありません。
@@ -112,9 +158,9 @@ export default async function Page({
       <section className="mt-6">
         <Card>
           <CardBody>
-            <h2 className="font-serif text-lg font-bold text-charcoal-900">
+            <SectionHeading icon={<Icon path={ICON_PATHS.note} />}>
               メモを追加
-            </h2>
+            </SectionHeading>
             <div className="mt-4">
               <CustomerNoteForm customerId={customer.id} />
             </div>
@@ -125,9 +171,9 @@ export default async function Page({
       <section className="mt-6">
         <Card>
           <CardBody>
-            <h2 className="font-serif text-lg font-bold text-charcoal-900">
+            <SectionHeading icon={<Icon path={ICON_PATHS.reminder} />}>
               リマインダーを追加
-            </h2>
+            </SectionHeading>
             <div className="mt-4">
               <ReminderForm customerId={customer.id} />
             </div>
@@ -136,9 +182,9 @@ export default async function Page({
       </section>
 
       <section className="mt-8">
-        <h2 className="font-serif text-lg font-bold text-charcoal-900">
+        <SectionHeading icon={<Icon path={ICON_PATHS.timeline} />}>
           タイムライン
-        </h2>
+        </SectionHeading>
 
         {timeline.length === 0 ? (
           <p className="mt-4 text-base text-foreground-muted">

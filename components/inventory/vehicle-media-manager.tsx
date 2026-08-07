@@ -232,8 +232,7 @@ export function VehicleMediaManager({
     });
   };
 
-  const submitVideo = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitVideo = async () => {
     setVideoError(null);
     setVideoSubmitting(true);
 
@@ -429,7 +428,10 @@ export function VehicleMediaManager({
           動画（YouTube等の外部URL）
         </h3>
 
-        <form onSubmit={submitVideo} className="mt-3 flex flex-wrap gap-3">
+        {/* 車両編集フォーム（<form>）の内側にネストされるため、HTML仕様上ここは
+            <form>にできない（<form>のネストは無効でハイドレーションエラーの原因になる）。
+            送信ボタンのclickとEnterキー押下の両方でsubmitVideoを呼ぶ。 */}
+        <div className="mt-3 flex flex-wrap gap-3">
           <input
             type="url"
             required
@@ -437,11 +439,22 @@ export function VehicleMediaManager({
             className="input flex-1"
             value={videoUrl}
             onChange={(e) => setVideoUrl(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                void submitVideo();
+              }
+            }}
           />
-          <Button type="submit" disabled={videoSubmitting} variant="primary">
+          <Button
+            type="button"
+            disabled={videoSubmitting}
+            variant="primary"
+            onClick={() => void submitVideo()}
+          >
             {videoSubmitting ? "登録中..." : "追加する"}
           </Button>
-        </form>
+        </div>
 
         {videoError && (
           <p className="mt-2 text-base text-red-600" role="alert">

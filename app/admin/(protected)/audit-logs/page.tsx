@@ -60,7 +60,11 @@ export default async function Page() {
           監査ログはまだありません。
         </p>
       ) : (
-        <Card className="mt-6">
+        <>
+          <p className="mt-6 text-sm text-foreground-muted sm:hidden">
+            → 表は横にスクロールできます
+          </p>
+          <Card className="mt-2 sm:mt-6">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-base">
               <thead>
@@ -94,7 +98,8 @@ export default async function Page() {
               </tbody>
             </table>
           </div>
-        </Card>
+          </Card>
+        </>
       )}
     </main>
   );

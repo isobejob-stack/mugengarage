@@ -125,7 +125,11 @@ export function TagsManager({ initialTags }: { initialTags: Tag[] }) {
       {tags.length === 0 ? (
         <p className="text-base text-foreground-muted">タグはまだ登録されていません。</p>
       ) : (
-        <Card>
+        <>
+          <p className="text-sm text-foreground-muted sm:hidden">
+            → 表は横にスクロールできます
+          </p>
+          <Card>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-base">
               <thead>
@@ -159,7 +163,8 @@ export function TagsManager({ initialTags }: { initialTags: Tag[] }) {
               </tbody>
             </table>
           </div>
-        </Card>
+          </Card>
+        </>
       )}
 
       <ConfirmDialog
