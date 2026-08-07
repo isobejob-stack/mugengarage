@@ -48,6 +48,7 @@ export function VehicleMediaManager({
   const [videoSubmitting, setVideoSubmitting] = useState(false);
   const [reordering, setReordering] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const successMessageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -60,6 +61,13 @@ export function VehicleMediaManager({
       }
     };
   }, []);
+
+  // カメラ用・アルバム用の2つのinputを持つため、どちらから選ばれた場合も両方クリアする
+  // （同じ写真を連続で選び直したときにonChangeが発火しなくなるのを防ぐ）
+  const resetFileInputs = () => {
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
+  };
 
   // 03_ui_rules.md 6章: アップロード時は進捗（プログレスバー）を表示する
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,7 +82,7 @@ export function VehicleMediaManager({
       (file) => file.size > MAX_VEHICLE_PHOTO_FILE_SIZE_BYTES,
     );
     if (oversizedFile) {
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      resetFileInputs();
       setPhotoError(
         `「${oversizedFile.name}」のサイズが上限（${
           MAX_VEHICLE_PHOTO_FILE_SIZE_BYTES / (1024 * 1024)
@@ -97,7 +105,7 @@ export function VehicleMediaManager({
     };
     xhr.onload = () => {
       setUploadProgress(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      resetFileInputs();
 
       let body: { data?: PhotoWithUrl[]; error?: { message: string } } | null =
         null;
@@ -273,7 +281,31 @@ export function VehicleMediaManager({
           写真
         </h3>
 
+        {/* 現地での撮影導線は「カメラ」と「アルバム」で入口を分ける。
+            capture属性はスマートフォンでカメラを直接起動できる一方、指定すると
+            アルバムからの選択と複数枚同時選択ができなくなる（iOS Safari等）。
+            「たくさん撮ってまとめて登録したい」運用を殺さないよう、
+            1枚ずつその場で撮る用（capture付き）と、撮り溜めた写真をまとめて選ぶ用
+            （capture無し・multiple）の2つのボタンを併置する。 */}
         <div className="mt-3 flex flex-wrap items-center gap-3">
+          <label
+            className={buttonClassName({
+              variant: "primary",
+              size: "md",
+              className: "cursor-pointer sm:hidden",
+            })}
+          >
+            カメラで撮影
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </label>
+
           <label
             className={buttonClassName({
               variant: "outline",
@@ -281,15 +313,13 @@ export function VehicleMediaManager({
               className: "cursor-pointer",
             })}
           >
-            写真を選択してアップロード
+            <span className="sm:hidden">アルバムから選ぶ（複数可）</span>
+            <span className="hidden sm:inline">写真を選択してアップロード</span>
             <input
               ref={fileInputRef}
               type="file"
               multiple
               accept="image/*"
-              // 現地でのクイック登録（/admin/vehicles/quick-new）でのスマートフォン撮影を想定し、
-              // タップ時にカメラアプリが直接開きやすくする。デスクトップでは無視される安全な属性。
-              capture="environment"
               onChange={handleFileChange}
               className="hidden"
             />
