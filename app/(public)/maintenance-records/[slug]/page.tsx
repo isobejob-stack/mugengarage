@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -5,7 +6,29 @@ import { getPublicMaintenanceRecordBySlug } from "@/lib/maintenance/queries";
 import { listRelatedContents } from "@/lib/related/queries";
 import { RelatedContentList } from "@/components/related/related-content-list";
 import { buildLineConsultationUrl } from "@/lib/site-config";
+import { getSiteSettings } from "@/lib/settings/queries";
 import { Button } from "@/components/ui/button";
+import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
+
+// 各詳細ページに固有のtitle/descriptionを与える。従来はルートlayoutの値を継承しており、
+// 検索結果でどのページも同じ文言になっていた（docs/tasks/ISSUE-005）。
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const record = await getPublicMaintenanceRecordBySlug(slug);
+
+  if (!record) return {};
+
+  return buildPageMetadata({
+    title: record.title,
+    description:
+      excerptFromMarkdown(record.body) || "クラシックJaguarの整備実績です。",
+    path: `/maintenance-records/${slug}`,
+  });
+}
 
 // SCR-PUB-014: 整備実績詳細（故障事例・費用感・作業ポイント、関連車種・図鑑・ブログ）
 export default async function Page({
@@ -20,28 +43,35 @@ export default async function Page({
     notFound();
   }
 
-  const related = await listRelatedContents("maintenance_record", record.id);
+  const [related, settings] = await Promise.all([
+    listRelatedContents("maintenance_record", record.id),
+    getSiteSettings(),
+  ]);
+  const lineConsultUrl = buildLineConsultationUrl(
+    settings.line_url,
+    "repair",
+    record.title,
+  );
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
       {record.category && (
         <p className="text-sm text-foreground-muted">{record.category}</p>
       )}
-      <h1 className="mt-1 font-serif text-2xl font-bold text-charcoal-900">
+      <h1 className="mt-1 font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
         {record.title}
       </h1>
 
       {/* FR-LINE-002: 整備実績詳細ページでは「修理」カテゴリに固定した相談導線を表示する。
-          レビュー指摘対応（必須修正3）: プリフィル文言に整備実績タイトルを含め、ボタン文言と送信内容を一致させる */}
-      <div className="mt-4">
-        <Button
-          href={buildLineConsultationUrl("repair", record.title)}
-          variant="line"
-          size="md"
-        >
-          同じような症状をLINEで相談する
-        </Button>
-      </div>
+          レビュー指摘対応（必須修正3）: プリフィル文言に整備実績タイトルを含め、ボタン文言と送信内容を一致させる。
+          LINEのURLが未設定のあいだはボタンを出さない。 */}
+      {lineConsultUrl && (
+        <div className="mt-4">
+          <Button href={lineConsultUrl} variant="line" size="md">
+            同じような症状をLINEで相談する
+          </Button>
+        </div>
+      )}
 
       {record.issue_description && (
         <section className="mt-6 rounded-xl border border-neutral-200 bg-cream-50 p-4 shadow-soft">

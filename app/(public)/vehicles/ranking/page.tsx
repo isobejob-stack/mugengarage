@@ -1,9 +1,17 @@
 import Link from "next/link";
 import { getVehicleFavoriteRanking } from "@/lib/engagement/queries";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 // 静的生成されるとお気に入り数が増えても順位が次回デプロイまで変わらないため、
 // リクエストごとに描画する（理由の詳細は app/(public)/blog/page.tsx のコメント参照）。
 export const dynamic = "force-dynamic";
+
+export const metadata = buildPageMetadata({
+  title: "人気ランキング",
+  description:
+    "お気に入り登録の多いクラシックJaguarをランキング形式でご紹介します。いま注目されている車両が分かります。",
+  path: "/vehicles/ranking",
+});
 
 // SCR-PUB-005: 人気ランキング（お気に入り数を基に公開中の車両を順位表示、FR-FAV-004）
 export default async function Page() {
@@ -11,7 +19,7 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+      <h1 className="font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
         人気ランキング
       </h1>
       <p className="mt-2 text-foreground-muted">

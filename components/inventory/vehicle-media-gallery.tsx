@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef, useState } from "react";
 import { toEmbeddableVideoUrl } from "@/lib/inventory/video";
 import { VehicleMediaLightbox } from "@/components/inventory/vehicle-media-lightbox";
@@ -48,7 +49,7 @@ export function VehicleMediaGallery({
     <div className="flex flex-col gap-8">
       {photos.length > 0 && (
         <section>
-          <h2 className="font-serif text-lg font-bold text-charcoal-900">写真</h2>
+          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">写真</h2>
           <div className="relative mt-3">
             <div
               className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth px-4 pb-2"
@@ -72,13 +73,20 @@ export function VehicleMediaGallery({
                       setLightboxIndex(index);
                     }}
                     aria-label={`${buildAlt(index)}を拡大表示`}
-                    className="rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                    // 高さ＋アスペクト比で幅を確定させる。従来は w-auto で写真の縦横比により
+                    // 幅がバラバラになり、(1)読み込み完了まで幅が不明でカルーセルがガタつく
+                    // （CLS）、(2)スナップ位置が写真ごとに変わりスワイプの手応えが不安定、
+                    // という2つの問題があった。4:3固定は一覧のカード（CardImage）とも揃う。
+                    className="relative block aspect-[4/3] h-64 overflow-hidden rounded-2xl shadow-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 sm:h-80"
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element -- Supabase Storageの公開URLを直接表示するため */}
-                    <img
+                    <Image
                       src={photo.public_url}
                       alt={buildAlt(index)}
-                      className="h-64 w-auto rounded-2xl object-cover shadow-soft sm:h-80"
+                      fill
+                      sizes="(min-width: 640px) 27rem, 21rem"
+                      // 車両詳細の主役画像。1枚目はLCPになるため遅延読み込みを外す。
+                      priority={index === 0}
+                      className="object-cover"
                     />
                   </button>
                 </div>
@@ -116,14 +124,17 @@ export function VehicleMediaGallery({
                   key={photo.id}
                   href={`#photo-${photo.id}`}
                   onClick={() => setActiveIndex(index)}
-                  className="block h-16 w-16 flex-none md:h-20 md:w-full"
+                  className="relative block h-16 w-16 flex-none overflow-hidden rounded-lg border border-neutral-200 shadow-soft md:h-20 md:w-full"
                   aria-label={`${index + 1}枚目の写真を表示`}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element -- Supabase Storageの公開URLを直接表示するため */}
-                  <img
+                  <Image
                     src={photo.public_url}
                     alt={buildAlt(index)}
-                    className="h-16 w-16 rounded-lg border border-neutral-200 object-cover shadow-soft md:h-20 md:w-full"
+                    fill
+                    // サムネイルは最大でも80px四方。元画像をそのまま配信すると数MBの写真が
+                    // 枚数分ダウンロードされるため、必要な解像度だけを取得させる。
+                    sizes="80px"
+                    className="object-cover"
                   />
                 </a>
               ))}
@@ -134,7 +145,7 @@ export function VehicleMediaGallery({
 
       {videos.length > 0 && (
         <section>
-          <h2 className="font-serif text-lg font-bold text-charcoal-900">動画</h2>
+          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">動画</h2>
           <div className="mt-3 flex flex-col gap-4">
             {videos.map((video) => {
               const embedUrl = toEmbeddableVideoUrl(video.video_url);

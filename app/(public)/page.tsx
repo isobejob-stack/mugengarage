@@ -1,7 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { listPublicVehicles, getLeadVehiclePhotoPaths } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
-import { LINE_URL } from "@/lib/site-config";
+import { SITE_URL } from "@/lib/site-config";
+import { getSiteSettings } from "@/lib/settings/queries";
 import { LineConsultationMenu } from "@/components/layout/line-consultation-menu";
 import { Button } from "@/components/ui/button";
 import { Card, CardImage, CardBody, CardTitle, CardMeta, CardPrice } from "@/components/ui/card";
@@ -11,6 +13,13 @@ import { VehicleFeatureBadges } from "@/components/ui/status-badge";
 // 次回デプロイまでトップに出ない（最も目に付く画面で更新が反映されない状態になる）。
 // リクエストごとに描画する（理由の詳細は app/(public)/blog/page.tsx のコメント参照）。
 export const dynamic = "force-dynamic";
+
+// トップページはルートlayoutのtitle.default（"エムガレージ｜クラシックJaguar専門店"）を
+// そのまま使いたいため、titleは上書きせずcanonicalのみ明示する。
+// トップは "/" と "" の両方で到達しうるため、正規URLを示しておく。
+export const metadata: Metadata = {
+  alternates: { canonical: SITE_URL },
+};
 
 const ENCYCLOPEDIA_LINKS = [
   {
@@ -32,7 +41,10 @@ const ENCYCLOPEDIA_LINKS = [
 
 // SCR-PUB-001: トップページ（FR-INV-005, FR-LINE-001, FR-SEO-001）
 export default async function Page() {
-  const vehicles = await listPublicVehicles();
+  const [vehicles, settings] = await Promise.all([
+    listPublicVehicles(),
+    getSiteSettings(),
+  ]);
   const featuredVehicles = vehicles.slice(0, 3);
 
   // 在庫車両カードのサムネイル用に、トップ3件分のみ先頭写真を1クエリでまとめて取得する
@@ -60,15 +72,17 @@ export default async function Page() {
           <Button href="/vehicles" variant="secondary" size="lg">
             在庫車両を見る
           </Button>
-          <Button href={LINE_URL} variant="line" size="lg">
-            LINEで相談する
-          </Button>
+          {settings.line_url && (
+            <Button href={settings.line_url} variant="line" size="lg">
+              LINEで相談する
+            </Button>
+          )}
         </div>
       </section>
 
       <section className="mt-10">
         <div className="flex items-center justify-between">
-          <h2 className="font-serif text-lg font-bold text-charcoal-900">
+          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
             在庫車両
           </h2>
           <Link href="/vehicles" className="text-sm hover:underline">
@@ -89,9 +103,12 @@ export default async function Page() {
                       isRecommended={v.is_recommended}
                       isNewArrival={v.is_new_arrival}
                     />
+                    {/* 先頭カードの写真はファーストビューに入りLCPになりやすいため、
+                        遅延読み込みを外して表示を前倒しする（2枚目以降は遅延のまま） */}
                     <CardImage
                       src={featuredPhotoUrls[index] ?? undefined}
                       alt={`${v.manufacturers?.name ?? ""} ${v.models?.name ?? ""}`}
+                      priority={index === 0}
                     />
                     <CardBody>
                       <CardTitle>
@@ -112,11 +129,11 @@ export default async function Page() {
 
       {/* FR-LINE-002: 相談カテゴリ表示（購入／修理／売却／部品／Jaguar全般／カーライフ相談） */}
       <div className="mt-10">
-        <LineConsultationMenu />
+        <LineConsultationMenu lineUrl={settings.line_url} />
       </div>
 
       <section className="mt-10">
-        <h2 className="font-serif text-lg font-bold text-charcoal-900">
+        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
           Jaguarを知る
         </h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">

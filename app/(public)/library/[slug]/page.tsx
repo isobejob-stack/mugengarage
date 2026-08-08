@@ -1,9 +1,31 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getPublicLibraryEntryBySlug } from "@/lib/library/queries";
 import { listRelatedContents } from "@/lib/related/queries";
 import { RelatedContentList } from "@/components/related/related-content-list";
+import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
+
+// 各詳細ページに固有のtitle/descriptionを与える。従来はルートlayoutの値を継承しており、
+// 検索結果でどのページも同じ文言になっていた（docs/tasks/ISSUE-005）。
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const entry = await getPublicLibraryEntryBySlug(slug);
+
+  if (!entry) return {};
+
+  return buildPageMetadata({
+    title: entry.title,
+    description:
+      excerptFromMarkdown(entry.body) || "クラシックJaguarの用語解説です。",
+    path: `/library/${slug}`,
+  });
+}
 
 // SCR-PUB-012: ライブラリ詳細（用語集・図鑑・ブログへの相互リンク、FR-LIB-002）
 export default async function Page({
@@ -25,7 +47,7 @@ export default async function Page({
       {entry.category && (
         <p className="text-sm text-foreground-muted">{entry.category}</p>
       )}
-      <h1 className="mt-1 font-serif text-2xl font-bold text-charcoal-900">
+      <h1 className="mt-1 font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
         {entry.title}
       </h1>
 

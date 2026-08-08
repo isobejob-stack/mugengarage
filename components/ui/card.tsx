@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
@@ -69,24 +70,42 @@ export function Card(props: CardProps): ReactNode {
 
 // CardImage: 車両カード等、画像ありパターン用。4:3のトリミング＋hoverで軽くズーム。
 // src未指定（写真未登録）の場合は、共通のフォールバックUI（車のシルエット＋案内文）を表示する。
+//
+// priority: 一覧の先頭（ファーストビューに入る）カードにのみ true を渡す。
+// LCP（Largest Contentful Paint）になりうる画像の遅延読み込みを外し、表示を前倒しする。
+// 画面外のカードまで true にすると帯域を奪い合って逆効果になるため、先頭数枚に限ること。
 export function CardImage({
   src,
   alt,
   className,
+  priority = false,
 }: {
   src?: string;
   alt: string;
   className?: string;
+  priority?: boolean;
 }): ReactNode {
   return (
-    <div className={cx("aspect-[4/3] w-full overflow-hidden bg-neutral-100", className)}>
+    <div
+      className={cx(
+        "relative aspect-[4/3] w-full overflow-hidden bg-neutral-100",
+        className,
+      )}
+    >
       {src ? (
-        // Next/Image導入は別タスクで検討。ここでは既存実装との互換のため img を使用。
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        // next/imageでAVIF/WebP変換・端末幅に応じたリサイズ・遅延読み込みを行う。
+        // 車両写真は一眼で撮った数MBのJPEGがそのまま登録されうるため、生の<img>だと
+        // スマートフォンにもフルサイズが届いてしまう。
+        // fill + aspect比固定の親要素により、読み込み完了前後でレイアウトが動かない（CLS対策）。
+        <Image
           src={src}
           alt={alt}
-          className="h-full w-full object-cover transition-transform duration-500 ease-premium group-hover:scale-105"
+          fill
+          // カードは「モバイル=全幅 / sm以上=3カラム」で表示される。実際に必要な解像度だけを
+          // 配信するため、ブラウザに選択させる候補幅のヒントを与える。
+          sizes="(min-width: 640px) 33vw, 100vw"
+          priority={priority}
+          className="object-cover transition-transform duration-500 ease-premium group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
         />
       ) : (
         <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-cream-200 text-foreground-muted">

@@ -62,6 +62,41 @@ body {
   font-family: var(--font-sans);
 }
 
+/* WCAG 2.3.3（Animation from Interactions）対応。
+   ホバーで浮く・画像がズームする等の装飾的な動きは、前庭障害や乗り物酔いの体質がある人に
+   めまい・吐き気を引き起こしうる。OS側で「視差効果を減らす」を有効にしている利用者には
+   アニメーションを実質無効化する。値を0にせず0.01msにするのは、transitionend/animationend の
+   発火に依存した処理を壊さないための定石。 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 本文の可読性。クラシックJaguarの購買層は年齢が高めで、加齢に伴い
+   コントラスト感度と近見視力は低下する。行間を広めに取り、日本語の禁則・
+   単語途中での改行を避けることで、読み進める負荷を下げる。
+   （行間の確保は若年層にとっても可読性を損なわないため、全体に適用する） */
+body {
+  line-height: 1.75;
+  word-break: normal;
+  overflow-wrap: anywhere;
+  line-break: strict;
+}
+
+/* 見出しは行間を詰める。本文と同じ1.75では、複数行になった見出しが
+   間延びして「かたまり」として認識されにくくなるため。 */
+h1,
+h2,
+h3 {
+  line-height: 1.35;
+}
+
 @layer components {
   /* 03_ui_rules.md 4章・5章: タップ領域44px以上、視認性の高い入力欄 */
   .input {

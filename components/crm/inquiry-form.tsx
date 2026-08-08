@@ -9,6 +9,7 @@ import {
   inquiryCategoryLabels,
   type InquiryFormValues,
 } from "@/lib/crm/schema";
+import { postJson } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
 
 // SCR-PUB-017: 問い合わせフォーム
@@ -27,15 +28,14 @@ export function InquiryForm() {
 
   const onSubmit = async (values: InquiryFormValues) => {
     setSubmitError(null);
-    const res = await fetch("/api/inquiries", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setSubmitError(body?.error?.message ?? "送信に失敗しました");
+    // 従来は fetch を直接呼んでおり、送信中に電波が切れると例外が投げっぱなしになって
+    // 「送信できていないのにエラーも出ない」状態になっていた。問い合わせの取りこぼしに
+    // 直結するため、通信失敗も必ず画面上のメッセージとして返す（lib/api/client.ts）。
+    const result = await postJson("/api/inquiries", values);
+
+    if (!result.ok) {
+      setSubmitError(result.message);
       return;
     }
 
@@ -53,7 +53,11 @@ export function InquiryForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
+    // relative: ハニーポットをabsoluteで画面外に出すため、位置の基準をこのformに固定する
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="relative flex flex-col gap-5"
+    >
       <Field label="相談カテゴリ">
         <select className="input" {...register("category")}>
           {Object.entries(inquiryCategoryLabels).map(([value, label]) => (
@@ -79,6 +83,24 @@ export function InquiryForm() {
       <Field label="お問い合わせ内容" error={errors.message?.message}>
         <textarea rows={6} className="input" {...register("message")} />
       </Field>
+
+      {/* ハニーポット。人間には見えず、スクリーンリーダーにも読まれず、
+          Tabキーでも到達しないダミー欄。フォームを機械的に埋めるボットだけが値を入れるため、
+          サーバー側で値の有無をスパム判定に使う（app/api/inquiries/route.ts）。
+          display:none ではなく位置を画面外へ飛ばすのは、display:none の項目を
+          無視するボットに気付かれにくくするため。 */}
+      <div aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
+        <label htmlFor="website">
+          この欄は入力しないでください
+          <input
+            id="website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            {...register("website")}
+          />
+        </label>
+      </div>
 
       {submitError && <p className="text-sm text-red-600">{submitError}</p>}
 

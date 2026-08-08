@@ -6,12 +6,25 @@ import {
 // FR-LINE-002: 相談カテゴリ表示。購入／修理／売却／部品／Jaguar全般／カーライフ相談の
 // 6カテゴリを訴求し、タップすると各カテゴリの事前入力テキスト付きLINEリンクへ遷移する（FR-LINE-003）。
 // 03_ui_rules.md 4章: タップ対象は最低44px四方のタップ領域（min-h-11 = 44px）を確保する。
-export function LineConsultationMenu() {
+export function LineConsultationMenu({ lineUrl }: { lineUrl: string | null }) {
+  // カテゴリごとの遷移先を先に組み立て、URLを生成できたものだけを表示する。
+  // lineUrlが未設定、または保存されている値が不正なURLの場合は遷移先が無いため、
+  // 該当カテゴリ（＝結果的に全カテゴリ）を出さない。
+  const categories = LINE_CONSULTATION_CATEGORIES.map((category) => ({
+    ...category,
+    href: buildLineConsultationUrl(lineUrl, category.id),
+  })).filter(
+    (category): category is (typeof category) & { href: string } =>
+      category.href !== null,
+  );
+
+  if (categories.length === 0) return null;
+
   return (
     <section aria-labelledby="line-consultation-menu-heading">
       <h2
         id="line-consultation-menu-heading"
-        className="font-serif text-lg font-bold text-charcoal-900"
+        className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl"
       >
         カテゴリから相談する
       </h2>
@@ -19,10 +32,10 @@ export function LineConsultationMenu() {
         ご相談内容に近いカテゴリをお選びください。
       </p>
       <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {LINE_CONSULTATION_CATEGORIES.map((category) => (
+        {categories.map((category) => (
           <li key={category.id}>
             <a
-              href={buildLineConsultationUrl(category.id)}
+              href={category.href}
               target="_blank"
               rel="noopener noreferrer"
               className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-l-4 border-neutral-200 border-l-[#06C755] bg-white px-4 py-3 text-center text-sm font-medium text-charcoal-800 shadow-soft transition-all duration-200 ease-standard hover:-translate-y-0.5 hover:border-[#06C755] hover:bg-[#06C755]/5 hover:shadow-medium active:translate-y-0"

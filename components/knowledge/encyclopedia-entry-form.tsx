@@ -16,6 +16,7 @@ import { emptySeoFieldsValues } from "@/lib/seo/schema";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { SeoFieldsSection } from "@/components/ui/seo-fields-section";
 import { Button } from "@/components/ui/button";
+import { deleteJson, sendJson } from "@/lib/api/client";
 
 // SCR-ADM-012: 図鑑編集フォーム
 export function EncyclopediaEntryForm({
@@ -48,18 +49,14 @@ export function EncyclopediaEntryForm({
 
   const onSubmit = async (values: EncyclopediaEntryFormValues) => {
     setSubmitError(null);
-    const res = await fetch(
+    const result = await sendJson(
       isEdit ? `/api/admin/encyclopedia/${entryId}` : "/api/admin/encyclopedia",
-      {
-        method: isEdit ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      },
+      isEdit ? "PATCH" : "POST",
+      values,
     );
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setSubmitError(body?.error?.message ?? "保存に失敗しました");
+    if (!result.ok) {
+      setSubmitError(result.message);
       return;
     }
 
@@ -72,13 +69,10 @@ export function EncyclopediaEntryForm({
     if (!entryId) return;
     setDeleteError(null);
     setIsDeleting(true);
-    const res = await fetch(`/api/admin/encyclopedia/${entryId}`, {
-      method: "DELETE",
-    });
+    const result = await deleteJson(`/api/admin/encyclopedia/${entryId}`);
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setDeleteError(body?.error?.message ?? "削除に失敗しました");
+    if (!result.ok) {
+      setDeleteError(result.message);
       setIsDeleting(false);
       return;
     }

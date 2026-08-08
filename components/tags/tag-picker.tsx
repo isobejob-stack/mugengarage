@@ -4,6 +4,7 @@ import { useState } from "react";
 import { slugifyTagName } from "@/lib/tags/schema";
 import type { Tag } from "@/lib/seo/types";
 import { Button } from "@/components/ui/button";
+import { postJson } from "@/lib/api/client";
 
 // FR-INV-012 / FR-BLOG-002: 車両・記事編集フォームでのタグ選択UI。
 // 既存タグからの複数選択に加え、その場での新規タグ作成にも対応する
@@ -38,20 +39,18 @@ export function TagPicker({
     setError(null);
     setCreating(true);
 
-    const res = await fetch("/api/admin/tags", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, slug: slugifyTagName(name) }),
+    const result = await postJson<Tag>("/api/admin/tags", {
+      name,
+      slug: slugifyTagName(name),
     });
 
-    const body = await res.json().catch(() => null);
-    if (!res.ok) {
-      setError(body?.error?.message ?? "タグの作成に失敗しました");
+    if (!result.ok) {
+      setError(result.message);
       setCreating(false);
       return;
     }
 
-    const created: Tag = body.data;
+    const created = result.data;
     setTags((prev) =>
       [...prev, created].sort((a, b) => a.name.localeCompare(b.name, "ja")),
     );

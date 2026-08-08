@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { patchJson } from "@/lib/api/client";
 
 // ISSUE-004課題1 / BR-DEL-002: 論理削除データの復元UI（6ドメイン共通）
 // 各ドメインの「削除済み一覧」画面（例: app/admin/(protected)/vehicles/deleted/page.tsx）から使う
@@ -46,15 +47,12 @@ export function DeletedItemsList<
       return next;
     });
 
-    const res = await fetch(`/api/admin/${domain}/${id}/restore`, {
-      method: "PATCH",
-    });
+    const result = await patchJson(`/api/admin/${domain}/${id}/restore`);
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
+    if (!result.ok) {
       setErrors((prev) => ({
         ...prev,
-        [id]: body?.error?.message ?? "復元に失敗しました",
+        [id]: result.message,
       }));
       setPendingId(null);
       return;

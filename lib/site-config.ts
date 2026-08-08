@@ -1,5 +1,9 @@
 // サイト全体で共通のナビゲーション・LINE導線設定（01_business_requirements.md: LINE相談は最重要CTA）
 
+// 顧客向けの店舗名。metadataのタイトル組み立て等で使う。
+// 「M-GARAGE Platform」は開発側から見たシステム名であり、顧客向けの表記ではない。
+export const SITE_NAME = "エムガレージ";
+
 export const siteNav = [
   { label: "在庫車両", href: "/vehicles" },
   { label: "図鑑", href: "/encyclopedia" },
@@ -10,8 +14,11 @@ export const siteNav = [
   { label: "お問い合わせ", href: "/contact" },
 ] as const;
 
-// TODO: 実際の公式LINEアカウントのURLに差し替える（FR-LINE-003）
-export const LINE_URL = "https://line.me/";
+// LINE URL・掲載媒体リンクはDB（site_settings）で管理し、管理画面から編集する。
+// 以前はここに定数として持っていたが、仮の値のまま全ページのCTAに使われており、
+// 開発者を介さないと最重要導線を直せない状態になっていた（docs/tasks/ISSUE-005）。
+// 取得は lib/settings/queries.ts の getSiteSettings() を使う。
+
 
 // FR-LINE-002: 相談カテゴリ表示。02_functional_requirements.md 記載の6カテゴリ
 // （購入／修理／売却／部品／Jaguar全般／カーライフ相談）を定義する。
@@ -56,10 +63,17 @@ export const LINE_CONSULTATION_CATEGORIES: ReadonlyArray<{
 // 「【contextContent】の購入について相談したいです。」のように対象（車両名・整備実績タイトル等）を
 // 含めたプリフィル文言を生成する。ボタン文言（例：「この車をLINEで相談する」）と実際にLINEへ
 // 送信される内容を一致させるための引数。
+//
+// lineUrl: 管理画面で設定された公式LINEアカウントのURL（lib/settings/queries.ts）。
+// 未設定の場合は呼び出し側でLINEボタン自体を表示しない想定のため、ここではnullを受けたら
+// nullを返す。仮のURLへ遷移させるより、導線を出さないほうが利用者を裏切らない。
 export function buildLineConsultationUrl(
+  lineUrl: string | null,
   category: LineConsultationCategory,
   contextContent?: string,
-): string {
+): string | null {
+  if (!lineUrl) return null;
+
   const categoryConfig = LINE_CONSULTATION_CATEGORIES.find(
     (c) => c.id === category,
   );
@@ -67,9 +81,14 @@ export function buildLineConsultationUrl(
     ? `【${contextContent}】の${categoryConfig?.label ?? ""}について相談したいです。`
     : (categoryConfig?.presetText ?? "");
 
-  const url = new URL(LINE_URL);
-  url.searchParams.set("text", presetText);
-  return url.toString();
+  // 管理画面で不正なURLが保存されていてもページ全体を落とさない
+  try {
+    const url = new URL(lineUrl);
+    url.searchParams.set("text", presetText);
+    return url.toString();
+  } catch {
+    return null;
+  }
 }
 
 // FR-SEO-005/007: サイトマップ・robots.txt・構造化データ・canonical URL生成用のベースURL。

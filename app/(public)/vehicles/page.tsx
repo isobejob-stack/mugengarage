@@ -20,6 +20,7 @@ import {
   CardPrice,
 } from "@/components/ui/card";
 import { VehicleFeatureBadges } from "@/components/ui/status-badge";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 type SearchParams = Record<string, string | undefined>;
 
@@ -52,6 +53,13 @@ function buildQueryString(params: SearchParams, overrides: SearchParams) {
   const qs = merged.toString();
   return qs ? `/vehicles?${qs}` : "/vehicles";
 }
+
+export const metadata = buildPageMetadata({
+  title: "在庫車両",
+  description:
+    "エムガレージが取り扱うクラシックJaguarの在庫一覧です。Eタイプ・XK・Mark2など、年式・価格・状態からお探しいただけます。",
+  path: "/vehicles",
+});
 
 // SCR-PUB-002: 車両一覧・検索結果（FR-SRCH-001〜003: 複合条件絞り込み、URLクエリでの状態保持）
 export default async function Page({
@@ -128,7 +136,7 @@ export default async function Page({
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
       <div className="flex items-center justify-between">
-        <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+        <h1 className="font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
           在庫車両一覧
         </h1>
         <Link href="/vehicles/ranking" className="text-sm hover:underline">

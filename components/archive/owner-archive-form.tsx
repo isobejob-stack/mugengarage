@@ -9,6 +9,7 @@ import {
   type OwnerArchiveEntryFormValues,
 } from "@/lib/archive/schema";
 import { Button } from "@/components/ui/button";
+import { patchJson } from "@/lib/api/client";
 
 // SCR-ADM-019: オーナーズアーカイブ編集フォーム
 export function OwnerArchiveForm({
@@ -32,15 +33,10 @@ export function OwnerArchiveForm({
 
   const onSubmit = async (values: OwnerArchiveEntryFormValues) => {
     setSubmitError(null);
-    const res = await fetch(`/api/admin/owners-archive/${vehicleId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
+    const result = await patchJson(`/api/admin/owners-archive/${vehicleId}`, values);
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setSubmitError(body?.error?.message ?? "保存に失敗しました");
+    if (!result.ok) {
+      setSubmitError(result.message);
       return;
     }
 

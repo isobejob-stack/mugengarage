@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import {
   MAX_VEHICLE_PHOTO_FILE_SIZE_BYTES,
@@ -7,6 +8,7 @@ import {
 } from "@/lib/inventory/types";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Button, buttonClassName } from "@/components/ui/button";
+import { deleteJson, patchJson, postJson } from "@/lib/api/client";
 
 export type PhotoWithUrl = {
   id: string;
@@ -159,16 +161,15 @@ export function VehicleMediaManager({
     const previous = photos;
     setPhotos(nextPhotos);
 
-    const res = await fetch(`/api/admin/vehicles/${vehicleId}/photos/reorder`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ photoIds: nextPhotos.map((p) => p.id) }),
-    });
+    const result = await patchJson(
+      `/api/admin/vehicles/${vehicleId}/photos/reorder`,
+      { photoIds: nextPhotos.map((p) => p.id) },
+    );
 
-    if (!res.ok) {
+    // 楽観的に並び替えた表示を、失敗時は元の順序へ戻す
+    if (!result.ok) {
       setPhotos(previous);
-      const body = await res.json().catch(() => null);
-      setPhotoError(body?.error?.message ?? "並び替えに失敗しました");
+      setPhotoError(result.message);
     }
     setReordering(false);
   };
@@ -244,17 +245,15 @@ export function VehicleMediaManager({
     setVideoError(null);
     setVideoSubmitting(true);
 
-    const res = await fetch(`/api/admin/vehicles/${vehicleId}/videos`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ video_url: videoUrl }),
-    });
+    const result = await postJson<VehicleVideo>(
+      `/api/admin/vehicles/${vehicleId}/videos`,
+      { video_url: videoUrl },
+    );
 
-    const body = await res.json().catch(() => null);
-    if (!res.ok) {
-      setVideoError(body?.error?.message ?? "動画の登録に失敗しました");
+    if (!result.ok) {
+      setVideoError(result.message);
     } else {
-      setVideos((prev) => [...prev, body.data]);
+      setVideos((prev) => [...prev, result.data]);
       setVideoUrl("");
     }
     setVideoSubmitting(false);
@@ -262,13 +261,11 @@ export function VehicleMediaManager({
 
   const deleteVideo = async (videoId: string) => {
     setVideoError(null);
-    const res = await fetch(
+    const result = await deleteJson(
       `/api/admin/vehicles/${vehicleId}/videos/${videoId}`,
-      { method: "DELETE" },
     );
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setVideoError(body?.error?.message ?? "動画の削除に失敗しました");
+    if (!result.ok) {
+      setVideoError(result.message);
       return;
     }
     setVideos((prev) => prev.filter((v) => v.id !== videoId));
@@ -277,7 +274,7 @@ export function VehicleMediaManager({
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h3 className="font-serif text-lg font-bold text-charcoal-900">
+        <h3 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
           写真
         </h3>
 
@@ -392,12 +389,18 @@ export function VehicleMediaManager({
                   />
                 </label>
 
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={photo.public_url}
-                  alt=""
-                  className="aspect-square w-full rounded object-cover"
-                />
+                {/* 現地でスマートフォンから写真を登録する運用のため、ここは特に効く。
+                    生の<img>では登録済み写真の枚数ぶんフルサイズ（1枚あたり数MB）が
+                    ダウンロードされ、電波の弱い屋外で待たされる原因になっていた。 */}
+                <div className="relative aspect-square w-full overflow-hidden rounded">
+                  <Image
+                    src={photo.public_url}
+                    alt=""
+                    fill
+                    sizes="(min-width: 768px) 25vw, 50vw"
+                    className="object-cover"
+                  />
+                </div>
 
                 <div className="mt-2 flex flex-col gap-1">
                   <div className="flex items-center justify-between gap-1">
@@ -457,7 +460,7 @@ export function VehicleMediaManager({
       </div>
 
       <div>
-        <h3 className="font-serif text-lg font-bold text-charcoal-900">
+        <h3 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
           動画（YouTube等の外部URL）
         </h3>
 

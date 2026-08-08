@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { customerFormSchema, type CustomerFormValues } from "@/lib/crm/schema";
 import { Button } from "@/components/ui/button";
+import { patchJson } from "@/lib/api/client";
 
 // FR-CRM-001: 顧客情報編集フォーム
 export function CustomerEditForm({
@@ -28,15 +29,10 @@ export function CustomerEditForm({
 
   const onSubmit = async (values: CustomerFormValues) => {
     setSubmitError(null);
-    const res = await fetch(`/api/admin/customers/${customerId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
+    const result = await patchJson(`/api/admin/customers/${customerId}`, values);
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setSubmitError(body?.error?.message ?? "保存に失敗しました");
+    if (!result.ok) {
+      setSubmitError(result.message);
       return;
     }
 

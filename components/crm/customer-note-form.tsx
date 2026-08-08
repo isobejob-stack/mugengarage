@@ -9,6 +9,7 @@ import {
   type CustomerNoteFormValues,
 } from "@/lib/crm/schema";
 import { Button } from "@/components/ui/button";
+import { postJson } from "@/lib/api/client";
 
 // FR-CRM-003: 顧客メモ追加フォーム
 export function CustomerNoteForm({ customerId }: { customerId: string }) {
@@ -26,15 +27,10 @@ export function CustomerNoteForm({ customerId }: { customerId: string }) {
 
   const onSubmit = async (values: CustomerNoteFormValues) => {
     setSubmitError(null);
-    const res = await fetch(`/api/admin/customers/${customerId}/notes`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
+    const result = await postJson(`/api/admin/customers/${customerId}/notes`, values);
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setSubmitError(body?.error?.message ?? "保存に失敗しました");
+    if (!result.ok) {
+      setSubmitError(result.message);
       return;
     }
 

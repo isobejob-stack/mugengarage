@@ -19,7 +19,9 @@ import { VehicleMediaGallery } from "@/components/inventory/vehicle-media-galler
 import { getSeoMeta } from "@/lib/seo/queries";
 import { buildPublicPath } from "@/lib/seo/paths";
 import { buildVehicleStructuredData } from "@/lib/seo/structured-data";
-import { SITE_URL, buildLineConsultationUrl } from "@/lib/site-config";
+import { SITE_NAME, SITE_URL, buildLineConsultationUrl } from "@/lib/site-config";
+import { getSiteSettings } from "@/lib/settings/queries";
+import { absoluteTitle } from "@/lib/seo/metadata";
 
 function buildVehicleDisplayName(vehicle: {
   manufacturers: { name: string } | null;
@@ -51,7 +53,11 @@ export async function generateMetadata({
 
   const seoMeta = await getSeoMeta("vehicle", vehicle.id);
   const displayName = buildVehicleDisplayName(vehicle);
-  const title = seoMeta?.title || `${displayName}｜M-GARAGE Platform`;
+  // ルートlayoutの title.template（"%s｜エムガレージ"）が適用されるため、ここで店舗名を
+  // 付けると「◯◯｜エムガレージ｜エムガレージ」と二重になる。車両名のみを渡す。
+  // 管理画面でSEOタイトルが明示指定されている場合は、その文言をそのまま出したいので
+  // template を適用させない（absolute）。
+  const title = displayName;
   const description =
     seoMeta?.description ||
     vehicle.sales_comment ||
@@ -61,11 +67,12 @@ export async function generateMetadata({
   const canonicalUrl = seoMeta?.canonical_url || `${SITE_URL}${canonicalPath}`;
 
   return {
-    title,
+    title: seoMeta?.title ? absoluteTitle(seoMeta.title) : title,
     description,
     alternates: { canonical: canonicalUrl },
     openGraph: {
-      title,
+      // openGraph.title には title.template が効かないため、明示的に店舗名まで含める
+      title: seoMeta?.title || `${title}｜${SITE_NAME}`,
       description,
       url: canonicalUrl,
       images: seoMeta?.og_image_url ? [seoMeta.og_image_url] : undefined,
@@ -86,6 +93,13 @@ export default async function Page({
   if (!vehicle) {
     notFound();
   }
+
+  const settings = await getSiteSettings();
+  const lineConsultUrl = buildLineConsultationUrl(
+    settings.line_url,
+    "purchase",
+    buildVehicleDisplayName(vehicle),
+  );
 
   const sessionId = await getSessionId();
   const [favoriteIds, related, photos, videos] = await Promise.all([
@@ -152,9 +166,11 @@ export default async function Page({
         <FavoriteButton vehicleId={vehicle.id} initialFavorited={isFavorited} />
         {/* FR-LINE-002: 車両詳細ページでは「購入」カテゴリに固定した相談導線を表示する。
             レビュー指摘対応（必須修正3）: プリフィル文言に車両名を含め、ボタン文言と送信内容を一致させる */}
-        <Button href={buildLineConsultationUrl("purchase", vehicleName)} variant="line" size="md">
-          この車をLINEで相談する
-        </Button>
+        {lineConsultUrl && (
+          <Button href={lineConsultUrl} variant="line" size="md">
+            この車をLINEで相談する
+          </Button>
+        )}
       </div>
 
       <div className="mt-8">
@@ -166,7 +182,7 @@ export default async function Page({
       </div>
 
       <section className="mt-14">
-        <h2 className="font-serif text-lg font-bold text-charcoal-900">
+        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
           車両情報
         </h2>
         {/* product-design-manager/graphic-designer策定方針「ショールーム的な高級感」に基づき、
@@ -250,7 +266,7 @@ export default async function Page({
         .filter(([, body]) => Boolean(body))
         .map(([title, body]) => (
           <section key={title} className="mt-14">
-            <h2 className="font-serif text-lg font-bold text-charcoal-900">
+            <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
               {title}
             </h2>
             <div className="prose mt-3 max-w-none">
@@ -272,18 +288,21 @@ export default async function Page({
           モーダル表示中はこのバーの上にライトボックスが正しく重なるようにする。
           fixedを使用（sticky+100vwのフルブリードは縦スクロールバー幅分の横スクロールが
           発生するため不採用）。<main>側にバー高さ分のpadding-bottomを確保済み。 */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-white/95 shadow-strong backdrop-blur-sm pb-[env(safe-area-inset-bottom)]">
-        <div className="mx-auto flex h-14 max-w-3xl items-center justify-center px-4 sm:h-16">
-          <Button
-            href={buildLineConsultationUrl("purchase", vehicleName)}
-            variant="line"
-            size="md"
-            className="w-full max-w-xs"
-          >
-            この車をLINEで相談する
-          </Button>
+      {/* LINEのURLが未設定のあいだは、空のバーだけが残らないよう固定バーごと非表示にする */}
+      {lineConsultUrl && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-white/95 shadow-strong backdrop-blur-sm pb-[env(safe-area-inset-bottom)]">
+          <div className="mx-auto flex h-14 max-w-3xl items-center justify-center px-4 sm:h-16">
+            <Button
+              href={lineConsultUrl}
+              variant="line"
+              size="md"
+              className="w-full max-w-xs"
+            >
+              この車をLINEで相談する
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </main>
   );
 }

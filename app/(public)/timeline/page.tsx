@@ -8,11 +8,19 @@ import { RelatedContentList } from "@/components/related/related-content-list";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Link from "next/link";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 function decadeOf(dateStr: string) {
   const year = new Date(dateStr).getFullYear();
   return `${Math.floor(year / 10) * 10}年代`;
 }
+
+export const metadata = buildPageMetadata({
+  title: "Jaguar年表",
+  description:
+    "1922年の創業から現代まで、Jaguarの歩みを年表でたどります。名車の登場とレースでの活躍を時系列で解説します。",
+  path: "/timeline",
+});
 
 // SCR-PUB-010: Jaguar年表（縦型タイムライン、カテゴリ色分け、年代絞り込み）
 export default async function Page({
@@ -36,7 +44,7 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+      <h1 className="font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
         Jaguar年表
       </h1>
       <p className="mt-2 text-foreground-muted">
@@ -85,7 +93,7 @@ export default async function Page({
                 {" ・ "}
                 {timelineCategoryLabels[e.category]}
               </p>
-              <h2 className="mt-1 font-serif text-lg font-bold text-charcoal-900">
+              <h2 className="mt-1 font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
                 {e.title}
               </h2>
               {e.body && (

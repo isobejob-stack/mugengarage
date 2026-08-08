@@ -39,7 +39,7 @@ export function ConfirmDialog({
       onCancel={onCancel}
       className="w-full max-w-sm rounded-2xl border border-neutral-200 bg-white p-6 shadow-medium backdrop:bg-black/40"
     >
-      <h2 className="font-serif text-lg font-bold text-charcoal-900">{title}</h2>
+      <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">{title}</h2>
       <p className="mt-2 text-base text-foreground-muted">{description}</p>
       <div className="mt-6 flex justify-end gap-3">
         <Button type="button" variant="outline" onClick={onCancel}>

@@ -27,7 +27,7 @@ export function SeoFieldsSection({
 
   return (
     <details className="group rounded-lg border border-neutral-200 bg-white p-4">
-      <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 font-serif text-lg font-bold text-charcoal-900 marker:content-none [&::-webkit-details-marker]:hidden">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl marker:content-none [&::-webkit-details-marker]:hidden">
         <span
           aria-hidden
           className="inline-block text-foreground-muted transition-transform group-open:rotate-90"

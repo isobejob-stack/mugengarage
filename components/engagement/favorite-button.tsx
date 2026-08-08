@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { postJson } from "@/lib/api/client";
 
 type FavoriteChangedDetail = { vehicleId: string; favorited: boolean };
 
@@ -42,18 +43,18 @@ export function FavoriteButton({
     const next = !favorited;
     setFavorited(next);
 
-    const res = await fetch("/api/favorites", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ vehicle_id: vehicleId }),
+    // 楽観的更新のため、失敗時は表示を元に戻す。従来は通信自体が失敗すると
+    // 例外でここを抜けてしまい、ロールバックもsetPending(false)も実行されず、
+    // ボタンが押せないまま実態と食い違う表示が残っていた。
+    const result = await postJson<{ favorited: boolean }>("/api/favorites", {
+      vehicle_id: vehicleId,
     });
 
-    if (!res.ok) {
+    if (!result.ok) {
       setFavorited(!next);
     } else {
-      const body = await res.json();
-      setFavorited(body.data.favorited);
-      broadcastFavoriteChanged({ vehicleId, favorited: body.data.favorited });
+      setFavorited(result.data.favorited);
+      broadcastFavoriteChanged({ vehicleId, favorited: result.data.favorited });
     }
     setPending(false);
   };

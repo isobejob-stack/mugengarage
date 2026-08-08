@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { slugifyTagName } from "@/lib/tags/schema";
 import type { Tag } from "@/lib/seo/types";
+import { deleteJson, postJson } from "@/lib/api/client";
 
 // SCR-ADM-024 ・ FR-INV-012 / FR-BLOG-002 ・ BR-DATA-003:
 // タグマスタの一覧表示・新規追加・削除を行う（管理画面から追加・編集可能なマスタデータとして管理する）
@@ -38,20 +39,18 @@ export function TagsManager({ initialTags }: { initialTags: Tag[] }) {
     }
 
     setSubmitting(true);
-    const res = await fetch("/api/admin/tags", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: trimmedName, slug: trimmedSlug }),
+    const result = await postJson<Tag>("/api/admin/tags", {
+      name: trimmedName,
+      slug: trimmedSlug,
     });
 
-    const body = await res.json().catch(() => null);
-    if (!res.ok) {
-      setSubmitError(body?.error?.message ?? "タグの作成に失敗しました");
+    if (!result.ok) {
+      setSubmitError(result.message);
       setSubmitting(false);
       return;
     }
 
-    setTags((prev) => sortByName([...prev, body.data as Tag]));
+    setTags((prev) => sortByName([...prev, result.data]));
     setName("");
     setSlug("");
     setSlugTouched(false);
@@ -60,11 +59,10 @@ export function TagsManager({ initialTags }: { initialTags: Tag[] }) {
 
   const handleDelete = async (id: string) => {
     setDeleteError(null);
-    const res = await fetch(`/api/admin/tags/${id}`, { method: "DELETE" });
+    const result = await deleteJson(`/api/admin/tags/${id}`);
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setDeleteError(body?.error?.message ?? "削除に失敗しました");
+    if (!result.ok) {
+      setDeleteError(result.message);
       return;
     }
 

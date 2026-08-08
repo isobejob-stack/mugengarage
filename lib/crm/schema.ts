@@ -12,6 +12,13 @@ export const inquiryFormSchema = z
       .or(z.literal("")),
     category: z.enum(["purchase", "repair", "sale", "parts", "other"]),
     message: z.string().min(1, "お問い合わせ内容を入力してください"),
+    // ハニーポット（FR-INQ-001の補強 / docs/tasks/ISSUE-005）。
+    // 画面上は視覚的にもスクリーンリーダーからも隠したダミー入力欄で、人間は絶対に入力しない。
+    // フォームを機械的に走査して全項目を埋めるボットだけがここに値を入れるため、
+    // 値が入っていたらスパムと判定する。
+    // CAPTCHAと違い、正規の利用者には操作の負担が一切かからないのが利点。
+    // 送信されないケース（古いキャッシュ等）も許容するためoptionalにする。
+    website: z.string().optional(),
   })
   .refine((data) => Boolean(data.phone) || Boolean(data.email), {
     message: "電話番号かメールアドレスのいずれかを入力してください",
@@ -26,6 +33,7 @@ export const emptyInquiryFormValues = {
   email: "",
   category: "purchase" as const,
   message: "",
+  website: "",
 };
 
 export const inquiryCategoryLabels: Record<string, string> = {

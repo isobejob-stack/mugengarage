@@ -1,6 +1,14 @@
 import { getSessionId } from "@/lib/engagement/session";
 import { getPublicFavoriteVehicles } from "@/lib/engagement/queries";
 import { Card, CardBody, CardTitle, CardMeta, CardPrice } from "@/components/ui/card";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+
+export const metadata = buildPageMetadata({
+  title: "お気に入り",
+  description:
+    "お気に入りに登録したクラシックJaguarの一覧です。",
+  path: "/favorites",
+});
 
 // SCR-PUB-004: お気に入り一覧（匿名セッションIDに紐づく車両を表示、FR-FAV-002）
 export default async function Page() {
@@ -9,7 +17,7 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+      <h1 className="font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
         お気に入り一覧
       </h1>
 

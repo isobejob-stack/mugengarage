@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { reminderFormSchema, type ReminderFormValues } from "@/lib/crm/schema";
 import { Button } from "@/components/ui/button";
+import { postJson } from "@/lib/api/client";
 
 // FR-CRM-004: リマインダー追加フォーム
 export function ReminderForm({ customerId }: { customerId: string }) {
@@ -23,15 +24,10 @@ export function ReminderForm({ customerId }: { customerId: string }) {
 
   const onSubmit = async (values: ReminderFormValues) => {
     setSubmitError(null);
-    const res = await fetch(`/api/admin/customers/${customerId}/reminders`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
+    const result = await postJson(`/api/admin/customers/${customerId}/reminders`, values);
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setSubmitError(body?.error?.message ?? "保存に失敗しました");
+    if (!result.ok) {
+      setSubmitError(result.message);
       return;
     }
 
