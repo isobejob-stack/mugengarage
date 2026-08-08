@@ -28,14 +28,56 @@ Vercelの環境変数に `BASIC_AUTH_USER` と `BASIC_AUTH_PASSWORD` を設定�
 
 ## 2. 未完了・要対応（ここから再開）
 
-### 🔴 最優先: Vercelの自動デプロイが止まっている
-GitHubへのpushは完了しているが、Vercel側で最新コミットがデプロイされていない。
+### 🔴 最優先: 「更新が本番に反映されない」問題（2026-08-08 調査・一部修正済み）
 
-- **確認方法**: `curl -s -o /dev/null -w "%{http_code}" -X POST https://mugengarage.vercel.app/api/admin/manufacturers`
+「更新内容が本番に反映されない」という症状には、**原因が異なる2つの問題**が重なっていた。
+
+#### 問題A: 公開ページの内容がビルド時に固定されていた（修正済み）
+
+Next.jsは検索条件（`searchParams`）を読まないページを既定でビルド時に静的生成する。
+そのため以下5ページはDBから内容を取得しているにもかかわらず**ビルド時点の内容で固定**され、
+管理画面でいくら編集しても次のデプロイまで公開サイトに反映されない状態だった。
+コード全体で `revalidatePath` / `revalidateTag` を一切使っていないため、時間が経っても回復しない。
+
+- `/`（トップページ。掲載車両が出る最重要画面）
+- `/blog`（ブログ一覧）
+- `/encyclopedia`（図鑑一覧）
+- `/owners-archive`（オーナーズアーカイブ一覧）
+- `/vehicles/ranking`（人気ランキング）
+
+→ 各ページに `export const dynamic = "force-dynamic"` を追加し、リクエストごとに
+最新のDB内容を描画するよう修正。車両一覧・ライブラリ等の他の公開ページは元々この挙動だったため、
+サイト全体で「管理画面の内容＝公開サイトの内容」に統一された。
+なお `/about`・`/contact` はDBを読まないため静的のままで正しい。
+
+#### 問題B: 環境変数が1つ欠けるとデプロイ全体が失敗する（修正済み）
+
+`npm run build` は、Supabaseの環境変数が未設定だと
+`Error: supabaseUrl is required.` でビルドが中断していた。**どの変数が足りないのか分からない**
+エラーメッセージのため、Vercelのビルドログを見ても原因を特定できない状態だった。
+
+→ 未設定の変数名と設定場所を名指しするエラーメッセージに変更（`lib/supabase/admin.ts`）。
+あわせて `app/sitemap.ts` は失敗しても静的URLのみのサイトマップに縮退してビルドを止めないようにした
+（サイトマップはSEO上の補助情報であり、それ1つのためにデプロイ全体を止める価値はないため）。
+
+上記A・Bの修正により、**環境変数が全く無い状態でも `npm run build` が成功する**ことを確認済み。
+ビルドがDBに依存しなくなったため、Supabaseの一時的な障害でデプロイが失敗することもなくなった。
+
+#### 残: Vercel側の状態確認（発注者・要ダッシュボード操作）
+
+開発環境からは本番URL（`mugengarage.vercel.app`）への通信が遮断されており、
+**Vercel側が実際にどうなっているかはこのセッションからは確認できなかった**。
+以下は手元のブラウザから確認が必要。
+
+- **反映されたかの確認**: `curl -s -o /dev/null -w "%{http_code}" -X POST https://mugengarage.vercel.app/api/admin/manufacturers`
   - `404` → 未デプロイ（最新が反映されていない）
   - `401` → デプロイ済み（認証エラーは正常。ルートが存在する証拠）
-- **原因調査**: Vercelダッシュボード → Deployments でビルド失敗の有無を確認
-- **影響**: 「現地でクイック登録」「カメラ撮影」「メーカー手入力」がまだ本番で使えない
+- **Vercelダッシュボード → Deployments** で確認すること:
+  1. 最新コミットのデプロイが**そもそも作られているか**（無ければGitHub連携が切れている）
+  2. ビルドが失敗していれば、そのログ（今回の修正でエラー内容が読みやすくなっている）
+  3. **Settings > Environment Variables**: `NEXT_PUBLIC_SUPABASE_URL`・`NEXT_PUBLIC_SUPABASE_ANON_KEY`・
+     `SUPABASE_SERVICE_ROLE_KEY` が Production / Preview **両方**に設定されているか
+     （片方だけに設定されているとその環境のビルドだけが失敗する）
 
 ### 🟡 発注者への確認待ち
 - **LINE URL**: `lib/site-config.ts` の `LINE_URL` が仮の値（`https://line.me/`）のまま。
