@@ -7,6 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardImage, CardBody, CardTitle, CardMeta, CardPrice } from "@/components/ui/card";
 import { VehicleFeatureBadges } from "@/components/ui/status-badge";
 
+// トップページは掲載中の車両をDBから取得しているため、静的生成されると車両を登録・公開しても
+// 次回デプロイまでトップに出ない（最も目に付く画面で更新が反映されない状態になる）。
+// リクエストごとに描画する（理由の詳細は app/(public)/blog/page.tsx のコメント参照）。
+export const dynamic = "force-dynamic";
+
 const ENCYCLOPEDIA_LINKS = [
   {
     href: "/encyclopedia",

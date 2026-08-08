@@ -2,6 +2,10 @@ import { listPublicEncyclopediaEntries } from "@/lib/knowledge/queries";
 import { encyclopediaCategoryLabels } from "@/lib/knowledge/schema";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 
+// 静的生成されると管理画面での図鑑の追加・編集が次回デプロイまで反映されないため、
+// リクエストごとに描画する（理由の詳細は app/(public)/blog/page.tsx のコメント参照）。
+export const dynamic = "force-dynamic";
+
 // SCR-PUB-008: Jaguar図鑑トップ／階層一覧（カテゴリ別に表示）
 export default async function Page() {
   const entries = await listPublicEncyclopediaEntries();
