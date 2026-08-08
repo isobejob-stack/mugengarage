@@ -9,7 +9,14 @@ import { recordAuditLog } from "@/lib/audit/log";
 // 既存のPATCH /api/admin/articles/:id の公開時ロジック（app/api/admin/articles/[id]/route.ts）に
 // 倣い、published_at も現在時刻をセットする。
 //
-// Vercel Cron Jobs（vercel.json）から毎時呼び出される想定のバッチエンドポイントであり、
+// Vercel Cron Jobs（vercel.json）から呼び出されるバッチエンドポイント。
+// 実行間隔は「1日1回（0 0 * * * ＝ 毎日09:00 JST）」。本来は公開予約の精度を上げるため毎時
+// （0 * * * *）にしたいが、VercelのHobby（無料）プランは1日1回より高頻度のCronを許可しておらず、
+// 毎時指定のままではデプロイ自体が「Hobby accounts are limited to daily cron jobs」で失敗し、
+// Cronに限らず全ての更新が本番に反映されなくなる（2026-08-08にこの事象が発生していた）。
+// Proプランへのアップグレード（docs/tasks/ISSUE-003、商用利用のため元々必須）の完了後は
+// vercel.json のscheduleを "0 * * * *" に戻すこと。
+//
 // 第三者が呼び出せてしまうと不正にステータスが公開へ書き換えられてしまう。
 // そのためVercel Cron Jobsの標準的な方式（Authorization: Bearer ${CRON_SECRET}）で
 // リクエスト元を検証する（authentication.md 8章の「管理系APIはリクエストごとに検証する」思想を、
