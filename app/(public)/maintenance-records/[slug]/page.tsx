@@ -27,7 +27,7 @@ export default async function Page({
       {record.category && (
         <p className="text-sm text-foreground-muted">{record.category}</p>
       )}
-      <h1 className="mt-1 font-serif text-2xl font-bold text-charcoal-900">
+      <h1 className="mt-1 font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
         {record.title}
       </h1>
 

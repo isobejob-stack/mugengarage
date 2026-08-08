@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import {
   MAX_VEHICLE_PHOTO_FILE_SIZE_BYTES,
@@ -277,7 +278,7 @@ export function VehicleMediaManager({
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h3 className="font-serif text-lg font-bold text-charcoal-900">
+        <h3 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
           写真
         </h3>
 
@@ -392,12 +393,18 @@ export function VehicleMediaManager({
                   />
                 </label>
 
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={photo.public_url}
-                  alt=""
-                  className="aspect-square w-full rounded object-cover"
-                />
+                {/* 現地でスマートフォンから写真を登録する運用のため、ここは特に効く。
+                    生の<img>では登録済み写真の枚数ぶんフルサイズ（1枚あたり数MB）が
+                    ダウンロードされ、電波の弱い屋外で待たされる原因になっていた。 */}
+                <div className="relative aspect-square w-full overflow-hidden rounded">
+                  <Image
+                    src={photo.public_url}
+                    alt=""
+                    fill
+                    sizes="(min-width: 768px) 25vw, 50vw"
+                    className="object-cover"
+                  />
+                </div>
 
                 <div className="mt-2 flex flex-col gap-1">
                   <div className="flex items-center justify-between gap-1">
@@ -457,7 +464,7 @@ export function VehicleMediaManager({
       </div>
 
       <div>
-        <h3 className="font-serif text-lg font-bold text-charcoal-900">
+        <h3 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
           動画（YouTube等の外部URL）
         </h3>
 

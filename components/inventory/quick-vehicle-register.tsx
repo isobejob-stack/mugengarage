@@ -85,7 +85,7 @@ export function QuickVehicleRegister({
         </Card>
 
         <div>
-          <h2 className="font-serif text-lg font-bold text-charcoal-900">
+          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
             写真
           </h2>
           <p className="mt-1 text-base text-foreground-muted">

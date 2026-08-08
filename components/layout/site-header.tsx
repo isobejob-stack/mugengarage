@@ -8,7 +8,7 @@ export function SiteHeader() {
   return (
     <header className="border-b border-neutral-200 bg-surface shadow-soft">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4">
-        <Link href="/" className="font-serif text-lg font-bold text-charcoal-900">
+        <Link href="/" className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
           M-GARAGE
         </Link>
 

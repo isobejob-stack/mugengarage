@@ -95,7 +95,13 @@ export function VehicleMediaLightbox({
         </button>
       )}
 
-      {/* eslint-disable-next-line @next/next/no-img-element -- Supabase Storageの公開URLを直接表示するため */}
+      {/* ここだけは意図的に next/image を使わず、オリジナル画像をそのまま表示する。
+          一覧・ギャラリー・サムネイルはnext/imageでAVIF/WebPへ再圧縮して転送量を削減しているが、
+          拡大表示はキズ・サビ等の状態を確認するための画面であり（高額商材のため状態確認が重要、
+          vehicle-media-gallery.tsx の設計判断を参照）、再圧縮で微細な質感が失われる余地を
+          残したくない。利用者が明示的に拡大操作をしたときにのみ読み込まれるため、
+          初期表示のパフォーマンスには影響しない。 */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- 上記の理由によりオリジナルを表示する */}
       <img
         src={photo.public_url}
         alt={photo.alt}

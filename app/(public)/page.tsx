@@ -68,7 +68,7 @@ export default async function Page() {
 
       <section className="mt-10">
         <div className="flex items-center justify-between">
-          <h2 className="font-serif text-lg font-bold text-charcoal-900">
+          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
             在庫車両
           </h2>
           <Link href="/vehicles" className="text-sm hover:underline">
@@ -89,9 +89,12 @@ export default async function Page() {
                       isRecommended={v.is_recommended}
                       isNewArrival={v.is_new_arrival}
                     />
+                    {/* 先頭カードの写真はファーストビューに入りLCPになりやすいため、
+                        遅延読み込みを外して表示を前倒しする（2枚目以降は遅延のまま） */}
                     <CardImage
                       src={featuredPhotoUrls[index] ?? undefined}
                       alt={`${v.manufacturers?.name ?? ""} ${v.models?.name ?? ""}`}
+                      priority={index === 0}
                     />
                     <CardBody>
                       <CardTitle>
@@ -116,7 +119,7 @@ export default async function Page() {
       </div>
 
       <section className="mt-10">
-        <h2 className="font-serif text-lg font-bold text-charcoal-900">
+        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
           Jaguarを知る
         </h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">

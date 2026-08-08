@@ -11,7 +11,7 @@ export function LineConsultationMenu() {
     <section aria-labelledby="line-consultation-menu-heading">
       <h2
         id="line-consultation-menu-heading"
-        className="font-serif text-lg font-bold text-charcoal-900"
+        className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl"
       >
         カテゴリから相談する
       </h2>

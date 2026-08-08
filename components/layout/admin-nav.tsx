@@ -69,7 +69,7 @@ export function AdminNav() {
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
         <Link
           href="/admin"
-          className="font-serif text-lg font-bold text-charcoal-900"
+          className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl"
         >
           M-GARAGE 管理画面
         </Link>

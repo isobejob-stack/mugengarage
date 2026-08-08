@@ -184,7 +184,7 @@ export function VehicleForm({
       className="flex flex-col gap-10 pb-24"
     >
       <section>
-        <h2 className="font-serif text-lg font-bold text-charcoal-900">
+        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
           基本情報
         </h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -345,7 +345,7 @@ export function VehicleForm({
       </section>
 
       <section>
-        <h2 className="font-serif text-lg font-bold text-charcoal-900">
+        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
           自由入力コンテンツ（Markdown）
         </h2>
         <div className="mt-4 flex flex-col gap-4">
@@ -389,7 +389,7 @@ export function VehicleForm({
       </section>
 
       <section>
-        <h2 className="font-serif text-lg font-bold text-charcoal-900">
+        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
           写真・動画
         </h2>
         <div className="mt-4">
@@ -408,7 +408,7 @@ export function VehicleForm({
       </section>
 
       <section>
-        <h2 className="font-serif text-lg font-bold text-charcoal-900">
+        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
           関連コンテンツ
         </h2>
         <div className="mt-4">
@@ -424,7 +424,7 @@ export function VehicleForm({
       </section>
 
       <section>
-        <h2 className="font-serif text-lg font-bold text-charcoal-900">
+        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
           タグ
         </h2>
         <div className="mt-4">
@@ -440,7 +440,7 @@ export function VehicleForm({
       </section>
 
       <section>
-        <h2 className="font-serif text-lg font-bold text-charcoal-900">
+        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
           公開設定
         </h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -493,7 +493,7 @@ export function VehicleForm({
 
       {isEdit && (
         <section>
-          <h2 className="font-serif text-lg font-bold text-charcoal-900">
+          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
             SEO・URL設定
           </h2>
           <div className="mt-4 flex flex-col gap-4">

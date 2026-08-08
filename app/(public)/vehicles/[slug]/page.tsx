@@ -166,7 +166,7 @@ export default async function Page({
       </div>
 
       <section className="mt-14">
-        <h2 className="font-serif text-lg font-bold text-charcoal-900">
+        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
           車両情報
         </h2>
         {/* product-design-manager/graphic-designer策定方針「ショールーム的な高級感」に基づき、
@@ -250,7 +250,7 @@ export default async function Page({
         .filter(([, body]) => Boolean(body))
         .map(([title, body]) => (
           <section key={title} className="mt-14">
-            <h2 className="font-serif text-lg font-bold text-charcoal-900">
+            <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
               {title}
             </h2>
             <div className="prose mt-3 max-w-none">

@@ -40,7 +40,7 @@ export default async function Page({
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
       <StatusBadge label="ご成約済み" tone="neutral" />
-      <h1 className="mt-3 font-serif text-2xl font-bold text-charcoal-900">
+      <h1 className="mt-3 font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
         {entry.vehicles?.manufacturers?.name} {entry.vehicles?.models?.name}
         {entry.vehicles?.model_year ? `（${entry.vehicles.model_year}年）` : ""}
       </h1>
@@ -58,7 +58,7 @@ export default async function Page({
 
       {entry.restoration_history && (
         <section className="mt-8">
-          <h2 className="font-serif text-lg font-bold text-charcoal-900">
+          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
             レストア履歴
           </h2>
           <div className="prose mt-2 max-w-none">
@@ -71,7 +71,7 @@ export default async function Page({
 
       {entry.sales_history && (
         <section className="mt-8">
-          <h2 className="font-serif text-lg font-bold text-charcoal-900">
+          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
             販売履歴
           </h2>
           <div className="prose mt-2 max-w-none">

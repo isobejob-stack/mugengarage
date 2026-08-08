@@ -45,7 +45,7 @@ export default async function Page({
       <p className="mt-2 text-sm text-foreground-muted">
         {encyclopediaCategoryLabels[entry.category]}
       </p>
-      <h1 className="mt-1 font-serif text-2xl font-bold text-charcoal-900">
+      <h1 className="mt-1 font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
         {entry.title}
       </h1>
 
@@ -55,7 +55,7 @@ export default async function Page({
 
       {children.length > 0 && (
         <section className="mt-10">
-          <h2 className="font-serif text-lg font-bold text-charcoal-900">
+          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
             関連項目
           </h2>
           <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
