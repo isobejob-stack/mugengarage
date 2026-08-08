@@ -9,8 +9,6 @@ export const revalidate = 3600;
 // 対象は「公開中」のコンテンツのみとする（BR-DEL-001の論理削除済み・非公開ステータスのものは含めない）。
 // timeline_eventは個別ページを持たない（lib/seo/paths.ts参照）ため一覧ページのみ含める。
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = createAdminClient();
-
   const staticEntries: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, changeFrequency: "daily", priority: 1 },
     { url: `${SITE_URL}/vehicles`, changeFrequency: "daily", priority: 0.9 },
@@ -40,6 +38,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/about`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${SITE_URL}/contact`, changeFrequency: "yearly", priority: 0.4 },
   ];
+
+  // サイトマップはビルド時にプリレンダリングされる唯一のDB依存ページであり、ここで例外を投げると
+  // 「Export encountered an error on /sitemap.xml/route」でビルド全体が落ちる。
+  // つまりSupabaseの環境変数漏れや一時的な障害だけで、他の全ページの更新まで本番に出せなくなる。
+  // サイトマップはSEO上の補助情報であり、それ1つのためにデプロイ全体を止める価値はないため、
+  // 失敗時は静的URLのみのサイトマップに縮退させ、原因はログに残す（revalidate=3600により
+  // 環境変数の修正やDB復旧後は1時間以内に自動で完全なサイトマップへ回復する）。
+  let dynamicEntries: MetadataRoute.Sitemap = [];
+  try {
+    dynamicEntries = await collectDynamicEntries();
+  } catch (error) {
+    console.error(
+      "[sitemap] 動的URLの取得に失敗したため、静的URLのみでサイトマップを生成しました。" +
+        "Supabaseの環境変数（NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY）と接続状態を確認してください。",
+      error,
+    );
+  }
+
+  return [...staticEntries, ...dynamicEntries];
+}
+
+async function collectDynamicEntries(): Promise<MetadataRoute.Sitemap> {
+  const supabase = createAdminClient();
 
   const [
     vehicles,
@@ -145,7 +166,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   return [
-    ...staticEntries,
     ...vehicleEntries,
     ...articleEntries,
     ...encyclopediaSitemapEntries,
