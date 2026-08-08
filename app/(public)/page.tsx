@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { listPublicVehicles, getLeadVehiclePhotoPaths } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
-import { LINE_URL, SITE_URL } from "@/lib/site-config";
+import { SITE_URL } from "@/lib/site-config";
+import { getSiteSettings } from "@/lib/settings/queries";
 import { LineConsultationMenu } from "@/components/layout/line-consultation-menu";
 import { Button } from "@/components/ui/button";
 import { Card, CardImage, CardBody, CardTitle, CardMeta, CardPrice } from "@/components/ui/card";
@@ -40,7 +41,10 @@ const ENCYCLOPEDIA_LINKS = [
 
 // SCR-PUB-001: トップページ（FR-INV-005, FR-LINE-001, FR-SEO-001）
 export default async function Page() {
-  const vehicles = await listPublicVehicles();
+  const [vehicles, settings] = await Promise.all([
+    listPublicVehicles(),
+    getSiteSettings(),
+  ]);
   const featuredVehicles = vehicles.slice(0, 3);
 
   // 在庫車両カードのサムネイル用に、トップ3件分のみ先頭写真を1クエリでまとめて取得する
@@ -68,9 +72,11 @@ export default async function Page() {
           <Button href="/vehicles" variant="secondary" size="lg">
             在庫車両を見る
           </Button>
-          <Button href={LINE_URL} variant="line" size="lg">
-            LINEで相談する
-          </Button>
+          {settings.line_url && (
+            <Button href={settings.line_url} variant="line" size="lg">
+              LINEで相談する
+            </Button>
+          )}
         </div>
       </section>
 
@@ -123,7 +129,7 @@ export default async function Page() {
 
       {/* FR-LINE-002: 相談カテゴリ表示（購入／修理／売却／部品／Jaguar全般／カーライフ相談） */}
       <div className="mt-10">
-        <LineConsultationMenu />
+        <LineConsultationMenu lineUrl={settings.line_url} />
       </div>
 
       <section className="mt-10">

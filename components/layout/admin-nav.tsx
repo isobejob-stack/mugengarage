@@ -36,6 +36,7 @@ const adminNavGroups: readonly AdminNavGroup[] = [
   {
     label: "設定",
     items: [
+      { label: "店舗情報・リンク", href: "/admin/site-settings" },
       { label: "メディア", href: "/admin/media" },
       { label: "タグ", href: "/admin/tags" },
       { label: "テンプレート", href: "/admin/templates" },

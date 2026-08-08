@@ -20,6 +20,7 @@ import { getSeoMeta } from "@/lib/seo/queries";
 import { buildPublicPath } from "@/lib/seo/paths";
 import { buildVehicleStructuredData } from "@/lib/seo/structured-data";
 import { SITE_NAME, SITE_URL, buildLineConsultationUrl } from "@/lib/site-config";
+import { getSiteSettings } from "@/lib/settings/queries";
 import { absoluteTitle } from "@/lib/seo/metadata";
 
 function buildVehicleDisplayName(vehicle: {
@@ -93,6 +94,13 @@ export default async function Page({
     notFound();
   }
 
+  const settings = await getSiteSettings();
+  const lineConsultUrl = buildLineConsultationUrl(
+    settings.line_url,
+    "purchase",
+    buildVehicleDisplayName(vehicle),
+  );
+
   const sessionId = await getSessionId();
   const [favoriteIds, related, photos, videos] = await Promise.all([
     sessionId ? listFavoriteVehicleIds(sessionId) : Promise.resolve([]),
@@ -158,9 +166,11 @@ export default async function Page({
         <FavoriteButton vehicleId={vehicle.id} initialFavorited={isFavorited} />
         {/* FR-LINE-002: 車両詳細ページでは「購入」カテゴリに固定した相談導線を表示する。
             レビュー指摘対応（必須修正3）: プリフィル文言に車両名を含め、ボタン文言と送信内容を一致させる */}
-        <Button href={buildLineConsultationUrl("purchase", vehicleName)} variant="line" size="md">
-          この車をLINEで相談する
-        </Button>
+        {lineConsultUrl && (
+          <Button href={lineConsultUrl} variant="line" size="md">
+            この車をLINEで相談する
+          </Button>
+        )}
       </div>
 
       <div className="mt-8">
@@ -278,18 +288,21 @@ export default async function Page({
           モーダル表示中はこのバーの上にライトボックスが正しく重なるようにする。
           fixedを使用（sticky+100vwのフルブリードは縦スクロールバー幅分の横スクロールが
           発生するため不採用）。<main>側にバー高さ分のpadding-bottomを確保済み。 */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-white/95 shadow-strong backdrop-blur-sm pb-[env(safe-area-inset-bottom)]">
-        <div className="mx-auto flex h-14 max-w-3xl items-center justify-center px-4 sm:h-16">
-          <Button
-            href={buildLineConsultationUrl("purchase", vehicleName)}
-            variant="line"
-            size="md"
-            className="w-full max-w-xs"
-          >
-            この車をLINEで相談する
-          </Button>
+      {/* LINEのURLが未設定のあいだは、空のバーだけが残らないよう固定バーごと非表示にする */}
+      {lineConsultUrl && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-white/95 shadow-strong backdrop-blur-sm pb-[env(safe-area-inset-bottom)]">
+          <div className="mx-auto flex h-14 max-w-3xl items-center justify-center px-4 sm:h-16">
+            <Button
+              href={lineConsultUrl}
+              variant="line"
+              size="md"
+              className="w-full max-w-xs"
+            >
+              この車をLINEで相談する
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </main>
   );
 }

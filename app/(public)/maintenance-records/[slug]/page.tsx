@@ -6,6 +6,7 @@ import { getPublicMaintenanceRecordBySlug } from "@/lib/maintenance/queries";
 import { listRelatedContents } from "@/lib/related/queries";
 import { RelatedContentList } from "@/components/related/related-content-list";
 import { buildLineConsultationUrl } from "@/lib/site-config";
+import { getSiteSettings } from "@/lib/settings/queries";
 import { Button } from "@/components/ui/button";
 import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
 
@@ -42,7 +43,15 @@ export default async function Page({
     notFound();
   }
 
-  const related = await listRelatedContents("maintenance_record", record.id);
+  const [related, settings] = await Promise.all([
+    listRelatedContents("maintenance_record", record.id),
+    getSiteSettings(),
+  ]);
+  const lineConsultUrl = buildLineConsultationUrl(
+    settings.line_url,
+    "repair",
+    record.title,
+  );
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
@@ -54,16 +63,15 @@ export default async function Page({
       </h1>
 
       {/* FR-LINE-002: 整備実績詳細ページでは「修理」カテゴリに固定した相談導線を表示する。
-          レビュー指摘対応（必須修正3）: プリフィル文言に整備実績タイトルを含め、ボタン文言と送信内容を一致させる */}
-      <div className="mt-4">
-        <Button
-          href={buildLineConsultationUrl("repair", record.title)}
-          variant="line"
-          size="md"
-        >
-          同じような症状をLINEで相談する
-        </Button>
-      </div>
+          レビュー指摘対応（必須修正3）: プリフィル文言に整備実績タイトルを含め、ボタン文言と送信内容を一致させる。
+          LINEのURLが未設定のあいだはボタンを出さない。 */}
+      {lineConsultUrl && (
+        <div className="mt-4">
+          <Button href={lineConsultUrl} variant="line" size="md">
+            同じような症状をLINEで相談する
+          </Button>
+        </div>
+      )}
 
       {record.issue_description && (
         <section className="mt-6 rounded-xl border border-neutral-200 bg-cream-50 p-4 shadow-soft">
