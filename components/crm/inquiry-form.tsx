@@ -9,6 +9,7 @@ import {
   inquiryCategoryLabels,
   type InquiryFormValues,
 } from "@/lib/crm/schema";
+import { postJson } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
 
 // SCR-PUB-017: 問い合わせフォーム
@@ -27,15 +28,14 @@ export function InquiryForm() {
 
   const onSubmit = async (values: InquiryFormValues) => {
     setSubmitError(null);
-    const res = await fetch("/api/inquiries", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setSubmitError(body?.error?.message ?? "送信に失敗しました");
+    // 従来は fetch を直接呼んでおり、送信中に電波が切れると例外が投げっぱなしになって
+    // 「送信できていないのにエラーも出ない」状態になっていた。問い合わせの取りこぼしに
+    // 直結するため、通信失敗も必ず画面上のメッセージとして返す（lib/api/client.ts）。
+    const result = await postJson("/api/inquiries", values);
+
+    if (!result.ok) {
+      setSubmitError(result.message);
       return;
     }
 

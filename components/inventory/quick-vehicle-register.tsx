@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { emptyVehicleFormValues } from "@/lib/inventory/schema";
 import type { Manufacturer, Model } from "@/lib/inventory/types";
+import { postJson } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { VehicleMediaManager } from "@/components/inventory/vehicle-media-manager";
@@ -39,28 +40,26 @@ export function QuickVehicleRegister({
     setSubmitting(true);
     setSubmitError(null);
 
-    const res = await fetch("/api/admin/vehicles", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...emptyVehicleFormValues,
-        manufacturer_id: manufacturerId,
-        model_id: modelId,
-        // 未入力時は0として送信する（依頼内容どおり）
-        price: price === "" ? 0 : Number(price),
-        status: "draft",
-      }),
+    // 現地（屋外）でスマートフォンから使う機能のため、通信断が最も起きやすい。
+    // 従来は fetch を直接呼んでおり、電波が切れると例外でハンドラを抜けてしまい、
+    // setSubmitting(false) に到達せずボタンが「登録中...」のまま永久に固まっていた。
+    // 通信失敗も必ず結果として受け取れるようにする（lib/api/client.ts）。
+    const result = await postJson<{ id: string }>("/api/admin/vehicles", {
+      ...emptyVehicleFormValues,
+      manufacturer_id: manufacturerId,
+      model_id: modelId,
+      // 未入力時は0として送信する（依頼内容どおり）
+      price: price === "" ? 0 : Number(price),
+      status: "draft",
     });
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setSubmitError(body?.error?.message ?? "登録に失敗しました");
+    if (!result.ok) {
+      setSubmitError(result.message);
       setSubmitting(false);
       return;
     }
 
-    const body = await res.json();
-    setCreatedVehicleId(body.data.id as string);
+    setCreatedVehicleId(result.data.id);
     setSubmitting(false);
     setStep("photos");
   };

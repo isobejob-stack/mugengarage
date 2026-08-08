@@ -6,6 +6,7 @@ import {
   Zen_Kaku_Gothic_New,
 } from "next/font/google";
 import "./globals.css";
+import { SITE_URL } from "@/lib/site-config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,10 +39,36 @@ const zenKakuGothicNew = Zen_Kaku_Gothic_New({
   preload: false,
 });
 
+// 従来この値は title「M-GARAGE Platform」/ description「…在庫・CRM・CMS統合プラットフォーム」
+// だった。これは開発側から見たシステム名であり、車両詳細を除く全ページがこれを継承していたため、
+// 検索結果やLINEでの共有時に、Jaguarを探している見込み客へ「CMS統合プラットフォーム」という
+// 無関係な文言が表示されていた。店舗の顧客向け文言に置き換える。
+//
+// title.template: 各ページが title を設定すると「ページ名｜エムガレージ」となり、
+// 未設定のページは default にフォールバックする。
 export const metadata: Metadata = {
-  title: "M-GARAGE Platform",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "エムガレージ｜クラシックJaguar専門店",
+    template: "%s｜エムガレージ",
+  },
   description:
-    "クラシックJaguar専門店エムガレージの在庫・CRM・CMS統合プラットフォーム",
+    "30年以上の実績を持つクラシックJaguar専門店エムガレージ。Eタイプ・XK・Mark2などの在庫車両、整備・修理・買取まで、Jaguarのことならご相談ください。",
+  // LINEでの共有が最重要導線（FR-LINE-001）でありながらOGPが未設定で、
+  // URLを送ってもプレビューが出ない状態だった。既定値をここで持たせ、
+  // 各ページで上書きできるようにする。
+  openGraph: {
+    type: "website",
+    locale: "ja_JP",
+    siteName: "エムガレージ",
+    title: "エムガレージ｜クラシックJaguar専門店",
+    description:
+      "30年以上の実績を持つクラシックJaguar専門店。在庫車両・整備・修理・買取のご相談を承ります。",
+    url: SITE_URL,
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
