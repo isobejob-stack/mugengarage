@@ -16,6 +16,7 @@ import { emptySeoFieldsValues } from "@/lib/seo/schema";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { SeoFieldsSection } from "@/components/ui/seo-fields-section";
 import { Button } from "@/components/ui/button";
+import { deleteJson, sendJson } from "@/lib/api/client";
 
 // SCR-ADM-014: 年表編集フォーム
 export function TimelineEventForm({
@@ -47,18 +48,14 @@ export function TimelineEventForm({
 
   const onSubmit = async (values: TimelineEventFormValues) => {
     setSubmitError(null);
-    const res = await fetch(
+    const result = await sendJson(
       isEdit ? `/api/admin/timeline/${eventId}` : "/api/admin/timeline",
-      {
-        method: isEdit ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      },
+      isEdit ? "PATCH" : "POST",
+      values,
     );
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setSubmitError(body?.error?.message ?? "保存に失敗しました");
+    if (!result.ok) {
+      setSubmitError(result.message);
       return;
     }
 
@@ -71,13 +68,10 @@ export function TimelineEventForm({
     if (!eventId) return;
     setDeleteError(null);
     setIsDeleting(true);
-    const res = await fetch(`/api/admin/timeline/${eventId}`, {
-      method: "DELETE",
-    });
+    const result = await deleteJson(`/api/admin/timeline/${eventId}`);
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setDeleteError(body?.error?.message ?? "削除に失敗しました");
+    if (!result.ok) {
+      setDeleteError(result.message);
       setIsDeleting(false);
       return;
     }

@@ -31,6 +31,7 @@ import type { RelatedContentCandidate } from "@/lib/related/types";
 import { TagPicker } from "@/components/tags/tag-picker";
 import { ManufacturerModelFields } from "@/components/inventory/manufacturer-model-fields";
 import type { Tag } from "@/lib/seo/types";
+import { deleteJson, sendJson } from "@/lib/api/client";
 import {
   toDatetimeLocalValue,
   fromDatetimeLocalValue,
@@ -135,18 +136,14 @@ export function VehicleForm({
 
   const save = async (values: VehicleFormValues) => {
     setSubmitError(null);
-    const res = await fetch(
+    const result = await sendJson(
       isEdit ? `/api/admin/vehicles/${vehicleId}` : "/api/admin/vehicles",
-      {
-        method: isEdit ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      },
+      isEdit ? "PATCH" : "POST",
+      values,
     );
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setSubmitError(body?.error?.message ?? "保存に失敗しました");
+    if (!result.ok) {
+      setSubmitError(result.message);
       return;
     }
 
@@ -159,16 +156,15 @@ export function VehicleForm({
     if (!vehicleId) return;
     setDeleteError(null);
     setIsDeleting(true);
-    const res = await fetch(`/api/admin/vehicles/${vehicleId}`, {
-      method: "DELETE",
-    });
+    const result = await deleteJson(`/api/admin/vehicles/${vehicleId}`);
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
+    if (!result.ok) {
+      // 409は「売約済みの車両は削除できない」という業務上の制約による拒否。
+      // サーバーが理由を返すためそれを優先しつつ、本文が無い場合の既定文言を状況別に出し分ける。
       setDeleteError(
-        res.status === 409
-          ? (body?.error?.message ?? "売約済みの車両は削除できません")
-          : (body?.error?.message ?? "削除に失敗しました"),
+        result.status === 409
+          ? result.message || "売約済みの車両は削除できません"
+          : result.message,
       );
       setIsDeleting(false);
       return;

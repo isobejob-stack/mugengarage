@@ -16,6 +16,7 @@ import { SeoFieldsSection } from "@/components/ui/seo-fields-section";
 import { TagPicker } from "@/components/tags/tag-picker";
 import { Button } from "@/components/ui/button";
 import type { Tag } from "@/lib/seo/types";
+import { deleteJson, sendJson } from "@/lib/api/client";
 import {
   toDatetimeLocalValue,
   fromDatetimeLocalValue,
@@ -53,18 +54,14 @@ export function ArticleForm({
 
   const onSubmit = async (values: ArticleFormValues) => {
     setSubmitError(null);
-    const res = await fetch(
+    const result = await sendJson(
       isEdit ? `/api/admin/articles/${articleId}` : "/api/admin/articles",
-      {
-        method: isEdit ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      },
+      isEdit ? "PATCH" : "POST",
+      values,
     );
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setSubmitError(body?.error?.message ?? "保存に失敗しました");
+    if (!result.ok) {
+      setSubmitError(result.message);
       return;
     }
 
@@ -77,13 +74,10 @@ export function ArticleForm({
     if (!articleId) return;
     setDeleteError(null);
     setIsDeleting(true);
-    const res = await fetch(`/api/admin/articles/${articleId}`, {
-      method: "DELETE",
-    });
+    const result = await deleteJson(`/api/admin/articles/${articleId}`);
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setDeleteError(body?.error?.message ?? "削除に失敗しました");
+    if (!result.ok) {
+      setDeleteError(result.message);
       setIsDeleting(false);
       return;
     }

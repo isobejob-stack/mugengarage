@@ -8,6 +8,7 @@ import {
 } from "@/lib/inventory/types";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Button, buttonClassName } from "@/components/ui/button";
+import { deleteJson, patchJson, postJson } from "@/lib/api/client";
 
 export type PhotoWithUrl = {
   id: string;
@@ -160,16 +161,15 @@ export function VehicleMediaManager({
     const previous = photos;
     setPhotos(nextPhotos);
 
-    const res = await fetch(`/api/admin/vehicles/${vehicleId}/photos/reorder`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ photoIds: nextPhotos.map((p) => p.id) }),
-    });
+    const result = await patchJson(
+      `/api/admin/vehicles/${vehicleId}/photos/reorder`,
+      { photoIds: nextPhotos.map((p) => p.id) },
+    );
 
-    if (!res.ok) {
+    // 楽観的に並び替えた表示を、失敗時は元の順序へ戻す
+    if (!result.ok) {
       setPhotos(previous);
-      const body = await res.json().catch(() => null);
-      setPhotoError(body?.error?.message ?? "並び替えに失敗しました");
+      setPhotoError(result.message);
     }
     setReordering(false);
   };
@@ -245,17 +245,15 @@ export function VehicleMediaManager({
     setVideoError(null);
     setVideoSubmitting(true);
 
-    const res = await fetch(`/api/admin/vehicles/${vehicleId}/videos`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ video_url: videoUrl }),
-    });
+    const result = await postJson<VehicleVideo>(
+      `/api/admin/vehicles/${vehicleId}/videos`,
+      { video_url: videoUrl },
+    );
 
-    const body = await res.json().catch(() => null);
-    if (!res.ok) {
-      setVideoError(body?.error?.message ?? "動画の登録に失敗しました");
+    if (!result.ok) {
+      setVideoError(result.message);
     } else {
-      setVideos((prev) => [...prev, body.data]);
+      setVideos((prev) => [...prev, result.data]);
       setVideoUrl("");
     }
     setVideoSubmitting(false);
@@ -263,13 +261,11 @@ export function VehicleMediaManager({
 
   const deleteVideo = async (videoId: string) => {
     setVideoError(null);
-    const res = await fetch(
+    const result = await deleteJson(
       `/api/admin/vehicles/${vehicleId}/videos/${videoId}`,
-      { method: "DELETE" },
     );
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setVideoError(body?.error?.message ?? "動画の削除に失敗しました");
+    if (!result.ok) {
+      setVideoError(result.message);
       return;
     }
     setVideos((prev) => prev.filter((v) => v.id !== videoId));

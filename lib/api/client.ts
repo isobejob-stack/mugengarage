@@ -10,7 +10,14 @@
 // 実際の利用場面で最も起きやすい種類の失敗であるため、共通化して確実に握りつぶす。
 
 export type ApiSuccess<T> = { ok: true; data: T };
-export type ApiFailure = { ok: false; message: string; field?: string };
+// status: HTTPステータス。409（競合）など、状況によって文言や挙動を変えたい呼び出し側が使う。
+// 通信自体が成立しなかった場合はレスポンスが存在しないため undefined になる。
+export type ApiFailure = {
+  ok: false;
+  message: string;
+  field?: string;
+  status?: number;
+};
 export type ApiResult<T> = ApiSuccess<T> | ApiFailure;
 
 // 通信そのものが成立しなかったときの文言。技術用語を避け、次に取るべき行動を示す。
@@ -44,12 +51,23 @@ async function request<T>(
       ok: false,
       message: errorBody?.error?.message ?? UNEXPECTED_ERROR_MESSAGE,
       field: errorBody?.error?.field,
+      status: response.status,
     };
   }
 
   // 204 No Content 等、本文が無い応答でも壊れないようにする
   const data = await response.json().catch(() => null);
   return { ok: true, data: data?.data ?? data };
+}
+
+// 新規作成と更新で同じフォームを使い回す画面（isEdit ? "PATCH" : "POST"）向けに、
+// メソッドを引数で受け取れる形も用意する。
+export function sendJson<T = unknown>(
+  url: string,
+  method: "POST" | "PATCH" | "DELETE",
+  body?: unknown,
+) {
+  return request<T>(url, method, body);
 }
 
 export function postJson<T = unknown>(url: string, body?: unknown) {

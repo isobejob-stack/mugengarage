@@ -7,6 +7,7 @@ import {
 } from "@/lib/inventory/schema";
 import type { Manufacturer, Model } from "@/lib/inventory/types";
 import { Button } from "@/components/ui/button";
+import { postJson } from "@/lib/api/client";
 
 const CUSTOM_OPTION_VALUE = "__custom__";
 
@@ -84,22 +85,18 @@ export function ManufacturerModelFields({
     setManufacturerCreateError(null);
     setCreatingManufacturer(true);
 
-    const res = await fetch("/api/admin/manufacturers", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, slug: slugifyManufacturerName(name) }),
+    const result = await postJson<Manufacturer>("/api/admin/manufacturers", {
+      name,
+      slug: slugifyManufacturerName(name),
     });
 
-    const body = await res.json().catch(() => null);
-    if (!res.ok) {
-      setManufacturerCreateError(
-        body?.error?.message ?? "メーカーの作成に失敗しました",
-      );
+    if (!result.ok) {
+      setManufacturerCreateError(result.message);
       setCreatingManufacturer(false);
       return;
     }
 
-    const created: Manufacturer = body.data;
+    const created = result.data;
     setManufacturerList((prev) =>
       [...prev, created].sort((a, b) => a.name.localeCompare(b.name, "ja")),
     );
@@ -115,24 +112,19 @@ export function ManufacturerModelFields({
     setModelCreateError(null);
     setCreatingModel(true);
 
-    const res = await fetch("/api/admin/models", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        manufacturer_id: manufacturerId,
-        name,
-        slug: slugifyModelName(name),
-      }),
+    const result = await postJson<Model>("/api/admin/models", {
+      manufacturer_id: manufacturerId,
+      name,
+      slug: slugifyModelName(name),
     });
 
-    const body = await res.json().catch(() => null);
-    if (!res.ok) {
-      setModelCreateError(body?.error?.message ?? "車種の作成に失敗しました");
+    if (!result.ok) {
+      setModelCreateError(result.message);
       setCreatingModel(false);
       return;
     }
 
-    const created: Model = body.data;
+    const created = result.data;
     setModelList((prev) =>
       [...prev, created].sort((a, b) => a.name.localeCompare(b.name, "ja")),
     );

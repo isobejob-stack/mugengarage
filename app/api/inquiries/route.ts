@@ -8,7 +8,15 @@ import { linkFavoritesToCustomer } from "@/lib/engagement/queries";
 // FR-INQ-001: 問い合わせフォーム送信（公開、認証不要）
 // event_flow.md 3.5: 既存Customerと紐付けるか、新規Customerを作成する（FR-INQ-003）
 export async function POST(request: NextRequest) {
-  const json = await request.json();
+  // 壊れたJSONを送られても500にせず、検証エラーとして返す
+  const json = await request.json().catch(() => null);
+  if (json === null) {
+    return apiError({
+      code: "VALIDATION_ERROR",
+      message: "リクエストの形式が正しくありません",
+    });
+  }
+
   const parsed = inquiryFormSchema.safeParse(json);
   if (!parsed.success) {
     const first = parsed.error.issues[0];
@@ -19,7 +27,19 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const { name, phone, email, category, message } = parsed.data;
+  // ハニーポット判定（docs/tasks/ISSUE-005）。
+  // このエンドポイントは認証不要の公開POSTで、customers / inquiries テーブルに直接書き込む。
+  // スパムが流入すると本物の問い合わせが埋もれ、「問い合わせを取りこぼさない」という
+  // 事業目的そのものを損なうため、最小コストの対策として画面外のダミー欄を用意している。
+  //
+  // 送信元にはエラーを返さず成功として扱う（サイレントに破棄する）。
+  // 「弾かれた」と分かるとボット側が回避策を試すため、成否を教えないほうが有効。
+  const { name, phone, email, category, message, website } = parsed.data;
+
+  if (website) {
+    return NextResponse.json({ data: { spam: true } }, { status: 201 });
+  }
+
   const supabase = createAdminClient();
 
   let customerId: string | null = null;
