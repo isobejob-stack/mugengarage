@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { getVehicleFavoriteRanking } from "@/lib/engagement/queries";
 
+// 静的生成されるとお気に入り数が増えても順位が次回デプロイまで変わらないため、
+// リクエストごとに描画する（理由の詳細は app/(public)/blog/page.tsx のコメント参照）。
+export const dynamic = "force-dynamic";
+
 // SCR-PUB-005: 人気ランキング（お気に入り数を基に公開中の車両を順位表示、FR-FAV-004）
 export default async function Page() {
   const ranking = await getVehicleFavoriteRanking(10);
