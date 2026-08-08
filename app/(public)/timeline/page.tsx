@@ -8,11 +8,19 @@ import { RelatedContentList } from "@/components/related/related-content-list";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Link from "next/link";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 function decadeOf(dateStr: string) {
   const year = new Date(dateStr).getFullYear();
   return `${Math.floor(year / 10) * 10}年代`;
 }
+
+export const metadata = buildPageMetadata({
+  title: "Jaguar年表",
+  description:
+    "1922年の創業から現代まで、Jaguarの歩みを年表でたどります。名車の登場とレースでの活躍を時系列で解説します。",
+  path: "/timeline",
+});
 
 // SCR-PUB-010: Jaguar年表（縦型タイムライン、カテゴリ色分け、年代絞り込み）
 export default async function Page({

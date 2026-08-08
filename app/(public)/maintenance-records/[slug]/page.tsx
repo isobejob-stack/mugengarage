@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -6,6 +7,27 @@ import { listRelatedContents } from "@/lib/related/queries";
 import { RelatedContentList } from "@/components/related/related-content-list";
 import { buildLineConsultationUrl } from "@/lib/site-config";
 import { Button } from "@/components/ui/button";
+import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
+
+// 各詳細ページに固有のtitle/descriptionを与える。従来はルートlayoutの値を継承しており、
+// 検索結果でどのページも同じ文言になっていた（docs/tasks/ISSUE-005）。
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const record = await getPublicMaintenanceRecordBySlug(slug);
+
+  if (!record) return {};
+
+  return buildPageMetadata({
+    title: record.title,
+    description:
+      excerptFromMarkdown(record.body) || "クラシックJaguarの整備実績です。",
+    path: `/maintenance-records/${slug}`,
+  });
+}
 
 // SCR-PUB-014: 整備実績詳細（故障事例・費用感・作業ポイント、関連車種・図鑑・ブログ）
 export default async function Page({

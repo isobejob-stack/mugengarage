@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
@@ -5,6 +6,28 @@ import remarkGfm from "remark-gfm";
 import { getPublicEncyclopediaEntryBySlug } from "@/lib/knowledge/queries";
 import { encyclopediaCategoryLabels } from "@/lib/knowledge/schema";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
+import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
+
+// 各詳細ページに固有のtitle/descriptionを与える。従来はルートlayoutの値を継承しており、
+// 検索結果でどのページも同じ文言になっていた（docs/tasks/ISSUE-005）。
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  // このクエリは親子関係を含めて返すため、項目自体は result.entry に入っている
+  const result = await getPublicEncyclopediaEntryBySlug(slug);
+
+  if (!result?.entry) return {};
+
+  return buildPageMetadata({
+    title: result.entry.title,
+    description:
+      excerptFromMarkdown(result.entry.body) || "Jaguar図鑑の解説ページです。",
+    path: `/encyclopedia/${slug}`,
+  });
+}
 
 // SCR-PUB-009: 図鑑詳細（在庫非依存で単体公開できる、BR-DOM-001）
 export default async function Page({

@@ -1,7 +1,29 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getPublicArticleBySlug } from "@/lib/content/queries";
+import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
+
+// 各詳細ページに固有のtitle/descriptionを与える。従来はルートlayoutの値を継承しており、
+// 検索結果でどのページも同じ文言になっていた（docs/tasks/ISSUE-005）。
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const article = await getPublicArticleBySlug(slug);
+
+  if (!article) return {};
+
+  return buildPageMetadata({
+    title: article.title,
+    description:
+      excerptFromMarkdown(article.body) || "クラシックJaguarに関する記事です。",
+    path: `/blog/${slug}`,
+  });
+}
 
 // SCR-PUB-007: ブログ詳細
 export default async function Page({

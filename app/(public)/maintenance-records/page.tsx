@@ -1,6 +1,14 @@
 import Link from "next/link";
 import { listPublicMaintenanceRecords } from "@/lib/maintenance/queries";
 import { Card, CardBody, CardTitle, CardMeta } from "@/components/ui/card";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+
+export const metadata = buildPageMetadata({
+  title: "整備実績",
+  description:
+    "エムガレージが手がけたクラシックJaguarの整備・修理の実績をご紹介します。作業内容と仕上がりをご確認いただけます。",
+  path: "/maintenance-records",
+});
 
 // SCR-PUB-013: 整備実績一覧（カテゴリ絞り込み・カード一覧）
 export default async function Page({

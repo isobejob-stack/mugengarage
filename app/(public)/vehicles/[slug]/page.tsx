@@ -19,7 +19,8 @@ import { VehicleMediaGallery } from "@/components/inventory/vehicle-media-galler
 import { getSeoMeta } from "@/lib/seo/queries";
 import { buildPublicPath } from "@/lib/seo/paths";
 import { buildVehicleStructuredData } from "@/lib/seo/structured-data";
-import { SITE_URL, buildLineConsultationUrl } from "@/lib/site-config";
+import { SITE_NAME, SITE_URL, buildLineConsultationUrl } from "@/lib/site-config";
+import { absoluteTitle } from "@/lib/seo/metadata";
 
 function buildVehicleDisplayName(vehicle: {
   manufacturers: { name: string } | null;
@@ -51,7 +52,11 @@ export async function generateMetadata({
 
   const seoMeta = await getSeoMeta("vehicle", vehicle.id);
   const displayName = buildVehicleDisplayName(vehicle);
-  const title = seoMeta?.title || `${displayName}｜M-GARAGE Platform`;
+  // ルートlayoutの title.template（"%s｜エムガレージ"）が適用されるため、ここで店舗名を
+  // 付けると「◯◯｜エムガレージ｜エムガレージ」と二重になる。車両名のみを渡す。
+  // 管理画面でSEOタイトルが明示指定されている場合は、その文言をそのまま出したいので
+  // template を適用させない（absolute）。
+  const title = displayName;
   const description =
     seoMeta?.description ||
     vehicle.sales_comment ||
@@ -61,11 +66,12 @@ export async function generateMetadata({
   const canonicalUrl = seoMeta?.canonical_url || `${SITE_URL}${canonicalPath}`;
 
   return {
-    title,
+    title: seoMeta?.title ? absoluteTitle(seoMeta.title) : title,
     description,
     alternates: { canonical: canonicalUrl },
     openGraph: {
-      title,
+      // openGraph.title には title.template が効かないため、明示的に店舗名まで含める
+      title: seoMeta?.title || `${title}｜${SITE_NAME}`,
       description,
       url: canonicalUrl,
       images: seoMeta?.og_image_url ? [seoMeta.og_image_url] : undefined,

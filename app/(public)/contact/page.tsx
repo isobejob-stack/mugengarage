@@ -1,5 +1,13 @@
 import { InquiryForm } from "@/components/crm/inquiry-form";
 import { LineConsultationMenu } from "@/components/layout/line-consultation-menu";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+
+export const metadata = buildPageMetadata({
+  title: "お問い合わせ",
+  description:
+    "車両のご購入・整備・修理・買取のご相談を承ります。LINEまたはフォームからお気軽にお問い合わせください。",
+  path: "/contact",
+});
 
 // SCR-PUB-017: 問い合わせフォーム（FR-INQ-001）
 // レビュー指摘対応（修正2）: 冒頭の文中リンク（カテゴリなし・プリフィルなし）はLineConsultationMenuと

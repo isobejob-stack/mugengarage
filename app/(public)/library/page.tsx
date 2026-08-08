@@ -2,6 +2,14 @@ import Link from "next/link";
 import { listPublicLibraryEntries } from "@/lib/library/queries";
 import { kanaRowOf } from "@/lib/library/schema";
 import { Card, CardBody, CardTitle, CardMeta } from "@/components/ui/card";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+
+export const metadata = buildPageMetadata({
+  title: "ライブラリ",
+  description:
+    "SUキャブレター、モノコックボディ、マッチングナンバーなど、クラシックJaguarに関する用語を辞典形式で解説します。",
+  path: "/library",
+});
 
 // SCR-PUB-011: ライブラリ一覧（五十音インデックス・カテゴリ絞り込み）
 export default async function Page({

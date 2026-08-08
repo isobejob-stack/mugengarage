@@ -1,7 +1,8 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { listPublicVehicles, getLeadVehiclePhotoPaths } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
-import { LINE_URL } from "@/lib/site-config";
+import { LINE_URL, SITE_URL } from "@/lib/site-config";
 import { LineConsultationMenu } from "@/components/layout/line-consultation-menu";
 import { Button } from "@/components/ui/button";
 import { Card, CardImage, CardBody, CardTitle, CardMeta, CardPrice } from "@/components/ui/card";
@@ -11,6 +12,13 @@ import { VehicleFeatureBadges } from "@/components/ui/status-badge";
 // 次回デプロイまでトップに出ない（最も目に付く画面で更新が反映されない状態になる）。
 // リクエストごとに描画する（理由の詳細は app/(public)/blog/page.tsx のコメント参照）。
 export const dynamic = "force-dynamic";
+
+// トップページはルートlayoutのtitle.default（"エムガレージ｜クラシックJaguar専門店"）を
+// そのまま使いたいため、titleは上書きせずcanonicalのみ明示する。
+// トップは "/" と "" の両方で到達しうるため、正規URLを示しておく。
+export const metadata: Metadata = {
+  alternates: { canonical: SITE_URL },
+};
 
 const ENCYCLOPEDIA_LINKS = [
   {

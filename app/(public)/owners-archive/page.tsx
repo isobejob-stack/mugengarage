@@ -1,10 +1,18 @@
 import Link from "next/link";
 import { listPublicOwnerArchiveEntries } from "@/lib/archive/queries";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 // 静的生成されると管理画面でのオーナーズアーカイブの追加・編集が次回デプロイまで反映されないため、
 // リクエストごとに描画する（理由の詳細は app/(public)/blog/page.tsx のコメント参照）。
 export const dynamic = "force-dynamic";
+
+export const metadata = buildPageMetadata({
+  title: "オーナーズアーカイブ",
+  description:
+    "これまでにご成約いただいたクラシックJaguarを、当店の販売実績としてご紹介します。",
+  path: "/owners-archive",
+});
 
 // SCR-PUB-015: オーナーズアーカイブ一覧（過去に販売した車両を在庫とは視覚的に区別して表示、FR-OWN-003）
 export default async function Page() {

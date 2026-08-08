@@ -1,5 +1,9 @@
 // サイト全体で共通のナビゲーション・LINE導線設定（01_business_requirements.md: LINE相談は最重要CTA）
 
+// 顧客向けの店舗名。metadataのタイトル組み立て等で使う。
+// 「M-GARAGE Platform」は開発側から見たシステム名であり、顧客向けの表記ではない。
+export const SITE_NAME = "エムガレージ";
+
 export const siteNav = [
   { label: "在庫車両", href: "/vehicles" },
   { label: "図鑑", href: "/encyclopedia" },
@@ -11,7 +15,43 @@ export const siteNav = [
 ] as const;
 
 // TODO: 実際の公式LINEアカウントのURLに差し替える（FR-LINE-003）
+// 現在は仮の値。この定数はサイト全体のLINE相談ボタンの遷移先であり、
+// 差し替えるまで最重要CTAが機能しない（docs/tasks/ISSUE-005 参照）。
 export const LINE_URL = "https://line.me/";
+
+// エムガレージの外部掲載媒体・公式SNS。
+// フッターからの導線と、構造化データ（Organization の sameAs）の両方で使う。
+// sameAsに列挙することで、検索エンジンに「これらは同一事業者である」と伝えられ、
+// ナレッジパネルやブランド検索の精度向上につながる。
+//
+// Instagramは共有時に長大なトラッキングクエリが付いた状態で共有されることがあるが、
+// リンク先としては正規化した形（クエリなし）を使う。
+export const EXTERNAL_LINKS = [
+  {
+    id: "instagram",
+    label: "Instagram",
+    href: "https://www.instagram.com/mgarage9333/",
+    description: "入庫車両や作業の様子を発信",
+  },
+  {
+    id: "facebook",
+    label: "Facebook",
+    href: "https://www.facebook.com/mgarage9333/",
+    description: "お知らせ・イベント情報",
+  },
+  {
+    id: "goonet",
+    label: "グーネット",
+    href: "https://www.goo-net.com/usedcar_shop/9570660/detail.html",
+    description: "在庫車両の掲載ページ",
+  },
+  {
+    id: "kurumaerabi",
+    label: "車選びドットコム",
+    href: "https://www.kurumaerabi.com/shop/detail/14921/",
+    description: "在庫車両の掲載ページ",
+  },
+] as const;
 
 // FR-LINE-002: 相談カテゴリ表示。02_functional_requirements.md 記載の6カテゴリ
 // （購入／修理／売却／部品／Jaguar全般／カーライフ相談）を定義する。
