@@ -28,9 +28,30 @@ Vercelの環境変数に `BASIC_AUTH_USER` と `BASIC_AUTH_PASSWORD` を設定�
 
 ## 2. 未完了・要対応（ここから再開）
 
-### 🔴 最優先: 「更新が本番に反映されない」問題（2026-08-08 調査・一部修正済み）
+### 🔴 最優先: 「更新が本番に反映されない」問題（2026-08-08 調査・修正済み）
 
-「更新内容が本番に反映されない」という症状には、**原因が異なる2つの問題**が重なっていた。
+「更新内容が本番に反映されない」という症状には、**原因が異なる3つの問題**が重なっていた。
+GitHubへのpushは一度も失敗しておらず（`main` はローカル・リモートとも差分ゼロ）、
+原因はGit側ではなかった。
+
+#### 問題0: Vercelのデプロイがすべて失敗していた（真の原因・修正済み）
+
+Vercelが以下のエラーでデプロイを**丸ごと拒否**していた。ビルドすら開始されていない。
+
+```
+Hobby accounts are limited to daily cron jobs.
+This cron expression (0 * * * *) would run more than once per day.
+```
+
+`vercel.json` の公開予約バッチ（`/api/cron/publish-scheduled`）を**毎時**（`0 * * * *`）で
+登録していたが、VercelのHobby（無料）プランは**1日1回より高頻度のCronを許可していない**。
+この設定は `d8e122d`「車両・記事の公開予約を実装」で入ったもので、
+**それ以降の全コミット（デザイン刷新・Basic認証・クイック登録・メーカー手入力など）が
+1件も本番に反映されていなかった**。症状の発生時期と完全に一致する。
+
+→ `vercel.json` のscheduleを `0 0 * * *`（毎日09:00 JST）に変更してデプロイを復旧。
+**公開予約の反映が最大約1日遅れる**という制約が残るが、Proプランへのアップグレード
+（`docs/tasks/ISSUE-003`。商用利用のため元々必須）の完了後に `0 * * * *` へ戻せば解消する。
 
 #### 問題A: 公開ページの内容がビルド時に固定されていた（修正済み）
 
@@ -63,21 +84,24 @@ Next.jsは検索条件（`searchParams`）を読まないページを既定で�
 上記A・Bの修正により、**環境変数が全く無い状態でも `npm run build` が成功する**ことを確認済み。
 ビルドがDBに依存しなくなったため、Supabaseの一時的な障害でデプロイが失敗することもなくなった。
 
-#### 残: Vercel側の状態確認（発注者・要ダッシュボード操作）
+#### 残: マージ後の反映確認（発注者）
 
-開発環境からは本番URL（`mugengarage.vercel.app`）への通信が遮断されており、
-**Vercel側が実際にどうなっているかはこのセッションからは確認できなかった**。
-以下は手元のブラウザから確認が必要。
+開発環境から本番URL（`mugengarage.vercel.app`）への通信は遮断されているため、
+最終的な反映確認は手元のブラウザ・端末から行う必要がある。
 
 - **反映されたかの確認**: `curl -s -o /dev/null -w "%{http_code}" -X POST https://mugengarage.vercel.app/api/admin/manufacturers`
   - `404` → 未デプロイ（最新が反映されていない）
   - `401` → デプロイ済み（認証エラーは正常。ルートが存在する証拠）
-- **Vercelダッシュボード → Deployments** で確認すること:
-  1. 最新コミットのデプロイが**そもそも作られているか**（無ければGitHub連携が切れている）
-  2. ビルドが失敗していれば、そのログ（今回の修正でエラー内容が読みやすくなっている）
-  3. **Settings > Environment Variables**: `NEXT_PUBLIC_SUPABASE_URL`・`NEXT_PUBLIC_SUPABASE_ANON_KEY`・
-     `SUPABASE_SERVICE_ROLE_KEY` が Production / Preview **両方**に設定されているか
-     （片方だけに設定されているとその環境のビルドだけが失敗する）
+- あわせて **Settings > Environment Variables** で、`NEXT_PUBLIC_SUPABASE_URL`・
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY`・`SUPABASE_SERVICE_ROLE_KEY`・`CRON_SECRET` が
+  Production / Preview **両方**に設定されているか確認しておくと安全
+  （片方だけだとその環境のビルドのみ失敗する。問題Bの修正により、
+  仮に漏れていてもビルドログで変数名が特定できるようになっている）
+
+#### 🟡 Proプランへのアップグレード後にやること
+
+`docs/tasks/ISSUE-003` のProプラン移行が完了したら、`vercel.json` のCron設定を
+`0 0 * * *` → `0 * * * *`（毎時）に戻す。公開予約の反映遅れ（最大約1日）が解消される。
 
 ### 🟡 発注者への確認待ち
 - **LINE URL**: `lib/site-config.ts` の `LINE_URL` が仮の値（`https://line.me/`）のまま。
