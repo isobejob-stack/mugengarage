@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import Image from "next/image";
+import { useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -8,7 +9,7 @@ import {
   type SiteSettingsFormValues,
 } from "@/lib/settings/schema";
 import { patchJson } from "@/lib/api/client";
-import { Button } from "@/components/ui/button";
+import { Button, buttonClassName } from "@/components/ui/button";
 
 // 店舗情報・外部リンクの編集フォーム。
 // これらは従来 lib/site-config.ts にハードコードされており、変更のたびに開発とデプロイが
@@ -16,8 +17,10 @@ import { Button } from "@/components/ui/button";
 // 最重要導線を直せない状態になっていた（docs/tasks/ISSUE-005）。
 export function SiteSettingsForm({
   initialValues,
+  initialHeroImageUrl,
 }: {
   initialValues: SiteSettingsFormValues;
+  initialHeroImageUrl: string | null;
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -152,6 +155,20 @@ export function SiteSettingsForm({
 
       <section>
         <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+          トップページの写真
+        </h2>
+        <p className="mt-2 text-base text-foreground-muted">
+          店舗やガレージ、車両の写真を1枚設定すると、トップページの最上部に大きく表示されます。
+          未設定の場合は文字だけの表示になります。
+        </p>
+        <HeroImageField
+          initialUrl={initialHeroImageUrl}
+          onError={setSubmitError}
+        />
+      </section>
+
+      <section>
+        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
           LINE相談のURL
         </h2>
         <p className="mt-2 text-base text-foreground-muted">
@@ -279,6 +296,129 @@ export function SiteSettingsForm({
         </Button>
       </div>
     </form>
+  );
+}
+
+// トップページのヒーロー画像。他の項目と違いファイルのアップロードを伴うため、
+// 「保存する」ボタンとは独立して即時にアップロード・削除する
+// （画像だけ選んで保存を押し忘れる、という取りこぼしを防ぐ）。
+function HeroImageField({
+  initialUrl,
+  onError,
+}: {
+  initialUrl: string | null;
+  onError: (message: string | null) => void;
+}) {
+  const [previewUrl, setPreviewUrl] = useState(initialUrl);
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const upload = async (file: File) => {
+    setUploading(true);
+    onError(null);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    // FormDataのためJSON前提のAPIクライアントは使えない。
+    // 通信断でも固まらないよう、ここでも必ずtry/catchで受け止める。
+    try {
+      const response = await fetch("/api/admin/site-settings/hero-image", {
+        method: "POST",
+        body: formData,
+      });
+      const body = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        onError(body?.error?.message ?? "画像のアップロードに失敗しました");
+        return;
+      }
+
+      setPreviewUrl(body.data.public_url);
+    } catch {
+      onError(
+        "通信に失敗しました。電波状況をご確認のうえ、もう一度お試しください。",
+      );
+    } finally {
+      setUploading(false);
+      // 同じファイルを選び直したときにonChangeが発火しなくなるのを防ぐ
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  const remove = async () => {
+    setUploading(true);
+    onError(null);
+
+    try {
+      const response = await fetch("/api/admin/site-settings/hero-image", {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        onError(body?.error?.message ?? "画像の削除に失敗しました");
+        return;
+      }
+      setPreviewUrl(null);
+    } catch {
+      onError(
+        "通信に失敗しました。電波状況をご確認のうえ、もう一度お試しください。",
+      );
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="mt-6">
+      {previewUrl && (
+        <div className="relative mb-4 aspect-[16/9] w-full max-w-xl overflow-hidden rounded-2xl border border-neutral-200 shadow-soft">
+          <Image
+            src={previewUrl}
+            alt="設定中のトップページ写真"
+            fill
+            sizes="(min-width: 640px) 36rem, 100vw"
+            className="object-cover"
+          />
+        </div>
+      )}
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="sr-only"
+        id="hero-image-input"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) void upload(file);
+        }}
+      />
+
+      <div className="flex flex-wrap gap-3">
+        <label
+          htmlFor="hero-image-input"
+          className={buttonClassName({ variant: "outline", size: "md" })}
+        >
+          {uploading
+            ? "処理中..."
+            : previewUrl
+              ? "写真を差し替える"
+              : "写真を選ぶ"}
+        </label>
+        {previewUrl && (
+          <Button
+            type="button"
+            variant="outline"
+            size="md"
+            disabled={uploading}
+            onClick={() => void remove()}
+          >
+            写真を外す
+          </Button>
+        )}
+      </div>
+    </div>
   );
 }
 

@@ -13,6 +13,8 @@ export type SiteSettings = {
   access_info: string | null;
   line_url: string | null;
   external_links: ExternalLink[];
+  // site-assets バケット内のオブジェクトパス。未設定なら文字ベースのヒーローにフォールバックする
+  hero_image_path: string | null;
 };
 
 // マイグレーション適用前・設定未入力でも公開サイトが壊れないための既定値。
@@ -28,6 +30,7 @@ const EMPTY_SETTINGS: SiteSettings = {
   access_info: null,
   line_url: null,
   external_links: [],
+  hero_image_path: null,
 };
 
 // 店舗設定は単一行（id = 'singleton'）で管理する。

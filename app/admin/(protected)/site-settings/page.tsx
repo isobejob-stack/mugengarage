@@ -1,4 +1,5 @@
 import { getSiteSettings } from "@/lib/settings/queries";
+import { getSiteAssetPublicUrl } from "@/lib/settings/storage";
 import { SiteSettingsForm } from "@/components/settings/site-settings-form";
 import type { SiteSettingsFormValues } from "@/lib/settings/schema";
 
@@ -36,7 +37,14 @@ export default async function Page() {
         保存すると公開サイトにすぐ反映されます。
       </p>
 
-      <SiteSettingsForm initialValues={initialValues} />
+      <SiteSettingsForm
+        initialValues={initialValues}
+        initialHeroImageUrl={
+          settings.hero_image_path
+            ? getSiteAssetPublicUrl(settings.hero_image_path)
+            : null
+        }
+      />
     </main>
   );
 }
