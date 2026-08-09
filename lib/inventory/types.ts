@@ -56,6 +56,7 @@ export interface Vehicle extends BaseEntity, SoftDeletable {
   is_recommended: boolean;
   is_new_arrival: boolean;
   price: number;
+  total_price: number | null;
   engine: string | null;
   engine_model_code: string | null;
   displacement_cc: number | null;

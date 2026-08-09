@@ -158,9 +158,32 @@ export default async function Page({
         {vehicle.manufacturers?.name} {vehicle.models?.name}
         {vehicle.model_year ? `（${vehicle.model_year}年）` : ""}
       </h1>
-      <p className="mt-2 font-mono text-3xl font-bold tabular-nums text-primary-700">
-        ¥{vehicle.price.toLocaleString()}
-      </p>
+      {/* 購入検討者が最終的に比較するのは支払総額のため、登録されていればそちらを主役にし、
+          車両本体価格を併記する。支払総額が未確定のあいだは本体価格のみを出す
+          （諸費用が分からない段階で総額らしき数字を見せない）。 */}
+      <div className="mt-2">
+        {vehicle.total_price !== null ? (
+          <>
+            <p className="font-mono text-3xl font-bold tabular-nums text-primary-700">
+              ¥{vehicle.total_price.toLocaleString()}
+              <span className="ml-2 font-sans text-base font-medium text-foreground-muted">
+                支払総額（税込）
+              </span>
+            </p>
+            <p className="mt-1 font-mono text-lg tabular-nums text-foreground-muted">
+              ¥{vehicle.price.toLocaleString()}
+              <span className="ml-2 font-sans text-base">車両本体価格</span>
+            </p>
+          </>
+        ) : (
+          <p className="font-mono text-3xl font-bold tabular-nums text-primary-700">
+            ¥{vehicle.price.toLocaleString()}
+            <span className="ml-2 font-sans text-base font-medium text-foreground-muted">
+              車両本体価格（税込）
+            </span>
+          </p>
+        )}
+      </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <FavoriteButton vehicleId={vehicle.id} initialFavorited={isFavorited} />

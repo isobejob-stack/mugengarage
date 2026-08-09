@@ -17,10 +17,10 @@ import {
   CardBody,
   CardTitle,
   CardMeta,
-  CardPrice,
 } from "@/components/ui/card";
 import { VehicleFeatureBadges } from "@/components/ui/status-badge";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import { VehicleCardPrice } from "@/components/inventory/vehicle-price";
 
 type SearchParams = Record<string, string | undefined>;
 
@@ -74,7 +74,6 @@ export default async function Page({
   );
 
   const filters: VehicleSearchFilters = {
-    manufacturerId: params.manufacturer || undefined,
     modelId: params.model || undefined,
     seriesId: params.series || undefined,
     generationId: params.generation || undefined,
@@ -85,19 +84,12 @@ export default async function Page({
     modelYearMax: toNumber(params.year_max),
     mileageMax: toNumber(params.mileage_max),
     transmission: params.transmission || undefined,
-    indoorStorageOnly: params.indoor === "1",
     shakenExpiryFrom: monthInputToDate(params.shaken_from, false),
     shakenExpiryTo: monthInputToDate(params.shaken_to, true),
     displacementMin: toNumber(params.displacement_min),
     displacementMax: toNumber(params.displacement_max),
-    horsepowerMin: toNumber(params.horsepower_min),
-    horsepowerMax: toNumber(params.horsepower_max),
-    ownerCountMax: toNumber(params.owner_count_max),
-    interiorColor: params.interior_color || undefined,
     exteriorColor: params.exterior_color || undefined,
-    seatMaterial: params.seat_material || undefined,
     drivetrain: params.drivetrain || undefined,
-    tagId: params.tag || undefined,
     sort: (params.sort as VehicleSearchFilters["sort"]) || undefined,
   };
 
@@ -109,15 +101,9 @@ export default async function Page({
       params.drivetrain ||
       params.shaken_from ||
       params.shaken_to ||
-      params.owner_count_max ||
       params.displacement_min ||
       params.displacement_max ||
-      params.horsepower_min ||
-      params.horsepower_max ||
-      params.interior_color ||
-      params.exterior_color ||
-      params.seat_material ||
-      params.tag,
+      params.exterior_color,
   );
 
   const [{ vehicles, totalCount }, facets] = await Promise.all([
@@ -149,22 +135,6 @@ export default async function Page({
         className="mt-6 flex flex-col gap-4 rounded-md border border-neutral-200 p-4"
       >
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <label className="block">
-            <span className="text-sm font-medium">メーカー</span>
-            <select
-              name="manufacturer"
-              defaultValue={params.manufacturer ?? ""}
-              className="input mt-1"
-            >
-              <option value="">指定なし</option>
-              {facets.manufacturers.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-          </label>
-
           <label className="block">
             <span className="text-sm font-medium">車種</span>
             <select
@@ -261,15 +231,6 @@ export default async function Page({
               className="input mt-1"
             />
           </label>
-          <label className="mt-6 flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              name="indoor"
-              value="1"
-              defaultChecked={params.indoor === "1"}
-            />
-            屋内保管のみ
-          </label>
         </div>
 
         {/* FR-SRCH-001: シリーズ・世代・グレード〜駆動方式までの詳細条件（画面が煩雑にならないよう折りたたみ） */}
@@ -363,15 +324,6 @@ export default async function Page({
                 className="input mt-1"
               />
             </label>
-            <label className="block">
-              <span className="text-sm font-medium">オーナー数（上限）</span>
-              <input
-                type="number"
-                name="owner_count_max"
-                defaultValue={params.owner_count_max ?? ""}
-                className="input mt-1"
-              />
-            </label>
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -393,42 +345,9 @@ export default async function Page({
                 className="input mt-1"
               />
             </label>
-            <label className="block">
-              <span className="text-sm font-medium">馬力（下限・PS）</span>
-              <input
-                type="number"
-                name="horsepower_min"
-                defaultValue={params.horsepower_min ?? ""}
-                className="input mt-1"
-              />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium">馬力（上限・PS）</span>
-              <input
-                type="number"
-                name="horsepower_max"
-                defaultValue={params.horsepower_max ?? ""}
-                className="input mt-1"
-              />
-            </label>
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <label className="block">
-              <span className="text-sm font-medium">内装色</span>
-              <select
-                name="interior_color"
-                defaultValue={params.interior_color ?? ""}
-                className="input mt-1"
-              >
-                <option value="">指定なし</option>
-                {facets.interiorColors.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </label>
             <label className="block">
               <span className="text-sm font-medium">外装色</span>
               <select
@@ -444,41 +363,8 @@ export default async function Page({
                 ))}
               </select>
             </label>
-            <label className="block">
-              <span className="text-sm font-medium">シート素材</span>
-              <select
-                name="seat_material"
-                defaultValue={params.seat_material ?? ""}
-                className="input mt-1"
-              >
-                <option value="">指定なし</option>
-                {facets.seatMaterials.map((m) => (
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
-                ))}
-              </select>
-            </label>
           </div>
 
-          {/* FR-SRCH-001: タグでの絞り込み（FR-INV-012で車両に付与されたタグ） */}
-          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <label className="block">
-              <span className="text-sm font-medium">タグ</span>
-              <select
-                name="tag"
-                defaultValue={params.tag ?? ""}
-                className="input mt-1"
-              >
-                <option value="">指定なし</option>
-                {facets.tags.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
         </details>
 
         <div className="flex gap-3">
@@ -521,7 +407,7 @@ export default async function Page({
                         走行距離 {v.mileage_km.toLocaleString()}km
                       </CardMeta>
                     )}
-                    <CardPrice>¥{v.price.toLocaleString()}</CardPrice>
+                    <VehicleCardPrice price={v.price} totalPrice={v.total_price} />
                   </CardBody>
                 </Card>
               </li>

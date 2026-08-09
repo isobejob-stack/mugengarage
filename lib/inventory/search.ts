@@ -2,11 +2,9 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { PaginationParams } from "@/lib/api/pagination";
 import { toRange } from "@/lib/api/pagination";
-import { listTags, listTaggableIdsByTag } from "@/lib/tags/queries";
 
 // FR-SRCH-001: 車両一覧の絞り込み条件
 export interface VehicleSearchFilters {
-  manufacturerId?: string;
   modelId?: string;
   seriesId?: string;
   generationId?: string;
@@ -17,22 +15,13 @@ export interface VehicleSearchFilters {
   modelYearMax?: number;
   mileageMax?: number;
   transmission?: string;
-  indoorStorageOnly?: boolean;
   // 車検満了日の範囲（例：「〇年〇月以降」）。model_year帯の実装パターンを踏襲
   shakenExpiryFrom?: string;
   shakenExpiryTo?: string;
   displacementMin?: number;
   displacementMax?: number;
-  horsepowerMin?: number;
-  horsepowerMax?: number;
-  ownerCountMax?: number;
-  interiorColor?: string;
   exteriorColor?: string;
-  seatMaterial?: string;
   drivetrain?: string;
-  // FR-SRCH-001: タグでの絞り込み（1件のみ指定可。taggingsはポリモーフィックな中間テーブルのため
-  // taggable_id経由で対象車両IDを取得してから絞り込む）
-  tagId?: string;
   sort?: "new" | "price_asc" | "price_desc";
 }
 
@@ -53,23 +42,14 @@ function distinctStringOptions(
 export async function getVehicleSearchFacetOptions() {
   const supabase = createAdminClient();
   const [
-    { data: manufacturers },
     { data: models },
     { data: series },
     { data: generations },
     { data: grades },
     { data: transmissions },
-    { data: interiorColors },
     { data: exteriorColors },
-    { data: seatMaterials },
     { data: drivetrains },
-    tags,
   ] = await Promise.all([
-    supabase
-      .from("manufacturers")
-      .select("id, name")
-      .is("deleted_at", null)
-      .order("name"),
     supabase
       .from("models")
       .select("id, name, manufacturer_id")
@@ -98,44 +78,26 @@ export async function getVehicleSearchFacetOptions() {
       .not("transmission", "is", null),
     supabase
       .from("vehicles")
-      .select("interior_color")
-      .eq("status", "published")
-      .is("deleted_at", null)
-      .not("interior_color", "is", null),
-    supabase
-      .from("vehicles")
       .select("exterior_color")
       .eq("status", "published")
       .is("deleted_at", null)
       .not("exterior_color", "is", null),
     supabase
       .from("vehicles")
-      .select("seat_material")
-      .eq("status", "published")
-      .is("deleted_at", null)
-      .not("seat_material", "is", null),
-    supabase
-      .from("vehicles")
       .select("drivetrain")
       .eq("status", "published")
       .is("deleted_at", null)
       .not("drivetrain", "is", null),
-    // FR-SRCH-001: タグでの絞り込み用の選択肢（タグマスタ全件）
-    listTags(),
   ]);
 
   return {
-    manufacturers: manufacturers ?? [],
     models: models ?? [],
     series: series ?? [],
     generations: generations ?? [],
     grades: grades ?? [],
     transmissions: distinctStringOptions(transmissions, "transmission"),
-    interiorColors: distinctStringOptions(interiorColors, "interior_color"),
     exteriorColors: distinctStringOptions(exteriorColors, "exterior_color"),
-    seatMaterials: distinctStringOptions(seatMaterials, "seat_material"),
     drivetrains: distinctStringOptions(drivetrains, "drivetrain"),
-    tags: tags.map((t) => ({ id: t.id, name: t.name })),
   };
 }
 
@@ -148,15 +110,12 @@ export async function searchPublicVehicles(
   let query = supabase
     .from("vehicles")
     .select(
-      "id, price, model_year, mileage_km, status, transmission, is_recommended, is_new_arrival, manufacturers(name), models(name)",
+      "id, price, total_price, model_year, mileage_km, status, transmission, is_recommended, is_new_arrival, manufacturers(name), models(name)",
       { count: "exact" },
     )
     .eq("status", "published")
     .is("deleted_at", null);
 
-  if (filters.manufacturerId) {
-    query = query.eq("manufacturer_id", filters.manufacturerId);
-  }
   if (filters.modelId) {
     query = query.eq("model_id", filters.modelId);
   }
@@ -187,9 +146,6 @@ export async function searchPublicVehicles(
   if (filters.transmission) {
     query = query.eq("transmission", filters.transmission);
   }
-  if (filters.indoorStorageOnly) {
-    query = query.eq("indoor_storage", true);
-  }
   // 車検満了日の範囲（「〇年〇月以降」＝満了日がこの日付以降＝残り期間が長い車両）
   if (filters.shakenExpiryFrom) {
     query = query.gte("shaken_expiry", filters.shakenExpiryFrom);
@@ -203,38 +159,11 @@ export async function searchPublicVehicles(
   if (filters.displacementMax !== undefined) {
     query = query.lte("displacement_cc", filters.displacementMax);
   }
-  if (filters.horsepowerMin !== undefined) {
-    query = query.gte("horsepower", filters.horsepowerMin);
-  }
-  if (filters.horsepowerMax !== undefined) {
-    query = query.lte("horsepower", filters.horsepowerMax);
-  }
-  if (filters.ownerCountMax !== undefined) {
-    query = query.lte("owner_count", filters.ownerCountMax);
-  }
-  if (filters.interiorColor) {
-    query = query.eq("interior_color", filters.interiorColor);
-  }
   if (filters.exteriorColor) {
     query = query.eq("exterior_color", filters.exteriorColor);
   }
-  if (filters.seatMaterial) {
-    query = query.eq("seat_material", filters.seatMaterial);
-  }
   if (filters.drivetrain) {
     query = query.eq("drivetrain", filters.drivetrain);
-  }
-  // FR-SRCH-001: タグでの絞り込み。taggingsはポリモーフィックな中間テーブルで
-  // vehiclesへの直接FKを持たないため、対象車両IDを先に取得してからinで絞り込む
-  if (filters.tagId) {
-    const taggedVehicleIds = await listTaggableIdsByTag(
-      "vehicle",
-      filters.tagId,
-    );
-    if (taggedVehicleIds.length === 0) {
-      return { vehicles: [], totalCount: 0 };
-    }
-    query = query.in("id", taggedVehicleIds);
   }
 
   switch (filters.sort) {
@@ -259,6 +188,7 @@ export async function searchPublicVehicles(
   const vehicles = (data ?? []) as unknown as Array<{
     id: string;
     price: number;
+    total_price: number | null;
     model_year: number | null;
     mileage_km: number | null;
     status: string;

@@ -7,8 +7,9 @@ import { SITE_URL, siteNav } from "@/lib/site-config";
 import { getSiteSettings } from "@/lib/settings/queries";
 import { LineConsultationMenu } from "@/components/layout/line-consultation-menu";
 import { Button } from "@/components/ui/button";
-import { Card, CardImage, CardBody, CardTitle, CardMeta, CardPrice } from "@/components/ui/card";
+import { Card, CardImage, CardBody, CardTitle, CardMeta } from "@/components/ui/card";
 import { VehicleFeatureBadges } from "@/components/ui/status-badge";
+import { VehicleCardPrice } from "@/components/inventory/vehicle-price";
 
 // トップページは掲載中の車両をDBから取得しているため、静的生成されると車両を登録・公開しても
 // 次回デプロイまでトップに出ない（最も目に付く画面で更新が反映されない状態になる）。
@@ -161,7 +162,7 @@ export default async function Page() {
                       {v.model_year !== null && (
                         <CardMeta>{v.model_year}年</CardMeta>
                       )}
-                      <CardPrice>¥{v.price.toLocaleString()}</CardPrice>
+                      <VehicleCardPrice price={v.price} totalPrice={v.total_price} />
                     </CardBody>
                   </Card>
                 </li>

@@ -72,6 +72,7 @@ export default async function Page({
     is_recommended: vehicle.is_recommended,
     is_new_arrival: vehicle.is_new_arrival,
     price: vehicle.price,
+    total_price: vehicle.total_price,
     engine: vehicle.engine,
     engine_model_code: vehicle.engine_model_code,
     displacement_cc: vehicle.displacement_cc,

@@ -190,7 +190,7 @@ export async function listPublicVehicles() {
   const { data } = await supabase
     .from("vehicles")
     .select(
-      "id, price, model_year, mileage_km, status, is_recommended, is_new_arrival, manufacturers(name), models(name)",
+      "id, price, total_price, model_year, mileage_km, status, is_recommended, is_new_arrival, manufacturers(name), models(name)",
     )
     .eq("status", "published")
     .is("deleted_at", null)
@@ -199,6 +199,7 @@ export async function listPublicVehicles() {
   const vehicles = (data ?? []) as unknown as Array<{
     id: string;
     price: number;
+    total_price: number | null;
     model_year: number | null;
     mileage_km: number | null;
     status: string;

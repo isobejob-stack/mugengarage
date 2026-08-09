@@ -21,10 +21,17 @@ export const vehicleFormSchema = z.object({
   status: z.enum(["published", "draft", "sold", "negotiating", "coming_soon"]),
   is_recommended: z.boolean(),
   is_new_arrival: z.boolean(),
+  // 車両本体価格（税込）。必須。
   price: z
     .number()
-    .int("価格は整数で入力してください")
-    .min(0, "価格は0以上で入力してください"),
+    .int("車両本体価格は整数で入力してください")
+    .min(0, "車両本体価格は0以上で入力してください"),
+  // 支払総額（税込、諸費用込み）。現地でのクイック登録時など諸費用が未確定の場合があるためnullable。
+  total_price: z
+    .number()
+    .int("支払総額は整数で入力してください")
+    .min(0, "支払総額は0以上で入力してください")
+    .nullable(),
 
   engine: z.string().nullable(),
   engine_model_code: z.string().nullable(),
@@ -77,6 +84,7 @@ export const emptyVehicleFormValues: VehicleFormValues = {
   is_recommended: false,
   is_new_arrival: false,
   price: 0,
+  total_price: null,
   engine: null,
   engine_model_code: null,
   displacement_cc: null,

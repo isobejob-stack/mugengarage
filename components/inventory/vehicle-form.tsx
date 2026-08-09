@@ -267,12 +267,28 @@ export function VehicleForm({
             </select>
           </Field>
 
-          <Field label="価格（円）" error={errors.price?.message}>
+          <Field label="車両本体価格（円）" error={errors.price?.message}>
             <input
               type="number"
               className="input"
               {...register("price", {
                 setValueAs: (v) => (v === "" ? 0 : Number(v)),
+              })}
+            />
+          </Field>
+
+          {/* 購入検討者が最終的に比較するのは支払総額のため、本体価格と並べて登録できるようにする。
+              諸費用が未確定の段階では空欄のままにでき、その場合は公開サイトに表示されない。 */}
+          <Field
+            label="支払総額（円・諸費用込み）"
+            error={errors.total_price?.message}
+          >
+            <input
+              type="number"
+              className="input"
+              placeholder="未定の場合は空欄"
+              {...register("total_price", {
+                setValueAs: (v) => (v === "" ? null : Number(v)),
               })}
             />
           </Field>

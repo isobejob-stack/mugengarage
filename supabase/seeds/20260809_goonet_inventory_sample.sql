@@ -11,9 +11,8 @@
 --   2. テスト投入のため、あとからまとめて削除できるようにするため
 -- 取り消したい場合は、このファイル末尾のコメントにある削除用SQLを実行する。
 --
--- 【価格の扱い】price には「車両本体価格」を入れている（中古車サイトの慣例）。
--- 「支払総額」は sales_comment に併記する。両方を1つの数値にはできないため、
--- 表示上どちらを主にするかは運用で判断できるようにしてある。
+-- 【価格の扱い】price に車両本体価格、total_price に支払総額（諸費用込み）を入れる。
+-- 公開サイトは支払総額が登録されていればそちらを主役に表示し、本体価格を併記する。
 --
 -- 【車検の扱い】shaken_expiry（車検満了日）は日付型だが、掲載情報では
 -- 「2027年2月」のように年月までしか分からない、または「車検整備付」「なし」という
@@ -46,127 +45,127 @@ on conflict (slug) do nothing;
 -- ── 車両 ────────────────────────────────────────────────
 insert into vehicles (
   id, manufacturer_id, model_id, status, is_new_arrival,
-  price, displacement_cc, model_year, mileage_km, accident_history,
+  price, total_price, displacement_cc, model_year, mileage_km, accident_history,
   sales_comment, other_notes, display_order
 ) values
   ('c0000000-0000-4000-8000-000000000001',
    (select id from manufacturers where name = 'ジャガー'),
    (select id from models where slug = 'xj'),
    'published', true,
-   590000, 4200, 2007, 187000, false,
-   'XJ 4.2 ソブリンL ロングボディー。支払総額73万円（税込・諸費用14万円）。法定整備付・保証付（1ヶ月/1000km）。',
+   590000, 730000, 4200, 2007, 187000, false,
+   'XJ 4.2 ソブリンL ロングボディー。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 2027年2月（満了日は車検証で要確認）', 1),
 
   ('c0000000-0000-4000-8000-000000000002',
    (select id from manufacturers where name = 'ジャガー'),
    (select id from models where slug = 'xj'),
    'published', false,
-   880000, 3500, 2004, 88000, false,
-   'XJ8 3.5。支払総額115万円（税込・諸費用27万円）。法定整備付・保証付（1ヶ月/1000km）。',
+   880000, 1150000, 3500, 2004, 88000, false,
+   'XJ8 3.5。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 2),
 
   ('c0000000-0000-4000-8000-000000000003',
    (select id from manufacturers where name = 'ジャガー'),
    (select id from models where slug = 'x-type'),
    'published', false,
-   390000, 2100, 2008, 64000, true,
-   'Xタイプ 2.0 エグゼクティブ。支払総額55万円（税込・諸費用16万円）。法定整備付・保証付（1ヶ月/1000km）。',
+   390000, 550000, 2100, 2008, 64000, true,
+   'Xタイプ 2.0 エグゼクティブ。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 2027年5月（満了日は車検証で要確認）／修復歴あり', 3),
 
   ('c0000000-0000-4000-8000-000000000004',
    (select id from manufacturers where name = 'ジャガー'),
    (select id from models where slug = 'xj'),
    'published', false,
-   2980000, 4200, 2008, 52000, false,
-   'XJ ポートフォリオ。支払総額315万円（税込・諸費用17万円）。法定整備付・保証付（1ヶ月/1000km）。',
+   2980000, 3150000, 4200, 2008, 52000, false,
+   'XJ ポートフォリオ。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 4),
 
   ('c0000000-0000-4000-8000-000000000005',
    (select id from manufacturers where name = 'ジャガー'),
    (select id from models where slug = 'xj'),
    'published', false,
-   980000, 3500, 2003, 75000, false,
-   'XJ8 3.5。支払総額123万円（税込・諸費用25万円）。法定整備付・保証付（1ヶ月/1000km）。',
+   980000, 1230000, 3500, 2003, 75000, false,
+   'XJ8 3.5。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 5),
 
   ('c0000000-0000-4000-8000-000000000006',
    (select id from manufacturers where name = 'ジャガー'),
    (select id from models where slug = 'xj'),
    'published', false,
-   1580000, 3200, 1995, 49000, false,
-   'XJ6 3.2。支払総額179万円（税込・諸費用21万円）。法定整備付・保証付（1ヶ月/1000km）。',
+   1580000, 1790000, 3200, 1995, 49000, false,
+   'XJ6 3.2。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 6),
 
   ('c0000000-0000-4000-8000-000000000007',
    (select id from manufacturers where name = 'ジャガー'),
    (select id from models where slug = 'xj'),
    'published', false,
-   3280000, 4200, 1983, 86000, false,
-   'XJ6 4.2 シリーズII。支払総額349万円（税込・諸費用21万円）。法定整備付・保証付（1ヶ月/1000km）。',
+   3280000, 3490000, 4200, 1983, 86000, false,
+   'XJ6 4.2 シリーズII。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 7),
 
   ('c0000000-0000-4000-8000-000000000008',
    (select id from manufacturers where name = 'ジャガー'),
    (select id from models where slug = 'xj'),
    'published', false,
-   980000, 3200, 1998, 59000, false,
-   'XJ エグゼクティブ 3.2 V8。支払総額123万円（税込・諸費用25万円）。法定整備付・保証付（1ヶ月/1000km）。',
+   980000, 1230000, 3200, 1998, 59000, false,
+   'XJ エグゼクティブ 3.2 V8。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 8),
 
   ('c0000000-0000-4000-8000-000000000009',
    (select id from manufacturers where name = 'ジャガー'),
    (select id from models where slug = 'xj'),
    'published', false,
-   2380000, 3200, 1993, 68000, false,
-   'XJ6 3.2。支払総額253万円（税込・諸費用15万円）。法定整備付・保証付（1ヶ月/1000km）。',
+   2380000, 2530000, 3200, 1993, 68000, false,
+   'XJ6 3.2。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 9),
 
   ('c0000000-0000-4000-8000-000000000010',
    (select id from manufacturers where name = 'ジャガー'),
    (select id from models where slug = 's-type'),
    'published', false,
-   390000, 3000, 2004, 87000, false,
-   'Sタイプ 3.0 V6。支払総額63万円（税込・諸費用24万円）。法定整備付・保証付（1ヶ月/1000km）。',
+   390000, 630000, 3000, 2004, 87000, false,
+   'Sタイプ 3.0 V6。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 10),
 
   ('c0000000-0000-4000-8000-000000000011',
    (select id from manufacturers where name = 'デイムラー'),
    (select id from models where slug = 'double-six'),
    'published', false,
-   4350000, 5300, 1990, 59000, false,
-   'デイムラー ダブルシックス。支払総額455万円（税込・諸費用20万円）。法定整備付・保証付（1ヶ月/1000km）。',
+   4350000, 4550000, 5300, 1990, 59000, false,
+   'デイムラー ダブルシックス。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 11),
 
   ('c0000000-0000-4000-8000-000000000012',
    (select id from manufacturers where name = 'ジャガー'),
    (select id from models where slug = 'xj'),
    'published', false,
-   1780000, 4000, 1995, 100000, false,
-   'XJR 4.0 スーパーチャージド。支払総額197万円（税込・諸費用19万円）。法定整備付・保証付（1ヶ月/1000km）。',
+   1780000, 1970000, 4000, 1995, 100000, false,
+   'XJR 4.0 スーパーチャージド。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 12),
 
   ('c0000000-0000-4000-8000-000000000013',
    (select id from manufacturers where name = 'ジャガー'),
    (select id from models where slug = 'xj'),
    'published', false,
-   1980000, 3200, 1994, 77000, false,
-   'XJ6 3.2。支払総額215万円（税込・諸費用17万円）。法定整備付・保証付（1ヶ月/1000km）。',
+   1980000, 2150000, 3200, 1994, 77000, false,
+   'XJ6 3.2。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: なし', 13),
 
   ('c0000000-0000-4000-8000-000000000014',
    (select id from manufacturers where name = 'ジャガー'),
    (select id from models where slug = 'xj-s'),
    'published', false,
-   3980000, 4000, 2002, 150000, false,
-   'XJ-S 4.0 コンバーチブル。支払総額423万円（税込・諸費用25万円）。法定整備付・保証付（1ヶ月/1000km）。',
+   3980000, 4230000, 4000, 2002, 150000, false,
+   'XJ-S 4.0 コンバーチブル。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付／年式は掲載情報のまま登録（XJ-Sの生産は1996年までのため、年式または車種名の確認を推奨）', 14),
 
   ('c0000000-0000-4000-8000-000000000015',
    (select id from manufacturers where name = 'デイムラー'),
    (select id from models where slug = 'double-six'),
    'published', false,
-   2980000, 6000, 1995, 66000, false,
-   'デイムラー ダブルシックス。支払総額316万円（税込・諸費用18万円）。法定整備付・保証付（1ヶ月/1000km）。',
+   2980000, 3160000, 6000, 1995, 66000, false,
+   'デイムラー ダブルシックス。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 15)
 on conflict (id) do nothing;
 
