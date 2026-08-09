@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { siteNav } from "@/lib/site-config";
+import { SiteNav } from "@/components/layout/site-nav";
 import { getSiteSettings } from "@/lib/settings/queries";
 import { Button } from "@/components/ui/button";
 
@@ -15,17 +15,7 @@ export async function SiteHeader() {
           M-GARAGE
         </Link>
 
-        <nav className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-          {siteNav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-charcoal-800 transition-colors duration-200 ease-standard hover:text-primary-700 hover:underline"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <SiteNav />
 
         <div className="flex items-center gap-3">
           <Button href="/favorites" variant="outline" size="md">

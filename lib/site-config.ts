@@ -4,13 +4,50 @@
 // 「M-GARAGE Platform」は開発側から見たシステム名であり、顧客向けの表記ではない。
 export const SITE_NAME = "エムガレージ";
 
-export const siteNav = [
+export type SiteNavItem = {
+  label: string;
+  href: string;
+  description?: string;
+  /** 下位項目。指定するとヘッダーでは展開メニューになる */
+  children?: ReadonlyArray<{
+    label: string;
+    href: string;
+    description: string;
+  }>;
+};
+
+// グローバルナビゲーション。
+//
+// 以前は7項目すべてが同列に並んでおり、うち3つ（図鑑・年表・ライブラリ）が
+// 「Jaguarを知る」ための読み物だった。店の主目的である在庫車両と、
+// 読み物コンテンツが同じ重みで並ぶため、知識系に比重が寄って見えていた。
+// 読み物を「Jaguarを知る」配下にまとめ、第一階層を5項目に整理する。
+export const siteNav: ReadonlyArray<SiteNavItem> = [
   { label: "在庫車両", href: "/vehicles" },
-  { label: "図鑑", href: "/encyclopedia" },
-  { label: "年表", href: "/timeline" },
-  { label: "ライブラリ", href: "/library" },
-  { label: "ブログ", href: "/blog" },
+  {
+    label: "Jaguarを知る",
+    // 見出し自体もリンクにする。まず図鑑へ入るのが自然な導線のため図鑑を代表とする。
+    href: "/encyclopedia",
+    children: [
+      {
+        label: "Jaguar図鑑",
+        href: "/encyclopedia",
+        description: "ブランド・シリーズ・車種・世代を体系的に紹介",
+      },
+      {
+        label: "Jaguar年表",
+        href: "/timeline",
+        description: "ブランドの歴史を時系列でたどる",
+      },
+      {
+        label: "ライブラリ",
+        href: "/library",
+        description: "Jaguarに関する知識を辞典形式で",
+      },
+    ],
+  },
   { label: "整備実績", href: "/maintenance-records" },
+  { label: "ブログ", href: "/blog" },
   { label: "お問い合わせ", href: "/contact" },
 ] as const;
 

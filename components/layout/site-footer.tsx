@@ -70,6 +70,20 @@ export async function SiteFooter() {
           )}
         </div>
 
+        {/* 管理画面への入口。店主が公開サイトを見ていて「ここを直したい」と思ったときに、
+            URLを手入力せずそのまま管理画面へ移れるようにする。
+            来店客の目にも触れる位置のため、ヘッダーではなくフッターの控えめな扱いとする。
+            未ログインでアクセスしてもproxy.tsがログイン画面へリダイレクトするため、
+            リンクが見えること自体は権限上の問題にならない。 */}
+        <div className="mt-6">
+          <Link
+            href="/admin"
+            className="inline-flex min-h-11 items-center rounded-lg px-2 text-foreground-muted transition-colors duration-200 ease-standard hover:text-primary-700 hover:underline active:text-primary-800 motion-reduce:transition-none"
+          >
+            管理画面にログイン
+          </Link>
+        </div>
+
         {/* 公式SNS・掲載媒体への導線。既にInstagram等で発信している実績があり、
             サイトから相互にたどれることで、来訪者が実店舗の活動を確認できる
             （高額商材では「実在する店か」の確認が購買判断に直結するため）。 */}

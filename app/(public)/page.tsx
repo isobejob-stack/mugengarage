@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { listPublicVehicles, getLeadVehiclePhotoPaths } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
 import { getSiteAssetPublicUrl } from "@/lib/settings/storage";
-import { SITE_URL } from "@/lib/site-config";
+import { SITE_URL, siteNav } from "@/lib/site-config";
 import { getSiteSettings } from "@/lib/settings/queries";
 import { LineConsultationMenu } from "@/components/layout/line-consultation-menu";
 import { Button } from "@/components/ui/button";
@@ -23,23 +22,11 @@ export const metadata: Metadata = {
   alternates: { canonical: SITE_URL },
 };
 
-const ENCYCLOPEDIA_LINKS = [
-  {
-    href: "/encyclopedia",
-    title: "Jaguar図鑑",
-    description: "ブランド・シリーズ・車種・世代を体系的に紹介",
-  },
-  {
-    href: "/timeline",
-    title: "Jaguar年表",
-    description: "ブランドの歴史を時系列でたどる",
-  },
-  {
-    href: "/library",
-    title: "ライブラリ",
-    description: "Jaguarに関する知識を辞典形式で",
-  },
-] as const;
+const TOP_PAGE_VEHICLE_LIMIT = 9;
+
+// 「Jaguarを知る」配下の読み物。ヘッダーのナビゲーションと同じ定義を使い、
+// トップページとヘッダーで項目がずれないようにする（lib/site-config.ts）。
+const KNOWLEDGE_NAV = siteNav.find((item) => item.label === "Jaguarを知る");
 
 // SCR-PUB-001: トップページ（FR-INV-005, FR-LINE-001, FR-SEO-001）
 export default async function Page() {
@@ -47,7 +34,11 @@ export default async function Page() {
     listPublicVehicles(),
     getSiteSettings(),
   ]);
-  const featuredVehicles = vehicles.slice(0, 3);
+  // トップに出す在庫の上限。3カラムのグリッドがちょうど3行で埋まる9台とする
+  // （10台前後で打ち切る想定だが、9なら最終行に1台だけ余るような欠けが出ない）。
+  // これを超える場合は「すべて見る」ボタンで在庫一覧へ送る。
+  const featuredVehicles = vehicles.slice(0, TOP_PAGE_VEHICLE_LIMIT);
+  const hasMoreVehicles = vehicles.length > TOP_PAGE_VEHICLE_LIMIT;
 
   // 在庫車両カードのサムネイル用に、トップ3件分のみ先頭写真を1クエリでまとめて取得する
   const leadPhotoPaths = await getLeadVehiclePhotoPaths(
@@ -134,14 +125,14 @@ export default async function Page() {
 
       <div className="mx-auto max-w-5xl px-4">
       <section className="mt-10">
-        <div className="flex items-center justify-between">
-          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
-            在庫車両
-          </h2>
-          <Link href="/vehicles" className="text-sm hover:underline">
-            すべて見る →
-          </Link>
-        </div>
+        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+          在庫車両
+        </h2>
+        {vehicles.length > 0 && (
+          <p className="mt-2 text-foreground-muted">
+            現在{vehicles.length}台を掲載しています。
+          </p>
+        )}
         {featuredVehicles.length === 0 ? (
           <p className="mt-4 text-foreground-muted">
             現在公開中の車両はありません。
@@ -178,6 +169,17 @@ export default async function Page() {
             )}
           </ul>
         )}
+
+        {/* 掲載台数が上限を超えたら、続きは在庫一覧へ送る。
+            従来は小さな文字リンクだったため見落としやすく、スマートフォンでは
+            タップ領域も足りていなかった。ボタンとして明示する。 */}
+        {hasMoreVehicles && (
+          <div className="mt-6 flex justify-center">
+            <Button href="/vehicles" variant="outline" size="lg">
+              在庫車両をすべて見る（{vehicles.length}台）
+            </Button>
+          </div>
+        )}
       </section>
 
       {/* FR-LINE-002: 相談カテゴリ表示（購入／修理／売却／部品／Jaguar全般／カーライフ相談） */}
@@ -185,21 +187,26 @@ export default async function Page() {
         <LineConsultationMenu lineUrl={settings.line_url} />
       </div>
 
-      <section className="mt-10">
-        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
-          Jaguarを知る
-        </h2>
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {ENCYCLOPEDIA_LINKS.map((item) => (
-            <Card key={item.href} href={item.href}>
-              <CardBody>
-                <CardTitle>{item.title}</CardTitle>
-                <CardMeta>{item.description}</CardMeta>
-              </CardBody>
-            </Card>
-          ))}
-        </div>
-      </section>
+      {KNOWLEDGE_NAV?.children && (
+        <section className="mt-10">
+          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+            {KNOWLEDGE_NAV.label}
+          </h2>
+          <p className="mt-2 text-foreground-muted">
+            クラシックJaguarをより深く知るための読み物です。
+          </p>
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {KNOWLEDGE_NAV.children.map((item) => (
+              <Card key={item.href} href={item.href}>
+                <CardBody>
+                  <CardTitle>{item.label}</CardTitle>
+                  <CardMeta>{item.description}</CardMeta>
+                </CardBody>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
       </div>
     </main>
   );
