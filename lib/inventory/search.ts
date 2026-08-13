@@ -15,9 +15,6 @@ export interface VehicleSearchFilters {
   modelYearMax?: number;
   mileageMax?: number;
   transmission?: string;
-  // 車検満了日の範囲（例：「〇年〇月以降」）。model_year帯の実装パターンを踏襲
-  shakenExpiryFrom?: string;
-  shakenExpiryTo?: string;
   displacementMin?: number;
   displacementMax?: number;
   exteriorColor?: string;
@@ -145,13 +142,6 @@ export async function searchPublicVehicles(
   }
   if (filters.transmission) {
     query = query.eq("transmission", filters.transmission);
-  }
-  // 車検満了日の範囲（「〇年〇月以降」＝満了日がこの日付以降＝残り期間が長い車両）
-  if (filters.shakenExpiryFrom) {
-    query = query.gte("shaken_expiry", filters.shakenExpiryFrom);
-  }
-  if (filters.shakenExpiryTo) {
-    query = query.lte("shaken_expiry", filters.shakenExpiryTo);
   }
   if (filters.displacementMin !== undefined) {
     query = query.gte("displacement_cc", filters.displacementMin);

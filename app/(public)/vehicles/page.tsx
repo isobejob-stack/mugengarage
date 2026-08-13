@@ -21,6 +21,15 @@ import {
 import { VehicleFeatureBadges } from "@/components/ui/status-badge";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { VehicleCardPrice } from "@/components/inventory/vehicle-price";
+import {
+  FilterSection,
+  SelectField,
+  RangeSelectField,
+  PRICE_OPTIONS,
+  YEAR_OPTIONS,
+  MILEAGE_OPTIONS,
+  DISPLACEMENT_OPTIONS,
+} from "@/components/inventory/vehicle-search-fields";
 
 type SearchParams = Record<string, string | undefined>;
 
@@ -28,21 +37,6 @@ function toNumber(value: string | undefined) {
   if (!value) return undefined;
   const n = Number(value);
   return Number.isFinite(n) ? n : undefined;
-}
-
-// <input type="month">の "YYYY-MM" を車検満了日の比較用に日付文字列へ変換する
-function monthInputToDate(value: string | undefined, endOfMonth: boolean) {
-  if (!value) return undefined;
-  const match = /^(\d{4})-(\d{2})$/.exec(value);
-  if (!match) return undefined;
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  if (!endOfMonth) {
-    return `${match[1]}-${match[2]}-01`;
-  }
-  // その月の末日（翌月0日目）
-  const lastDay = new Date(year, month, 0).getDate();
-  return `${match[1]}-${match[2]}-${String(lastDay).padStart(2, "0")}`;
 }
 
 function buildQueryString(params: SearchParams, overrides: SearchParams) {
@@ -84,8 +78,6 @@ export default async function Page({
     modelYearMax: toNumber(params.year_max),
     mileageMax: toNumber(params.mileage_max),
     transmission: params.transmission || undefined,
-    shakenExpiryFrom: monthInputToDate(params.shaken_from, false),
-    shakenExpiryTo: monthInputToDate(params.shaken_to, true),
     displacementMin: toNumber(params.displacement_min),
     displacementMax: toNumber(params.displacement_max),
     exteriorColor: params.exterior_color || undefined,
@@ -99,8 +91,6 @@ export default async function Page({
       params.generation ||
       params.grade ||
       params.drivetrain ||
-      params.shaken_from ||
-      params.shaken_to ||
       params.displacement_min ||
       params.displacement_max ||
       params.exterior_color,
@@ -134,237 +124,108 @@ export default async function Page({
         method="get"
         className="mt-6 flex flex-col gap-4 rounded-md border border-neutral-200 p-4"
       >
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <label className="block">
-            <span className="text-sm font-medium">車種</span>
-            <select
-              name="model"
-              defaultValue={params.model ?? ""}
-              className="input mt-1"
-            >
-              <option value="">指定なし</option>
-              {facets.models.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="block">
-            <span className="text-sm font-medium">ミッション</span>
-            <select
-              name="transmission"
-              defaultValue={params.transmission ?? ""}
-              className="input mt-1"
-            >
-              <option value="">指定なし</option>
-              {facets.transmissions.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="block">
-            <span className="text-sm font-medium">並び替え</span>
-            <select
-              name="sort"
-              defaultValue={params.sort ?? ""}
-              className="input mt-1"
-            >
-              <option value="">おすすめ順</option>
-              <option value="new">新着順</option>
-              <option value="price_asc">価格が安い順</option>
-              <option value="price_desc">価格が高い順</option>
-            </select>
-          </label>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <label className="block">
-            <span className="text-sm font-medium">価格（下限・円）</span>
-            <input
-              type="number"
-              name="price_min"
-              defaultValue={params.price_min ?? ""}
-              className="input mt-1"
-            />
-          </label>
-          <label className="block">
-            <span className="text-sm font-medium">価格（上限・円）</span>
-            <input
-              type="number"
-              name="price_max"
-              defaultValue={params.price_max ?? ""}
-              className="input mt-1"
-            />
-          </label>
-          <label className="block">
-            <span className="text-sm font-medium">年式（下限）</span>
-            <input
-              type="number"
-              name="year_min"
-              defaultValue={params.year_min ?? ""}
-              className="input mt-1"
-            />
-          </label>
-          <label className="block">
-            <span className="text-sm font-medium">年式（上限）</span>
-            <input
-              type="number"
-              name="year_max"
-              defaultValue={params.year_max ?? ""}
-              className="input mt-1"
-            />
-          </label>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-4">
-          <label className="block">
-            <span className="text-sm font-medium">走行距離（上限・km）</span>
-            <input
-              type="number"
-              name="mileage_max"
-              defaultValue={params.mileage_max ?? ""}
-              className="input mt-1"
-            />
-          </label>
-        </div>
-
+        <FilterSection title="条件を選ぶ">
+          <SelectField
+            label="車種"
+            name="model"
+            defaultValue={params.model}
+            options={facets.models.map((m) => ({ value: m.id, label: m.name }))}
+          />
+          <SelectField
+            label="ミッション"
+            name="transmission"
+            defaultValue={params.transmission}
+            options={facets.transmissions.map((t) => ({ value: t, label: t }))}
+          />
+          <RangeSelectField
+            label="車両本体価格"
+            fromName="price_min"
+            toName="price_max"
+            fromValue={params.price_min}
+            toValue={params.price_max}
+            options={PRICE_OPTIONS}
+          />
+          <RangeSelectField
+            label="年式"
+            fromName="year_min"
+            toName="year_max"
+            fromValue={params.year_min}
+            toValue={params.year_max}
+            options={YEAR_OPTIONS}
+          />
+          <SelectField
+            label="走行距離"
+            name="mileage_max"
+            defaultValue={params.mileage_max}
+            options={MILEAGE_OPTIONS}
+            placeholder="上限なし"
+          />
+          <SelectField
+            label="並び替え"
+            name="sort"
+            defaultValue={params.sort}
+            options={[
+              { value: "new", label: "新着順" },
+              { value: "price_asc", label: "価格が安い順" },
+              { value: "price_desc", label: "価格が高い順" },
+            ]}
+            placeholder="おすすめ順"
+          />
+        </FilterSection>
         {/* FR-SRCH-001: シリーズ・世代・グレード〜駆動方式までの詳細条件（画面が煩雑にならないよう折りたたみ） */}
         <details
           className="rounded-md border border-neutral-200 p-4"
           open={hasAdvancedFilters}
         >
-          <summary className="min-h-11 cursor-pointer py-2 text-base font-medium">
+          <summary className="min-h-11 cursor-pointer py-2 text-base font-medium text-charcoal-900">
             詳細検索（車種階層・車検・エンジン諸元・色ほか）
           </summary>
 
-          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <label className="block">
-              <span className="text-sm font-medium">シリーズ</span>
-              <select
+          <div className="mt-4 flex flex-col gap-6">
+            <FilterSection title="車種の階層">
+              <SelectField
+                label="シリーズ"
                 name="series"
-                defaultValue={params.series ?? ""}
-                className="input mt-1"
-              >
-                <option value="">指定なし</option>
-                {facets.series.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium">世代</span>
-              <select
+                defaultValue={params.series}
+                options={facets.series.map((x) => ({ value: x.id, label: x.name }))}
+              />
+              <SelectField
+                label="世代"
                 name="generation"
-                defaultValue={params.generation ?? ""}
-                className="input mt-1"
-              >
-                <option value="">指定なし</option>
-                {facets.generations.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium">グレード</span>
-              <select
+                defaultValue={params.generation}
+                options={facets.generations.map((x) => ({ value: x.id, label: x.name }))}
+              />
+              <SelectField
+                label="グレード"
                 name="grade"
-                defaultValue={params.grade ?? ""}
-                className="input mt-1"
-              >
-                <option value="">指定なし</option>
-                {facets.grades.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium">駆動方式</span>
-              <select
+                defaultValue={params.grade}
+                options={facets.grades.map((x) => ({ value: x.id, label: x.name }))}
+              />
+            </FilterSection>
+
+            <FilterSection title="装備・仕様">
+              <RangeSelectField
+                label="排気量"
+                fromName="displacement_min"
+                toName="displacement_max"
+                fromValue={params.displacement_min}
+                toValue={params.displacement_max}
+                options={DISPLACEMENT_OPTIONS}
+              />
+              <SelectField
+                label="駆動方式"
                 name="drivetrain"
-                defaultValue={params.drivetrain ?? ""}
-                className="input mt-1"
-              >
-                <option value="">指定なし</option>
-                {facets.drivetrains.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <label className="block">
-              <span className="text-sm font-medium">車検残（この年月以降）</span>
-              <input
-                type="month"
-                name="shaken_from"
-                defaultValue={params.shaken_from ?? ""}
-                className="input mt-1"
+                defaultValue={params.drivetrain}
+                options={facets.drivetrains.map((d) => ({ value: d, label: d }))}
               />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium">車検残（この年月以前）</span>
-              <input
-                type="month"
-                name="shaken_to"
-                defaultValue={params.shaken_to ?? ""}
-                className="input mt-1"
-              />
-            </label>
-          </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <label className="block">
-              <span className="text-sm font-medium">排気量（下限・cc）</span>
-              <input
-                type="number"
-                name="displacement_min"
-                defaultValue={params.displacement_min ?? ""}
-                className="input mt-1"
-              />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium">排気量（上限・cc）</span>
-              <input
-                type="number"
-                name="displacement_max"
-                defaultValue={params.displacement_max ?? ""}
-                className="input mt-1"
-              />
-            </label>
-          </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <label className="block">
-              <span className="text-sm font-medium">外装色</span>
-              <select
+              <SelectField
+                label="外装色"
                 name="exterior_color"
-                defaultValue={params.exterior_color ?? ""}
-                className="input mt-1"
-              >
-                <option value="">指定なし</option>
-                {facets.exteriorColors.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </label>
+                defaultValue={params.exterior_color}
+                options={facets.exteriorColors.map((c) => ({ value: c, label: c }))}
+              />
+            </FilterSection>
           </div>
-
         </details>
 
         <div className="flex gap-3">
