@@ -293,6 +293,63 @@ export function VehicleForm({
             />
           </Field>
 
+          {/* 中古車掲載サイトで標準的に載っている取引条件（docs/tasks/ISSUE-006）。
+              これまで持てておらず、掲載情報を文章で書くしかなかった項目。 */}
+          <Field label="車検">
+            <select className="input" {...register("shaken_status")}>
+              <option value="">未設定</option>
+              <option value="inspection_included">車検整備付</option>
+              <option value="valid_until">満了日あり（下の欄に入力）</option>
+              <option value="none">車検なし</option>
+            </select>
+          </Field>
+
+          <Field label="法定整備">
+            <select className="input" {...register("legal_maintenance")}>
+              <option value="">未設定</option>
+              <option value="included">整備付</option>
+              <option value="separate">別途</option>
+              <option value="none">なし</option>
+            </select>
+          </Field>
+
+          <Field label="保証">
+            <select className="input" {...register("warranty_type")}>
+              <option value="">未設定</option>
+              <option value="with">保証付</option>
+              <option value="without">保証なし</option>
+            </select>
+          </Field>
+
+          <Field label="保証期間（ヶ月）">
+            <input
+              type="number"
+              className="input"
+              {...register("warranty_months", {
+                setValueAs: (v) => (v === "" ? null : Number(v)),
+              })}
+            />
+          </Field>
+
+          <Field label="保証距離（km）">
+            <input
+              type="number"
+              className="input"
+              {...register("warranty_km", {
+                setValueAs: (v) => (v === "" ? null : Number(v)),
+              })}
+            />
+          </Field>
+
+          {/* 輸入車のため、ハンドル位置は購入判断を大きく左右する */}
+          <Field label="ハンドル">
+            <select className="input" {...register("steering_side")}>
+              <option value="">未設定</option>
+              <option value="right">右ハンドル</option>
+              <option value="left">左ハンドル</option>
+            </select>
+          </Field>
+
           <Field label="年式">
             <input
               type="number"

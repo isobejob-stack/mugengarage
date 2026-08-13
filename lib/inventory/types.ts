@@ -57,6 +57,22 @@ export interface Vehicle extends BaseEntity, SoftDeletable {
   is_new_arrival: boolean;
   price: number;
   total_price: number | null;
+  // 取りうる値はDBのCHECK制約と揃える（supabase/migrations/20260813180000）。
+  // string で持つとフォームの列挙型に代入できず、値の取り違えも検出できないため。
+  shaken_status: "inspection_included" | "valid_until" | "none" | null;
+  legal_maintenance: "included" | "separate" | "none" | null;
+  warranty_type: "with" | "without" | null;
+  warranty_months: number | null;
+  warranty_km: number | null;
+  recycle_fee: "included" | "separate" | "none" | null;
+  steering_side: "right" | "left" | null;
+  fuel_type: string | null;
+  capacity: number | null;
+  door_count: number | null;
+  has_record_book: boolean | null;
+  is_non_smoking: boolean | null;
+  model_code: string | null;
+  location_text: string | null;
   engine: string | null;
   engine_model_code: string | null;
   displacement_cc: number | null;

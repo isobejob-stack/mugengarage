@@ -46,6 +46,7 @@ on conflict (slug) do nothing;
 insert into vehicles (
   id, manufacturer_id, model_id, status, is_new_arrival,
   price, total_price, displacement_cc, model_year, mileage_km, accident_history,
+  shaken_status, shaken_expiry, legal_maintenance, warranty_type, warranty_months, warranty_km,
   sales_comment, other_notes, display_order
 ) values
   ('c0000000-0000-4000-8000-000000000001',
@@ -53,6 +54,7 @@ insert into vehicles (
    (select id from models where slug = 'xj'),
    'published', true,
    590000, 730000, 4200, 2007, 187000, false,
+   , +2027-02-01+, 'included', 'with', 1, 1000,
    'XJ 4.2 ソブリンL ロングボディー。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 2027年2月（満了日は車検証で要確認）', 1),
 
@@ -61,6 +63,7 @@ insert into vehicles (
    (select id from models where slug = 'xj'),
    'published', false,
    880000, 1150000, 3500, 2004, 88000, false,
+   , null, 'included', 'with', 1, 1000,
    'XJ8 3.5。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 2),
 
@@ -69,6 +72,7 @@ insert into vehicles (
    (select id from models where slug = 'x-type'),
    'published', false,
    390000, 550000, 2100, 2008, 64000, true,
+   , +2027-05-01+, 'included', 'with', 1, 1000,
    'Xタイプ 2.0 エグゼクティブ。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 2027年5月（満了日は車検証で要確認）／修復歴あり', 3),
 
@@ -77,6 +81,7 @@ insert into vehicles (
    (select id from models where slug = 'xj'),
    'published', false,
    2980000, 3150000, 4200, 2008, 52000, false,
+   , null, 'included', 'with', 1, 1000,
    'XJ ポートフォリオ。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 4),
 
@@ -85,6 +90,7 @@ insert into vehicles (
    (select id from models where slug = 'xj'),
    'published', false,
    980000, 1230000, 3500, 2003, 75000, false,
+   , null, 'included', 'with', 1, 1000,
    'XJ8 3.5。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 5),
 
@@ -93,6 +99,7 @@ insert into vehicles (
    (select id from models where slug = 'xj'),
    'published', false,
    1580000, 1790000, 3200, 1995, 49000, false,
+   , null, 'included', 'with', 1, 1000,
    'XJ6 3.2。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 6),
 
@@ -101,6 +108,7 @@ insert into vehicles (
    (select id from models where slug = 'xj'),
    'published', false,
    3280000, 3490000, 4200, 1983, 86000, false,
+   , null, 'included', 'with', 1, 1000,
    'XJ6 4.2 シリーズII。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 7),
 
@@ -109,6 +117,7 @@ insert into vehicles (
    (select id from models where slug = 'xj'),
    'published', false,
    980000, 1230000, 3200, 1998, 59000, false,
+   , null, 'included', 'with', 1, 1000,
    'XJ エグゼクティブ 3.2 V8。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 8),
 
@@ -117,6 +126,7 @@ insert into vehicles (
    (select id from models where slug = 'xj'),
    'published', false,
    2380000, 2530000, 3200, 1993, 68000, false,
+   , null, 'included', 'with', 1, 1000,
    'XJ6 3.2。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 9),
 
@@ -125,6 +135,7 @@ insert into vehicles (
    (select id from models where slug = 's-type'),
    'published', false,
    390000, 630000, 3000, 2004, 87000, false,
+   , null, 'included', 'with', 1, 1000,
    'Sタイプ 3.0 V6。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 10),
 
@@ -133,6 +144,7 @@ insert into vehicles (
    (select id from models where slug = 'double-six'),
    'published', false,
    4350000, 4550000, 5300, 1990, 59000, false,
+   , null, 'included', 'with', 1, 1000,
    'デイムラー ダブルシックス。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 11),
 
@@ -141,6 +153,7 @@ insert into vehicles (
    (select id from models where slug = 'xj'),
    'published', false,
    1780000, 1970000, 4000, 1995, 100000, false,
+   , null, 'included', 'with', 1, 1000,
    'XJR 4.0 スーパーチャージド。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 12),
 
@@ -149,6 +162,7 @@ insert into vehicles (
    (select id from models where slug = 'xj'),
    'published', false,
    1980000, 2150000, 3200, 1994, 77000, false,
+   , null, 'included', 'with', 1, 1000,
    'XJ6 3.2。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: なし', 13),
 
@@ -157,6 +171,7 @@ insert into vehicles (
    (select id from models where slug = 'xj-s'),
    'published', false,
    3980000, 4230000, 4000, 2002, 150000, false,
+   , null, 'included', 'with', 1, 1000,
    'XJ-S 4.0 コンバーチブル。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付／年式は掲載情報のまま登録（XJ-Sの生産は1996年までのため、年式または車種名の確認を推奨）', 14),
 
@@ -165,6 +180,7 @@ insert into vehicles (
    (select id from models where slug = 'double-six'),
    'published', false,
    2980000, 3160000, 6000, 1995, 66000, false,
+   , null, 'included', 'with', 1, 1000,
    'デイムラー ダブルシックス。法定整備付・保証付（1ヶ月/1000km）。',
    '車検: 車検整備付', 15)
 on conflict (id) do nothing;

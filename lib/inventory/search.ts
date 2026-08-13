@@ -107,7 +107,7 @@ export async function searchPublicVehicles(
   let query = supabase
     .from("vehicles")
     .select(
-      "id, price, total_price, model_year, mileage_km, status, transmission, is_recommended, is_new_arrival, manufacturers(name), models(name)",
+      "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, status, transmission, is_recommended, is_new_arrival, manufacturers(name), models(name)",
       { count: "exact" },
     )
     .eq("status", "published")
@@ -181,6 +181,9 @@ export async function searchPublicVehicles(
     total_price: number | null;
     model_year: number | null;
     mileage_km: number | null;
+    shaken_status: string | null;
+    shaken_expiry: string | null;
+    accident_history: boolean | null;
     status: string;
     transmission: string | null;
     is_recommended: boolean;

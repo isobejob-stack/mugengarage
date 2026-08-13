@@ -16,7 +16,6 @@ import {
   CardImage,
   CardBody,
   CardTitle,
-  CardMeta,
 } from "@/components/ui/card";
 import { VehicleFeatureBadges } from "@/components/ui/status-badge";
 import { buildPageMetadata } from "@/lib/seo/metadata";
@@ -30,6 +29,7 @@ import {
   MILEAGE_OPTIONS,
   DISPLACEMENT_OPTIONS,
 } from "@/components/inventory/vehicle-search-fields";
+import { VehicleCardSpecs } from "@/components/inventory/vehicle-card-specs";
 
 type SearchParams = Record<string, string | undefined>;
 
@@ -261,14 +261,15 @@ export default async function Page({
                   <CardBody>
                     <CardTitle>
                       {v.manufacturers?.name} {v.models?.name}
-                      {v.model_year ? `（${v.model_year}年）` : ""}
                     </CardTitle>
-                    {v.mileage_km !== null && (
-                      <CardMeta>
-                        走行距離 {v.mileage_km.toLocaleString()}km
-                      </CardMeta>
-                    )}
                     <VehicleCardPrice price={v.price} totalPrice={v.total_price} />
+                    <VehicleCardSpecs
+                      modelYear={v.model_year}
+                      mileageKm={v.mileage_km}
+                      shakenStatus={v.shaken_status}
+                      shakenExpiry={v.shaken_expiry}
+                      accidentHistory={v.accident_history}
+                    />
                   </CardBody>
                 </Card>
               </li>
