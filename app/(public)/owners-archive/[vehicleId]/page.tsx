@@ -8,6 +8,7 @@ import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
 import { VehicleMediaGallery } from "@/components/inventory/vehicle-media-gallery";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 // 車両名を組み立ててtitleに使う。従来はルートlayoutの値を継承しており、
 // アーカイブ全件が検索結果で同じ文言になっていた（docs/tasks/ISSUE-005）。
@@ -72,7 +73,15 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <StatusBadge label="ご成約済み" tone="neutral" />
+      <Breadcrumb
+        items={[
+          { label: "オーナーズアーカイブ", href: "/owners-archive" },
+          { label: vehicleName },
+        ]}
+      />
+      <div className="mt-4">
+        <StatusBadge label="ご成約済み" tone="neutral" />
+      </div>
       <h1 className="text-charcoal-900 mt-3 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         {entry.vehicles?.manufacturers?.name} {entry.vehicles?.models?.name}
         {entry.vehicles?.model_year ? `（${entry.vehicles.model_year}年）` : ""}

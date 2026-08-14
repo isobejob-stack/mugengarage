@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import { CarIcon } from "@/components/ui/car-icon";
 
 // 共有UIプリミティブ: Card（デザイン刷新プロジェクト フェーズ1）
 // 車両カード（画像あり）・図鑑/年表カード（画像なし）の双方に対応するサブコンポーネント構成。
@@ -112,21 +113,7 @@ export function CardImage({
         />
       ) : (
         <div className="bg-cream-200 text-foreground-muted flex h-full w-full flex-col items-center justify-center gap-2">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-10 w-10"
-            aria-hidden="true"
-          >
-            <path d="M3.5 13.5l1.4-4.3A2 2 0 0 1 6.8 7.8h10.4a2 2 0 0 1 1.9 1.4l1.4 4.3" />
-            <rect x="2.5" y="13.5" width="19" height="4.5" rx="1.5" />
-            <circle cx="7" cy="18" r="1.4" fill="currentColor" stroke="none" />
-            <circle cx="17" cy="18" r="1.4" fill="currentColor" stroke="none" />
-          </svg>
+          <CarIcon className="h-10 w-10" />
           <span className="text-sm font-medium">写真準備中</span>
         </div>
       )}

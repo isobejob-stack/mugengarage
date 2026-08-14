@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getPublicEncyclopediaEntryBySlug } from "@/lib/knowledge/queries";
 import { encyclopediaCategoryLabels } from "@/lib/knowledge/schema";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 // 各詳細ページに固有のtitle/descriptionを与える。従来はルートlayoutの値を継承しており、
 // 検索結果でどのページも同じ文言になっていた（docs/tasks/ISSUE-005）。
@@ -46,24 +46,17 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <nav className="text-foreground-muted text-sm">
-        <Link href="/encyclopedia" className="hover:underline">
-          図鑑
-        </Link>
-        {parent && (
-          <>
-            {" / "}
-            <Link
-              href={`/encyclopedia/${parent.slug}`}
-              className="hover:underline"
-            >
-              {parent.title}
-            </Link>
-          </>
-        )}
-        {" / "}
-        {entry.title}
-      </nav>
+      {/* 図鑑だけが独自のパンくずを持っていたため、共通コンポーネントに統一する。
+          これでBreadcrumbListの構造化データも他ページと同じ形で出力される。 */}
+      <Breadcrumb
+        items={[
+          { label: "Jaguar図鑑", href: "/encyclopedia" },
+          ...(parent
+            ? [{ label: parent.title, href: `/encyclopedia/${parent.slug}` }]
+            : []),
+          { label: entry.title },
+        ]}
+      />
 
       <p className="text-foreground-muted mt-2 text-sm">
         {encyclopediaCategoryLabels[entry.category]}

@@ -16,6 +16,8 @@ import { listFavoriteVehicleIds } from "@/lib/engagement/queries";
 import { listRelatedContents } from "@/lib/related/queries";
 import { RelatedContentList } from "@/components/related/related-content-list";
 import { VehicleMediaGallery } from "@/components/inventory/vehicle-media-gallery";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { CarIcon } from "@/components/ui/car-icon";
 import { getSeoMeta } from "@/lib/seo/queries";
 import { buildPublicPath } from "@/lib/seo/paths";
 import { buildVehicleStructuredData } from "@/lib/seo/structured-data";
@@ -301,7 +303,17 @@ export default async function Page({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: structuredDataJson }}
       />
-      <VehicleStatusBadge status={vehicle.status} />
+      {/* FR-SEO-006: 検索結果から直接開かれることが多いページのため、
+          今どの分類にいるのかと一覧への戻り先を最初に示す */}
+      <Breadcrumb
+        items={[
+          { label: "在庫車両", href: "/vehicles" },
+          { label: vehicleName },
+        ]}
+      />
+      <div className="mt-4">
+        <VehicleStatusBadge status={vehicle.status} />
+      </div>
       <h1 className="text-charcoal-900 mt-3 font-serif text-3xl font-bold">
         {vehicle.manufacturers?.name} {vehicle.models?.name}
         {vehicle.model_year ? `（${vehicle.model_year}年）` : ""}
@@ -322,6 +334,21 @@ export default async function Page({
               ¥{vehicle.price.toLocaleString()}
               <span className="ml-2 font-sans text-base">車両本体価格</span>
             </p>
+            {/* 支払総額と本体価格の差額＝諸費用（ISSUE-006 3.2）。
+                差額を説明せずに2つの金額だけを並べると「この差は何なのか」という
+                不信につながるため、金額と主な内訳の名目まで出す。
+                総額が本体価格以下（諸費用込みの表記等）の場合は出さない。 */}
+            {vehicle.total_price > vehicle.price && (
+              <p className="text-foreground-muted mt-1 font-mono text-lg tabular-nums">
+                ¥{(vehicle.total_price - vehicle.price).toLocaleString()}
+                <span className="ml-2 font-sans text-base">
+                  諸費用
+                  <span className="ml-1 text-sm">
+                    （登録費用・自動車税・自賠責保険料等）
+                  </span>
+                </span>
+              </p>
+            )}
           </>
         ) : (
           <p className="text-primary-700 font-mono text-3xl font-bold tabular-nums">
@@ -345,11 +372,37 @@ export default async function Page({
       </div>
 
       <div className="mt-8">
-        <VehicleMediaGallery
-          photos={photosWithUrl}
-          videos={videos}
-          vehicleName={vehicleName}
-        />
+        {photosWithUrl.length === 0 && videos.length === 0 ? (
+          // 写真も動画も未登録のとき、ギャラリーは何も描画しないため
+          // 価格の直後にいきなり諸元表が来て「作りかけのページ」に見えていた。
+          // 一覧カードには「写真準備中」のフォールバックがあるのに詳細には無く、
+          // 一覧で写真準備中を見て開いた人ほど落差を感じる状態だった。
+          //
+          // 写真が無いこと自体は今すぐ解消できないが、
+          // 「写真が見たい」という最も強い購入検討サインを相談に変換できる場面でもある。
+          // 写真が登録されれば、この枠は自動的にギャラリーへ切り替わる。
+          <div className="bg-cream-100 flex aspect-[4/3] w-full flex-col items-center justify-center gap-3 rounded-2xl border border-neutral-200 px-6 text-center">
+            <CarIcon className="text-foreground-muted h-12 w-12" />
+            <p className="text-charcoal-900 text-base font-medium">
+              この車両の写真は準備中です
+            </p>
+            <p className="text-foreground-muted text-sm">
+              現車の写真をご希望の方は、お気軽にお問い合わせください。
+              個別にお送りいたします。
+            </p>
+            {lineConsultUrl && (
+              <Button href={lineConsultUrl} variant="line" size="md">
+                写真をLINEで請求する
+              </Button>
+            )}
+          </div>
+        ) : (
+          <VehicleMediaGallery
+            photos={photosWithUrl}
+            videos={videos}
+            vehicleName={vehicleName}
+          />
+        )}
       </div>
 
       {specGroups.map((group) => (
@@ -391,8 +444,13 @@ export default async function Page({
 
       <RelatedContentList items={related} title="関連コンテンツ" />
 
-      <div className="mt-16 border-t border-neutral-200 pt-8">
+      <div className="mt-16 flex flex-wrap items-center gap-3 border-t border-neutral-200 pt-8">
         <FavoriteButton vehicleId={vehicle.id} initialFavorited={isFavorited} />
+        {/* 読み終えた位置から一覧に戻れるようにする。
+            検索結果から直接開いた利用者にはブラウザバック以外の戻り手段が無かった。 */}
+        <Button href="/vehicles" variant="outline" size="md">
+          在庫車両一覧に戻る
+        </Button>
       </div>
 
       {/* レビュー指摘対応（必須修正4）: 01_public_ui_spec.md 5章（SCR-PUB-003, FR-VEH-007）
@@ -402,18 +460,32 @@ export default async function Page({
           モーダル表示中はこのバーの上にライトボックスが正しく重なるようにする。
           fixedを使用（sticky+100vwのフルブリードは縦スクロールバー幅分の横スクロールが
           発生するため不採用）。<main>側にバー高さ分のpadding-bottomを確保済み。 */}
-      {/* LINEのURLが未設定のあいだは、空のバーだけが残らないよう固定バーごと非表示にする */}
-      {lineConsultUrl && (
+      {/* LINE・電話とも未設定のあいだは、空のバーだけが残らないよう固定バーごと非表示にする。
+          数百万円の商材で連絡手段がLINEのみだと、LINEを使わない層を取りこぼす。
+          店舗の電話番号が設定されていれば併記する（設定は管理画面 > 店舗情報・リンク）。 */}
+      {(lineConsultUrl || settings.phone) && (
         <div className="shadow-strong fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm">
-          <div className="mx-auto flex h-14 max-w-3xl items-center justify-center px-4 sm:h-16">
-            <Button
-              href={lineConsultUrl}
-              variant="line"
-              size="md"
-              className="w-full max-w-xs"
-            >
-              この車をLINEで相談する
-            </Button>
+          <div className="mx-auto flex h-14 max-w-3xl items-center justify-center gap-3 px-4 sm:h-16">
+            {settings.phone && (
+              <Button
+                href={`tel:${settings.phone}`}
+                variant="outline"
+                size="md"
+                className="w-full max-w-xs"
+              >
+                電話で問い合わせる
+              </Button>
+            )}
+            {lineConsultUrl && (
+              <Button
+                href={lineConsultUrl}
+                variant="line"
+                size="md"
+                className="w-full max-w-xs"
+              >
+                この車をLINEで相談する
+              </Button>
+            )}
           </div>
         </div>
       )}
@@ -436,9 +508,13 @@ function Row({
 }) {
   return (
     <div className="bg-cream-50 shadow-soft rounded-xl border border-neutral-200 px-4 py-3">
-      <p className="text-foreground-muted text-base font-medium">{label}</p>
+      {/* 項目名と値を同じ大きさで置くと、拾い読みする表で視線が値に落ちない。
+          項目名を一段小さく、値を大きくして主従を付ける
+          （本文16px以上の原則は「読ませる文章」に対するもので、
+          表の項目名は値に添えるラベルのため14pxを許容する） */}
+      <p className="text-foreground-muted text-sm font-medium">{label}</p>
       <p
-        className={`text-charcoal-900 mt-1 text-base font-semibold ${
+        className={`text-charcoal-900 mt-1 text-lg font-semibold ${
           breakAll ? "break-all" : "break-words"
         }`}
       >

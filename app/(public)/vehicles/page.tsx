@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   getVehicleSearchFacetOptions,
   searchPublicVehicles,
@@ -26,7 +25,11 @@ import {
   DISPLACEMENT_OPTIONS,
 } from "@/components/inventory/vehicle-search-fields";
 import { VehicleCardSpecs } from "@/components/inventory/vehicle-card-specs";
-import { VehicleActiveFilters } from "@/components/inventory/vehicle-active-filters";
+import {
+  VehicleActiveFilters,
+  buildActiveFilters,
+} from "@/components/inventory/vehicle-active-filters";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { VehicleSortSelect } from "@/components/inventory/vehicle-sort-select";
 import { Pagination } from "@/components/ui/pagination";
 import { FavoriteIconButton } from "@/components/engagement/favorite-icon-button";
@@ -118,159 +121,209 @@ export default async function Page({
   const rangeStart = (meta.page - 1) * meta.per_page + 1;
   const rangeEnd = Math.min(meta.page * meta.per_page, totalCount);
 
+  // 畳んだ絞り込みフォームの見出しに「◯件適用中」を出すために使う。
+  // 表示するタグと同じ関数から数えるので、タグの数と件数がずれない。
+  const activeFilterCount = buildActiveFilters(params, facets).length;
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-          在庫車両一覧
-        </h1>
-        <Link href="/vehicles/ranking" className="text-sm hover:underline">
-          人気ランキングを見る
-        </Link>
-      </div>
+      <Breadcrumb items={[{ label: "在庫車両" }]} />
+      <h1 className="text-charcoal-900 mt-3 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
+        在庫車両一覧
+      </h1>
 
-      <form
-        method="get"
-        className="mt-6 flex flex-col gap-4 rounded-md border border-neutral-200 p-4"
+      {/*
+        絞り込みフォームは既定で畳んでおく。
+        展開したままだとスマートフォンでは縦800px以上を占め、
+        「在庫一覧を開いたのに車が1台も見えない」状態になっていた。
+        在庫が15台規模の店でそれをやると、品揃えが無い店に見えてしまう。
+        中古車メディアもスマートフォンでは結果を先に出し、条件は畳んでいる。
+
+        条件が付いているときは開いた状態で描画する（何で絞ったか確認しに来るため）。
+        畳んでいるあいだも、適用中の条件は下のタグ列に出ているので見失わない。
+      */}
+      <details
+        className="group mt-6 overflow-hidden rounded-2xl border border-neutral-200 bg-white"
+        open={activeFilterCount > 0}
       >
-        <FilterSection title="条件を選ぶ">
-          <SelectField
-            label="車種"
-            name="model"
-            defaultValue={params.model}
-            options={facets.models.map((m) => ({ value: m.id, label: m.name }))}
-          />
-          <SelectField
-            label="ミッション"
-            name="transmission"
-            defaultValue={params.transmission}
-            options={facets.transmissions.map((t) => ({ value: t, label: t }))}
-          />
-          <RangeSelectField
-            label="車両本体価格"
-            fromName="price_min"
-            toName="price_max"
-            fromValue={params.price_min}
-            toValue={params.price_max}
-            options={PRICE_OPTIONS}
-          />
-          <RangeSelectField
-            label="年式"
-            fromName="year_min"
-            toName="year_max"
-            fromValue={params.year_min}
-            toValue={params.year_max}
-            options={YEAR_OPTIONS}
-          />
-          <SelectField
-            label="走行距離"
-            name="mileage_max"
-            defaultValue={params.mileage_max}
-            options={MILEAGE_OPTIONS}
-            placeholder="上限なし"
-          />
-        </FilterSection>
+        <summary className="text-charcoal-900 hover:bg-cream-100 flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-base font-bold">
+          <span>
+            条件を絞り込む
+            {activeFilterCount > 0 && (
+              <span className="text-primary-700 ml-2 text-sm font-medium">
+                （{activeFilterCount}件適用中）
+              </span>
+            )}
+          </span>
+          <span
+            aria-hidden="true"
+            className="text-foreground-muted shrink-0 text-sm transition-transform group-open:rotate-180"
+          >
+            ▼
+          </span>
+        </summary>
 
-        {/* 並び替えは検索結果の直上に移したが、条件を変えて再検索したときに
-            選んでいた並び順が消えないよう、フォーム側でも引き継ぐ。 */}
-        {params.sort && <input type="hidden" name="sort" value={params.sort} />}
-
-        {/* ISSUE-006: 中古車サイトで最も使われる2条件。折りたたみの中ではなく
-            常に見える位置に置く（条件を1つも開かずに絞り込める状態を作る）。 */}
-        <FilterSection title="条件で絞り込む">
-          <CheckboxField
-            label="車検あり"
-            name="shaken"
-            defaultChecked={params.shaken === "1"}
-            description="車検整備付、または車検が残っている車両"
-          />
-          <CheckboxField
-            label="修復歴なし"
-            name="no_accident"
-            defaultChecked={params.no_accident === "1"}
-            description="修復歴なしと確認できている車両"
-          />
-        </FilterSection>
-        {/* FR-SRCH-001: シリーズ・世代・グレード〜駆動方式までの詳細条件（画面が煩雑にならないよう折りたたみ） */}
-        <details
-          className="rounded-md border border-neutral-200 p-4"
-          open={hasAdvancedFilters}
+        <form
+          method="get"
+          className="flex flex-col gap-4 border-t border-neutral-200 p-4"
         >
-          <summary className="text-charcoal-900 min-h-11 cursor-pointer py-2 text-base font-medium">
-            詳細検索（車種階層・エンジン諸元・色ほか）
-          </summary>
-
-          <div className="mt-4 flex flex-col gap-6">
-            <FilterSection title="車種の階層">
-              <SelectField
-                label="シリーズ"
-                name="series"
-                defaultValue={params.series}
-                options={facets.series.map((x) => ({
-                  value: x.id,
-                  label: x.name,
-                }))}
-              />
-              <SelectField
-                label="世代"
-                name="generation"
-                defaultValue={params.generation}
-                options={facets.generations.map((x) => ({
-                  value: x.id,
-                  label: x.name,
-                }))}
-              />
-              <SelectField
-                label="グレード"
-                name="grade"
-                defaultValue={params.grade}
-                options={facets.grades.map((x) => ({
-                  value: x.id,
-                  label: x.name,
-                }))}
-              />
-            </FilterSection>
-
-            <FilterSection title="装備・仕様">
+          <FilterSection title="基本条件">
+            {/* 選択肢に在庫台数を添える。中古車メディアの定石で、
+              0件になる条件を選ぶ前に気付けるようにするためのもの。 */}
+            <SelectField
+              label="車種"
+              name="model"
+              defaultValue={params.model}
+              options={facets.models.map((m) => ({
+                value: m.id,
+                label: `${m.name}（${m.count}台）`,
+              }))}
+            />
+            <SelectField
+              label="ミッション"
+              name="transmission"
+              defaultValue={params.transmission}
+              options={facets.transmissions.map((t) => ({
+                value: t,
+                label: t,
+              }))}
+            />
+            {/* 一覧・詳細は支払総額を主役に出しているが、絞り込みは車両本体価格が基準。
+              ラベルだけでは読み飛ばされ「200万円以下で絞ったのに総額228万円が出る」と
+              検索が壊れて見えるため、基準が違うことを明記する。 */}
+            <div>
               <RangeSelectField
-                label="排気量"
-                fromName="displacement_min"
-                toName="displacement_max"
-                fromValue={params.displacement_min}
-                toValue={params.displacement_max}
-                options={DISPLACEMENT_OPTIONS}
+                label="車両本体価格"
+                fromName="price_min"
+                toName="price_max"
+                fromValue={params.price_min}
+                toValue={params.price_max}
+                options={PRICE_OPTIONS}
               />
-              <SelectField
-                label="駆動方式"
-                name="drivetrain"
-                defaultValue={params.drivetrain}
-                options={facets.drivetrains.map((d) => ({
-                  value: d,
-                  label: d,
-                }))}
-              />
-              <SelectField
-                label="外装色"
-                name="exterior_color"
-                defaultValue={params.exterior_color}
-                options={facets.exteriorColors.map((c) => ({
-                  value: c,
-                  label: c,
-                }))}
-              />
-            </FilterSection>
-          </div>
-        </details>
+              <p className="text-foreground-muted mt-1 text-sm">
+                ※ 車両本体価格で絞り込みます（表示中の支払総額とは異なります）
+              </p>
+            </div>
+            <RangeSelectField
+              label="年式"
+              fromName="year_min"
+              toName="year_max"
+              fromValue={params.year_min}
+              toValue={params.year_max}
+              options={YEAR_OPTIONS}
+            />
+            <SelectField
+              label="走行距離"
+              name="mileage_max"
+              defaultValue={params.mileage_max}
+              options={MILEAGE_OPTIONS}
+              placeholder="上限なし"
+            />
+          </FilterSection>
 
-        <div className="flex gap-3">
-          <Button type="submit" variant="primary" size="md">
-            この条件で検索
-          </Button>
-          <Button href="/vehicles" variant="outline" size="md">
-            条件をクリア
-          </Button>
-        </div>
-      </form>
+          {/* 並び替えは検索結果の直上に移したが、条件を変えて再検索したときに
+            選んでいた並び順が消えないよう、フォーム側でも引き継ぐ。 */}
+          {params.sort && (
+            <input type="hidden" name="sort" value={params.sort} />
+          )}
+
+          {/* ISSUE-006: 中古車サイトで最も使われる2条件。折りたたみの中ではなく
+            常に見える位置に置く（条件を1つも開かずに絞り込める状態を作る）。 */}
+          <FilterSection title="こだわり条件">
+            <CheckboxField
+              label="車検あり"
+              name="shaken"
+              defaultChecked={params.shaken === "1"}
+              description="車検整備付、または車検が残っている車両"
+            />
+            <CheckboxField
+              label="修復歴なし"
+              name="no_accident"
+              defaultChecked={params.no_accident === "1"}
+              description="修復歴なしと確認できている車両"
+            />
+          </FilterSection>
+          {/* FR-SRCH-001: シリーズ・世代・グレード〜駆動方式までの詳細条件（画面が煩雑にならないよう折りたたみ） */}
+          <details
+            className="rounded-md border border-neutral-200 p-4"
+            open={hasAdvancedFilters}
+          >
+            <summary className="text-charcoal-900 min-h-11 cursor-pointer py-2 text-base font-medium">
+              さらに細かく指定する（車種階層・エンジン諸元・色ほか）
+            </summary>
+
+            <div className="mt-4 flex flex-col gap-6">
+              <FilterSection title="車種の階層">
+                <SelectField
+                  label="シリーズ"
+                  name="series"
+                  defaultValue={params.series}
+                  options={facets.series.map((x) => ({
+                    value: x.id,
+                    label: `${x.name}（${x.count}台）`,
+                  }))}
+                />
+                <SelectField
+                  label="世代"
+                  name="generation"
+                  defaultValue={params.generation}
+                  options={facets.generations.map((x) => ({
+                    value: x.id,
+                    label: `${x.name}（${x.count}台）`,
+                  }))}
+                />
+                <SelectField
+                  label="グレード"
+                  name="grade"
+                  defaultValue={params.grade}
+                  options={facets.grades.map((x) => ({
+                    value: x.id,
+                    label: `${x.name}（${x.count}台）`,
+                  }))}
+                />
+              </FilterSection>
+
+              <FilterSection title="装備・仕様">
+                <RangeSelectField
+                  label="排気量"
+                  fromName="displacement_min"
+                  toName="displacement_max"
+                  fromValue={params.displacement_min}
+                  toValue={params.displacement_max}
+                  options={DISPLACEMENT_OPTIONS}
+                />
+                <SelectField
+                  label="駆動方式"
+                  name="drivetrain"
+                  defaultValue={params.drivetrain}
+                  options={facets.drivetrains.map((d) => ({
+                    value: d,
+                    label: d,
+                  }))}
+                />
+                <SelectField
+                  label="外装色"
+                  name="exterior_color"
+                  defaultValue={params.exterior_color}
+                  options={facets.exteriorColors.map((c) => ({
+                    value: c,
+                    label: c,
+                  }))}
+                />
+              </FilterSection>
+            </div>
+          </details>
+
+          <div className="flex gap-3">
+            <Button type="submit" variant="primary" size="md">
+              この条件で検索
+            </Button>
+            <Button href="/vehicles" variant="outline" size="md">
+              条件をクリア
+            </Button>
+          </div>
+        </form>
+      </details>
 
       <VehicleActiveFilters params={params} facets={facets} />
 
@@ -317,8 +370,14 @@ export default async function Page({
         <ul className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 md:gap-8">
           {vehicles.map((v, index) => {
             if (!v.slug) return null;
-            const vehicleName =
-              `${v.manufacturers?.name ?? ""} ${v.models?.name ?? ""}`.trim();
+            // グレードまで出す。「Jaguar Eタイプ」だけでは同車種内で比較にならない
+            const vehicleName = [
+              v.manufacturers?.name,
+              v.models?.name,
+              v.grades?.name,
+            ]
+              .filter(Boolean)
+              .join(" ");
             return (
               // お気に入りボタンをカード（リンク）の外側に重ねるため、liを基準位置にする
               <li key={v.id} className="relative">
@@ -364,6 +423,14 @@ export default async function Page({
         page={meta.page}
         totalPages={meta.total_pages}
       />
+
+      {/* 人気ランキングは以前は見出しの横にあり、結果にたどり着く前の脇道になっていた。
+          一覧を見終えて「決めきれなかった」人に効く導線のため、結果の後ろに置く。 */}
+      <div className="mt-10 flex justify-center border-t border-neutral-200 pt-8">
+        <Button href="/vehicles/ranking" variant="outline" size="md">
+          人気の車両ランキングを見る
+        </Button>
+      </div>
     </main>
   );
 }

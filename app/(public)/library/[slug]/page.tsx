@@ -6,6 +6,7 @@ import { getPublicLibraryEntryBySlug } from "@/lib/library/queries";
 import { listRelatedContents } from "@/lib/related/queries";
 import { RelatedContentList } from "@/components/related/related-content-list";
 import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 // 各詳細ページに固有のtitle/descriptionを与える。従来はルートlayoutの値を継承しており、
 // 検索結果でどのページも同じ文言になっていた（docs/tasks/ISSUE-005）。
@@ -44,6 +45,12 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
+      <Breadcrumb
+        items={[
+          { label: "ライブラリ", href: "/library" },
+          { label: entry.title },
+        ]}
+      />
       {entry.category && (
         <p className="text-foreground-muted text-sm">{entry.category}</p>
       )}

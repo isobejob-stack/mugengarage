@@ -38,7 +38,10 @@ export function VehicleCardSpecs({
   if (specs.length === 0) return null;
 
   return (
-    <ul className="text-foreground-muted mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm">
+    // 年式・走行距離・車検・修復歴は、一覧で比較させるために出している「本文」であって
+    // 補助情報ではない。薄いグレーの14pxだと購買層（50〜60代中心）には読み取りづらいため、
+    // 本文と同じ16px・十分な濃さで出す（03_ui_rules.md 4章）。
+    <ul className="text-charcoal-700 mt-2 flex flex-wrap gap-x-3 gap-y-1 text-base">
       {specs.map((spec) => (
         <li
           key={spec}

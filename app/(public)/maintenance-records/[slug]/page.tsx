@@ -9,6 +9,7 @@ import { buildLineConsultationUrl } from "@/lib/site-config";
 import { getSiteSettings } from "@/lib/settings/queries";
 import { Button } from "@/components/ui/button";
 import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 // 各詳細ページに固有のtitle/descriptionを与える。従来はルートlayoutの値を継承しており、
 // 検索結果でどのページも同じ文言になっていた（docs/tasks/ISSUE-005）。
@@ -55,6 +56,12 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
+      <Breadcrumb
+        items={[
+          { label: "整備実績", href: "/maintenance-records" },
+          { label: record.title },
+        ]}
+      />
       {record.category && (
         <p className="text-foreground-muted text-sm">{record.category}</p>
       )}

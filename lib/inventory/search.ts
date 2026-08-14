@@ -40,65 +40,92 @@ function distinctStringOptions(
   ).sort();
 }
 
+// 車種階層（車種・シリーズ・世代・グレード）の選択肢。
+//
+// 従来はマスタを全件返していた。マスタは図鑑（Jaguarの全車種を体系的に紹介する）と
+// 共用のため在庫より遥かに多く、選んでも必ず0件になる選択肢が大量に並んでいた。
+// 「選べたのに0件」は、探している側から見ると検索が壊れているのと区別が付かない。
+// 実在値から選択肢を作る点は、ミッション・色・駆動方式と同じ考え方に揃える。
+async function buildHierarchyOptions(
+  supabase: ReturnType<typeof createAdminClient>,
+  table: "models" | "series" | "generations" | "grades",
+  countById: Map<string, number>,
+) {
+  const ids = Array.from(countById.keys());
+  if (ids.length === 0) return [];
+
+  const { data } = await supabase
+    .from(table)
+    .select("id, name")
+    .in("id", ids)
+    .is("deleted_at", null)
+    .order("name");
+
+  return (data ?? []).map((row) => ({
+    id: row.id as string,
+    name: row.name as string,
+    count: countById.get(row.id as string) ?? 0,
+  }));
+}
+
+function countByColumn(
+  rows: Array<Record<string, unknown>> | null,
+  column: string,
+) {
+  const counts = new Map<string, number>();
+  for (const row of rows ?? []) {
+    const value = row[column] as string | null;
+    if (!value) continue;
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+  return counts;
+}
+
 export async function getVehicleSearchFacetOptions() {
   const supabase = createAdminClient();
-  const [
-    { data: models },
-    { data: series },
-    { data: generations },
-    { data: grades },
-    { data: transmissions },
-    { data: exteriorColors },
-    { data: drivetrains },
-  ] = await Promise.all([
-    supabase
-      .from("models")
-      .select("id, name, manufacturer_id")
-      .is("deleted_at", null)
-      .order("name"),
-    supabase
-      .from("series")
-      .select("id, name, model_id")
-      .is("deleted_at", null)
-      .order("name"),
-    supabase
-      .from("generations")
-      .select("id, name, series_id")
-      .is("deleted_at", null)
-      .order("name"),
-    supabase
-      .from("grades")
-      .select("id, name, generation_id")
-      .is("deleted_at", null)
-      .order("name"),
-    supabase
-      .from("vehicles")
-      .select("transmission")
-      .eq("status", "published")
-      .is("deleted_at", null)
-      .not("transmission", "is", null),
-    supabase
-      .from("vehicles")
-      .select("exterior_color")
-      .eq("status", "published")
-      .is("deleted_at", null)
-      .not("exterior_color", "is", null),
-    supabase
-      .from("vehicles")
-      .select("drivetrain")
-      .eq("status", "published")
-      .is("deleted_at", null)
-      .not("drivetrain", "is", null),
+
+  // 絞り込みに使う列をまとめて1回だけ読む。
+  // 以前は項目ごとに1クエリ（計7本）投げていたが、対象は同じ「公開中の車両」であり、
+  // 1本で取って集計すれば足りる。
+  const { data: publishedVehicles } = await supabase
+    .from("vehicles")
+    .select(
+      "model_id, series_id, generation_id, grade_id, transmission, exterior_color, drivetrain",
+    )
+    .eq("status", "published")
+    .is("deleted_at", null);
+
+  const [models, series, generations, grades] = await Promise.all([
+    buildHierarchyOptions(
+      supabase,
+      "models",
+      countByColumn(publishedVehicles, "model_id"),
+    ),
+    buildHierarchyOptions(
+      supabase,
+      "series",
+      countByColumn(publishedVehicles, "series_id"),
+    ),
+    buildHierarchyOptions(
+      supabase,
+      "generations",
+      countByColumn(publishedVehicles, "generation_id"),
+    ),
+    buildHierarchyOptions(
+      supabase,
+      "grades",
+      countByColumn(publishedVehicles, "grade_id"),
+    ),
   ]);
 
   return {
-    models: models ?? [],
-    series: series ?? [],
-    generations: generations ?? [],
-    grades: grades ?? [],
-    transmissions: distinctStringOptions(transmissions, "transmission"),
-    exteriorColors: distinctStringOptions(exteriorColors, "exterior_color"),
-    drivetrains: distinctStringOptions(drivetrains, "drivetrain"),
+    models,
+    series,
+    generations,
+    grades,
+    transmissions: distinctStringOptions(publishedVehicles, "transmission"),
+    exteriorColors: distinctStringOptions(publishedVehicles, "exterior_color"),
+    drivetrains: distinctStringOptions(publishedVehicles, "drivetrain"),
   };
 }
 
@@ -111,7 +138,9 @@ export async function searchPublicVehicles(
   let query = supabase
     .from("vehicles")
     .select(
-      "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, status, transmission, is_recommended, is_new_arrival, manufacturers(name), models(name)",
+      // grades: 旧車は同じ車種でもグレードで価格が大きく変わるため、
+      // 一覧の車名は「メーカー + 車種 + グレード」まで出す（ISSUE-006 3.1）
+      "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, status, transmission, is_recommended, is_new_arrival, manufacturers(name), models(name), grades(name)",
       { count: "exact" },
     )
     .eq("status", "published")
@@ -204,6 +233,7 @@ export async function searchPublicVehicles(
     is_new_arrival: boolean;
     manufacturers: { name: string } | null;
     models: { name: string } | null;
+    grades: { name: string } | null;
   }>;
 
   if (vehicles.length === 0) {

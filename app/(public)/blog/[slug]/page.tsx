@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getPublicArticleBySlug } from "@/lib/content/queries";
 import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 // 各詳細ページに固有のtitle/descriptionを与える。従来はルートlayoutの値を継承しており、
 // 検索結果でどのページも同じ文言になっていた（docs/tasks/ISSUE-005）。
@@ -40,6 +41,9 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
+      <Breadcrumb
+        items={[{ label: "ブログ", href: "/blog" }, { label: article.title }]}
+      />
       {article.category && (
         <p className="text-foreground-muted text-sm">{article.category}</p>
       )}

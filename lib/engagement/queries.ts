@@ -39,10 +39,14 @@ export async function getPublicFavoriteVehicles(sessionId: string) {
   const vehicleIds = await listFavoriteVehicleIds(sessionId);
   if (vehicleIds.length === 0) return [];
 
+  // お気に入り一覧は複数台を並べて見比べる画面のため、
+  // 車両一覧のカードと同じ情報（支払総額・年式・走行距離・車検・修復歴）を出せるようにする。
+  // 以前は本体価格しか取っておらず、一覧では支払総額・お気に入りでは本体価格という
+  // 「同じ見た目で違う意味の数字」が並んでいた（価格の誤認につながる）。
   const { data } = await supabase
     .from("vehicles")
     .select(
-      "id, price, model_year, mileage_km, status, manufacturers(name), models(name)",
+      "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, status, manufacturers(name), models(name), grades(name)",
     )
     .in("id", vehicleIds)
     .eq("status", "published")
@@ -51,11 +55,16 @@ export async function getPublicFavoriteVehicles(sessionId: string) {
   const vehicles = (data ?? []) as unknown as Array<{
     id: string;
     price: number;
+    total_price: number | null;
     model_year: number | null;
     mileage_km: number | null;
+    shaken_status: string | null;
+    shaken_expiry: string | null;
+    accident_history: boolean | null;
     status: string;
     manufacturers: { name: string } | null;
     models: { name: string } | null;
+    grades: { name: string } | null;
   }>;
   if (vehicles.length === 0) return [];
 
