@@ -117,10 +117,13 @@ export async function getVehicleFavoriteRanking(limit = 10) {
   }
 
   const vehicleIds = Array.from(countByVehicleId.keys());
+  // 価格の基準を車両一覧・お気に入りと揃える（支払総額を主役に、本体価格を添える）。
+  // ランキングも複数台を見比べる画面のため、ここだけ本体価格を大きく出すと
+  // 同じ見た目で違う意味の数字が並ぶことになる。
   const { data } = await supabase
     .from("vehicles")
     .select(
-      "id, price, model_year, mileage_km, status, manufacturers(name), models(name)",
+      "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, status, manufacturers(name), models(name), grades(name)",
     )
     .in("id", vehicleIds)
     .eq("status", "published")
@@ -129,11 +132,16 @@ export async function getVehicleFavoriteRanking(limit = 10) {
   const vehicles = (data ?? []) as unknown as Array<{
     id: string;
     price: number;
+    total_price: number | null;
     model_year: number | null;
     mileage_km: number | null;
+    shaken_status: string | null;
+    shaken_expiry: string | null;
+    accident_history: boolean | null;
     status: string;
     manufacturers: { name: string } | null;
     models: { name: string } | null;
+    grades: { name: string } | null;
   }>;
   if (vehicles.length === 0) return [];
 

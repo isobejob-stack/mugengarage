@@ -188,6 +188,20 @@ export default async function Page({
   // （ページごとに書くと1箇所で忘れた瞬間に穴になるため）。
   const structuredDataJson = serializeStructuredData(structuredData);
 
+  // 価格の直下に出す要約4項目。下の主要諸元表と同じ表示関数を通すため、
+  // 「車検整備付」等の文言が2箇所でずれることはない。
+  const summarySpecs = [
+    { label: "年式", value: formatModelYear(vehicle.model_year) },
+    { label: "走行距離", value: formatMileage(vehicle.mileage_km) },
+    {
+      label: "車検",
+      value: formatShakenValue(vehicle.shaken_status, vehicle.shaken_expiry),
+    },
+    { label: "修復歴", value: formatYesNo(vehicle.accident_history) },
+  ].filter((item): item is { label: string; value: string } =>
+    Boolean(item.value),
+  );
+
   // 主要諸元（ISSUE-006）。カーセンサー・グーネット等の中古車サイトと同じく、
   // 全項目を1つの表に並べるのではなく意味のまとまりごとに見出しを付ける。
   // 項目数が多いため、フラットに並べると「どこを見れば良いか」が分からなくなり、
@@ -360,7 +374,28 @@ export default async function Page({
         )}
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-3">
+      {/* 価格の直下に、購入検討で最初に確認される4項目だけを並べる。
+          下の主要諸元表にも同じ値は載っているが、そこまで読み進めないと
+          「年式と走行距離はいくつか」が分からないのは往復が多い。
+          中古車サイトが例外なく価格の隣にこの4点を置いているのと同じ理由。
+          未登録の項目は枠ごと出さない（空欄を並べると情報の無さが強調されるため）。 */}
+      {summarySpecs.length > 0 && (
+        <dl className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {summarySpecs.map((item) => (
+            <div
+              key={item.label}
+              className="bg-cream-100 rounded-xl border border-neutral-200 px-3 py-2.5"
+            >
+              <dt className="text-foreground-muted text-sm">{item.label}</dt>
+              <dd className="text-charcoal-900 mt-0.5 text-base font-semibold">
+                {item.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      )}
+
+      <div className="mt-5 flex flex-wrap items-center gap-3">
         <FavoriteButton vehicleId={vehicle.id} initialFavorited={isFavorited} />
         {/* FR-LINE-002: 車両詳細ページでは「購入」カテゴリに固定した相談導線を表示する。
             レビュー指摘対応（必須修正3）: プリフィル文言に車両名を含め、ボタン文言と送信内容を一致させる */}
