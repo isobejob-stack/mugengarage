@@ -88,3 +88,57 @@ export function formatRecycleFee(value: string | null): string | null {
   if (value === "none") return "リサイクル料金なし";
   return null;
 }
+
+// ── ラベル付きの表（詳細ページの主要諸元）で使う「値だけ」の文言 ──────────
+//
+// 上の format 系は、カードのように単独で置かれても意味が通るよう項目名を含んでいる
+// （例:「車検整備付」「法定整備付」）。一方、ラベルと並べる表で同じ文言を使うと
+// 「車検：車検整備付」のように項目名が二重になる。表用はこちらを使う。
+
+export function formatShakenValue(
+  status: string | null,
+  expiry: string | null,
+): string | null {
+  if (status === "inspection_included") return "車検整備付";
+  if (status === "none") return "なし";
+
+  const label = formatShaken(status, expiry);
+  if (label === null) return null;
+  // 「車検 2027年2月」→「2027年2月」、「車検あり」→「あり」
+  return label.replace(/^車検\s?/, "") || "あり";
+}
+
+export function formatLegalMaintenanceValue(value: string | null): string | null {
+  if (value === "included") return "付き";
+  if (value === "separate") return "別途";
+  if (value === "none") return "なし";
+  return null;
+}
+
+export function formatWarrantyValue(
+  type: string | null,
+  months: number | null,
+  km: number | null,
+): string | null {
+  if (type === "without") return "なし";
+  if (type !== "with") return null;
+
+  const parts: string[] = [];
+  if (months !== null) parts.push(`${months}ヶ月`);
+  if (km !== null) parts.push(`${km.toLocaleString()}km`);
+
+  return parts.length > 0 ? `付き（${parts.join("・")}）` : "付き";
+}
+
+export function formatRecycleFeeValue(value: string | null): string | null {
+  if (value === "included") return "込み";
+  if (value === "separate") return "別途";
+  if (value === "none") return "なし";
+  return null;
+}
+
+export function formatSteeringSideValue(value: string | null): string | null {
+  if (value === "right") return "右ハンドル";
+  if (value === "left") return "左ハンドル";
+  return null;
+}

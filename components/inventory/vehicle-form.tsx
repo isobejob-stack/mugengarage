@@ -37,6 +37,21 @@ import {
   fromDatetimeLocalValue,
 } from "@/lib/utils/datetime-local";
 
+// 「あり／なし」に加えて「未設定」を持つ項目のための変換。
+// チェックボックスでは未設定と「なし」を区別できず、未入力の車両が
+// すべて「なし」として公開されてしまうため、3択のselectで扱う。
+function toNullableBoolean(value: unknown): boolean | null {
+  if (value === "true") return true;
+  if (value === "false") return false;
+  return null;
+}
+
+function booleanSelectValue(value: boolean | null | undefined): string {
+  if (value === true) return "true";
+  if (value === false) return "false";
+  return "";
+}
+
 type HierarchyOptions = {
   manufacturers: Manufacturer[];
   models: Model[];
@@ -408,6 +423,216 @@ export function VehicleForm({
               className="input"
               {...register("vin")}
               value={watch("vin") ?? ""}
+            />
+          </Field>
+
+          {/* ISSUE-006: 以下は公開ページの主要諸元に表示される項目だが、
+              これまで入力欄が無く登録できなかったもの。
+              特に修復歴・排気量は中古車の購入判断で必ず確認される項目のため、
+              入力できないままだと掲載情報として成立しない。 */}
+          <Field label="修復歴">
+            <select
+              className="input"
+              {...register("accident_history", { setValueAs: toNullableBoolean })}
+              value={booleanSelectValue(watch("accident_history"))}
+            >
+              <option value="">未設定</option>
+              <option value="false">なし</option>
+              <option value="true">あり</option>
+            </select>
+          </Field>
+
+          <Field label="車検満了日">
+            <input
+              type="date"
+              className="input"
+              {...register("shaken_expiry")}
+              value={watch("shaken_expiry") ?? ""}
+            />
+          </Field>
+
+          <Field label="登録年">
+            <input
+              type="number"
+              className="input"
+              {...register("registration_year", {
+                setValueAs: (v) => (v === "" ? null : Number(v)),
+              })}
+              value={watch("registration_year") ?? ""}
+            />
+          </Field>
+
+          <Field label="排気量（cc）">
+            <input
+              type="number"
+              className="input"
+              {...register("displacement_cc", {
+                setValueAs: (v) => (v === "" ? null : Number(v)),
+              })}
+              value={watch("displacement_cc") ?? ""}
+            />
+          </Field>
+
+          <Field label="馬力（ps）">
+            <input
+              type="number"
+              className="input"
+              {...register("horsepower", {
+                setValueAs: (v) => (v === "" ? null : Number(v)),
+              })}
+              value={watch("horsepower") ?? ""}
+            />
+          </Field>
+
+          <Field label="トルク">
+            <input
+              type="text"
+              className="input"
+              {...register("torque")}
+              value={watch("torque") ?? ""}
+            />
+          </Field>
+
+          <Field label="エンジン型式">
+            <input
+              type="text"
+              className="input"
+              {...register("engine_model_code")}
+              value={watch("engine_model_code") ?? ""}
+            />
+          </Field>
+
+          <Field label="駆動方式">
+            <input
+              type="text"
+              className="input"
+              {...register("drivetrain")}
+              value={watch("drivetrain") ?? ""}
+            />
+          </Field>
+
+          <Field label="ボディタイプ">
+            <input
+              type="text"
+              className="input"
+              {...register("body_type")}
+              value={watch("body_type") ?? ""}
+            />
+          </Field>
+
+          <Field label="シート素材">
+            <input
+              type="text"
+              className="input"
+              {...register("seat_material")}
+              value={watch("seat_material") ?? ""}
+            />
+          </Field>
+
+          <Field label="型式">
+            <input
+              type="text"
+              className="input"
+              {...register("model_code")}
+              value={watch("model_code") ?? ""}
+            />
+          </Field>
+
+          <Field label="燃料">
+            <input
+              type="text"
+              className="input"
+              placeholder="ガソリン など"
+              {...register("fuel_type")}
+              value={watch("fuel_type") ?? ""}
+            />
+          </Field>
+
+          <Field label="乗車定員（名）">
+            <input
+              type="number"
+              className="input"
+              {...register("capacity", {
+                setValueAs: (v) => (v === "" ? null : Number(v)),
+              })}
+              value={watch("capacity") ?? ""}
+            />
+          </Field>
+
+          <Field label="ドア数">
+            <input
+              type="number"
+              className="input"
+              {...register("door_count", {
+                setValueAs: (v) => (v === "" ? null : Number(v)),
+              })}
+              value={watch("door_count") ?? ""}
+            />
+          </Field>
+
+          <Field label="オーナー数（人）">
+            <input
+              type="number"
+              className="input"
+              {...register("owner_count", {
+                setValueAs: (v) => (v === "" ? null : Number(v)),
+              })}
+              value={watch("owner_count") ?? ""}
+            />
+          </Field>
+
+          <Field label="リサイクル料金">
+            <select className="input" {...register("recycle_fee")}>
+              <option value="">未設定</option>
+              <option value="included">込み</option>
+              <option value="separate">別途</option>
+              <option value="none">なし</option>
+            </select>
+          </Field>
+
+          <Field label="記録簿">
+            <select
+              className="input"
+              {...register("has_record_book", { setValueAs: toNullableBoolean })}
+              value={booleanSelectValue(watch("has_record_book"))}
+            >
+              <option value="">未設定</option>
+              <option value="true">あり</option>
+              <option value="false">なし</option>
+            </select>
+          </Field>
+
+          <Field label="保管状況">
+            <select
+              className="input"
+              {...register("indoor_storage", { setValueAs: toNullableBoolean })}
+              value={booleanSelectValue(watch("indoor_storage"))}
+            >
+              <option value="">未設定</option>
+              <option value="true">屋内保管</option>
+              <option value="false">屋外保管</option>
+            </select>
+          </Field>
+
+          <Field label="禁煙車">
+            <select
+              className="input"
+              {...register("is_non_smoking", { setValueAs: toNullableBoolean })}
+              value={booleanSelectValue(watch("is_non_smoking"))}
+            >
+              <option value="">未設定</option>
+              <option value="true">禁煙車</option>
+              <option value="false">該当なし</option>
+            </select>
+          </Field>
+
+          <Field label="車両所在地">
+            <input
+              type="text"
+              className="input"
+              placeholder="東京都◯◯市 など"
+              {...register("location_text")}
+              value={watch("location_text") ?? ""}
             />
           </Field>
         </div>

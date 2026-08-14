@@ -22,6 +22,41 @@ import { buildVehicleStructuredData } from "@/lib/seo/structured-data";
 import { SITE_NAME, SITE_URL, buildLineConsultationUrl } from "@/lib/site-config";
 import { getSiteSettings } from "@/lib/settings/queries";
 import { absoluteTitle } from "@/lib/seo/metadata";
+import {
+  formatMileage,
+  formatModelYear,
+  formatShakenValue,
+  formatLegalMaintenanceValue,
+  formatWarrantyValue,
+  formatRecycleFeeValue,
+  formatSteeringSideValue,
+} from "@/lib/inventory/display";
+
+type SpecRow = {
+  label: string;
+  value: string;
+  fullWidth?: boolean;
+  breakAll?: boolean;
+};
+
+// 主要諸元の1行分。値が未登録（null/空文字）なら null を返し、呼び出し側で行ごと落とす。
+// 「未設定」「-」といったプレースホルダを並べても購入判断の材料にならず、
+// 実際に登録されている情報を埋もれさせるため（BR-DISP-001）。
+function spec(
+  label: string,
+  value: string | null,
+  options: { fullWidth?: boolean; breakAll?: boolean } = {},
+): SpecRow | null {
+  if (!value) return null;
+  return { label, value, ...options };
+}
+
+// 修復歴・記録簿のような「あり／なし」項目。
+// なしであることにも購入判断上の価値があるため、falseも表示する。
+function formatYesNo(value: boolean | null): string | null {
+  if (value === null) return null;
+  return value ? "あり" : "なし";
+}
 
 function buildVehicleDisplayName(vehicle: {
   manufacturers: { name: string } | null;
@@ -147,6 +182,109 @@ export default async function Page({
     "\\u003c",
   );
 
+  // 主要諸元（ISSUE-006）。カーセンサー・グーネット等の中古車サイトと同じく、
+  // 全項目を1つの表に並べるのではなく意味のまとまりごとに見出しを付ける。
+  // 項目数が多いため、フラットに並べると「どこを見れば良いか」が分からなくなり、
+  // 年齢層の高い購入検討者ほど読み飛ばしが起きやすいための構成。
+  //
+  // 値が未登録の項目は行ごと出さない（BR-DISP-001）。
+  // その結果1項目も残らなかったグループは、見出しだけが浮かないようグループごと出さない。
+  const specGroups = [
+    {
+      title: "基本情報",
+      rows: [
+        spec("年式", formatModelYear(vehicle.model_year)),
+        spec(
+          "登録年",
+          vehicle.registration_year === null
+            ? null
+            : `${vehicle.registration_year}年`,
+        ),
+        spec("走行距離", formatMileage(vehicle.mileage_km)),
+        spec("車検", formatShakenValue(vehicle.shaken_status, vehicle.shaken_expiry)),
+        spec("修復歴", formatYesNo(vehicle.accident_history)),
+        spec("記録簿", formatYesNo(vehicle.has_record_book)),
+        spec("型式", vehicle.model_code),
+        spec("ハンドル", formatSteeringSideValue(vehicle.steering_side)),
+        spec("ボディタイプ", vehicle.body_type),
+        spec(
+          "乗車定員",
+          vehicle.capacity === null ? null : `${vehicle.capacity}名`,
+        ),
+        spec(
+          "ドア数",
+          vehicle.door_count === null ? null : `${vehicle.door_count}ドア`,
+        ),
+        spec("燃料", vehicle.fuel_type),
+      ],
+    },
+    {
+      title: "エンジン・駆動",
+      rows: [
+        spec("エンジン", vehicle.engine),
+        spec("エンジン型式", vehicle.engine_model_code),
+        spec(
+          "排気量",
+          vehicle.displacement_cc === null
+            ? null
+            : `${vehicle.displacement_cc.toLocaleString()}cc`,
+        ),
+        spec(
+          "馬力",
+          vehicle.horsepower === null ? null : `${vehicle.horsepower}ps`,
+        ),
+        spec("トルク", vehicle.torque),
+        spec("ミッション", vehicle.transmission),
+        spec("駆動方式", vehicle.drivetrain),
+      ],
+    },
+    {
+      title: "外装・内装",
+      rows: [
+        spec("外装色", vehicle.exterior_color),
+        spec("内装色", vehicle.interior_color),
+        spec("シート素材", vehicle.seat_material),
+      ],
+    },
+    {
+      title: "販売条件",
+      rows: [
+        spec("法定整備", formatLegalMaintenanceValue(vehicle.legal_maintenance)),
+        spec(
+          "保証",
+          formatWarrantyValue(
+            vehicle.warranty_type,
+            vehicle.warranty_months,
+            vehicle.warranty_km,
+          ),
+        ),
+        spec("リサイクル料金", formatRecycleFeeValue(vehicle.recycle_fee)),
+        spec(
+          "保管状況",
+          vehicle.indoor_storage === null
+            ? null
+            : vehicle.indoor_storage
+              ? "屋内保管"
+              : "屋外保管",
+        ),
+        spec(
+          "オーナー数",
+          vehicle.owner_count === null ? null : `${vehicle.owner_count}人`,
+        ),
+        // 「禁煙車」は該当する場合のみ価値のある情報。falseのときに「喫煙車」と
+        // 掲げるのは実車の状態以上に不利な印象を与えるため、trueのときだけ出す。
+        spec("禁煙車", vehicle.is_non_smoking === true ? "禁煙車" : null),
+        spec("車両所在地", vehicle.location_text),
+        spec("車台番号", vehicle.vin, { fullWidth: true, breakAll: true }),
+      ],
+    },
+  ]
+    .map((group) => ({
+      ...group,
+      rows: group.rows.filter((row) => row !== null),
+    }))
+    .filter((group) => group.rows.length > 0);
+
   return (
     <main className="mx-auto max-w-3xl px-4 py-8 pb-24 sm:pb-28">
       <script
@@ -204,86 +342,23 @@ export default async function Page({
         />
       </div>
 
-      <section className="mt-14">
-        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
-          車両情報
-        </h2>
-        {/* product-design-manager/graphic-designer策定方針「ショールーム的な高級感」に基づき、
-            細罫線のみのtableから、ラベル＋値をカード風に並べる2カラムグリッドへ変更。
-            データ構造（label/value props）はRowコンポーネントとして維持する。
-            UIUXレビュー指摘（事業責任者協議事項）: 01_public_ui_spec.mdが求める
-            「メーカー〜VINまでの全項目」のうち従来6項目しか表示していなかったため、
-            既存データベースに値がある残りの項目もあわせて表示するようにした。 */}
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {vehicle.model_year !== null && (
-            <Row label="年式" value={`${vehicle.model_year}年`} />
-          )}
-          {vehicle.registration_year !== null && (
-            <Row label="登録年" value={`${vehicle.registration_year}年`} />
-          )}
-          {vehicle.mileage_km !== null && (
-            <Row
-              label="走行距離"
-              value={`${vehicle.mileage_km.toLocaleString()}km`}
-            />
-          )}
-          {vehicle.engine && <Row label="エンジン" value={vehicle.engine} />}
-          {vehicle.engine_model_code && (
-            <Row label="エンジン型式" value={vehicle.engine_model_code} />
-          )}
-          {vehicle.displacement_cc !== null && (
-            <Row
-              label="排気量"
-              value={`${vehicle.displacement_cc.toLocaleString()}cc`}
-            />
-          )}
-          {vehicle.horsepower !== null && (
-            <Row label="馬力" value={`${vehicle.horsepower}ps`} />
-          )}
-          {vehicle.torque && <Row label="トルク" value={vehicle.torque} />}
-          {vehicle.transmission && (
-            <Row label="ミッション" value={vehicle.transmission} />
-          )}
-          {vehicle.drivetrain && (
-            <Row label="駆動方式" value={vehicle.drivetrain} />
-          )}
-          {vehicle.body_type && (
-            <Row label="ボディタイプ" value={vehicle.body_type} />
-          )}
-          {vehicle.exterior_color && (
-            <Row label="外装色" value={vehicle.exterior_color} />
-          )}
-          {vehicle.interior_color && (
-            <Row label="内装色" value={vehicle.interior_color} />
-          )}
-          {vehicle.seat_material && (
-            <Row label="シート素材" value={vehicle.seat_material} />
-          )}
-          {vehicle.owner_count !== null && (
-            <Row label="オーナー数" value={`${vehicle.owner_count}人`} />
-          )}
-          {vehicle.shaken_expiry && (
-            <Row label="車検満了日" value={vehicle.shaken_expiry} />
-          )}
-          {vehicle.indoor_storage !== null && (
-            <Row
-              label="保管状況"
-              value={vehicle.indoor_storage ? "屋内保管" : "屋外保管"}
-            />
-          )}
-          {vehicle.accident_history !== null && (
-            <Row
-              label="事故歴"
-              value={vehicle.accident_history ? "あり" : "なし"}
-            />
-          )}
-          {vehicle.vin && (
-            <div className="col-span-2 sm:col-span-3">
-              <Row label="VIN" value={vehicle.vin} breakAll />
-            </div>
-          )}
-        </div>
-      </section>
+      {specGroups.map((group) => (
+        <section key={group.title} className="mt-14">
+          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+            {group.title}
+          </h2>
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {group.rows.map((row) => (
+              <div
+                key={row.label}
+                className={row.fullWidth ? "col-span-2 sm:col-span-3" : undefined}
+              >
+                <Row label={row.label} value={row.value} breakAll={row.breakAll} />
+              </div>
+            ))}
+          </div>
+        </section>
+      ))}
 
       {markdownSections
         .filter(([, body]) => Boolean(body))
