@@ -61,20 +61,31 @@ function normalize(value: string): string {
 }
 
 /**
- * コンテンツのタイトルが車種名を含むか。含む場合ほど強い順に点数を返す。
- * 0 は非該当。
+ * コンテンツのタイトルが車種名を含むか。強い順に点数を返す。0 は非該当。
  *
- * 「XJ」は「XJ6」「XJ220」「XJR」にも当たるが、これらは実際に同系統の話題であり、
- * 関連として出す価値がある。逆に完全一致を要求すると、ほとんど何も引っかからない。
+ * 位置ではなく「語として独立しているか」で強さを判定する。
+ * 単純な前方一致を優遇すると、2007年のXJ（X350型）の関連年表に
+ * 「XJ220C、ル・マンGT優勝と失格」が並び、本来最も関係の深い
+ * 「X350型XJ登場」が押し出される。XJ220は名前が似ているだけの別の車である。
+ *
+ * 「XJ」の直後が英数字なら（XJ220 / XJR）別の車種を指している可能性が高く、
+ * 「型XJ登場」のように英数字以外で区切られていれば、その車種そのものを指す。
  */
 function matchScore(title: string, keyword: string): number {
   const t = normalize(title);
   const k = normalize(keyword);
   if (k.length < 2) return 0; // 1文字の車種名は誤爆が大きいので対象外
   if (t === k) return 3;
-  if (t.startsWith(k)) return 2;
-  if (t.includes(k)) return 1;
-  return 0;
+
+  const index = t.indexOf(k);
+  if (index === -1) return 0;
+
+  // 前後が英数字でなければ、その車種名が語として独立していると見なす
+  const before = index > 0 ? t[index - 1] : "";
+  const after = t[index + k.length] ?? "";
+  const isAlnum = (c: string) => c !== "" && /[0-9a-z]/.test(c);
+
+  return !isAlnum(before) && !isAlnum(after) ? 2 : 1;
 }
 
 type Row = { id: string; title: string; slug?: string | null };
