@@ -121,13 +121,18 @@ insert into manufacturers (name, slug) values
   ('デイムラー', 'daimler')
 on conflict do nothing;
 
+-- 前回までの途中失敗などで、name と slug が食い違った状態の行が
+-- 残っている可能性があるため、slug を基準に名前を必ず正しい値へ揃える
+update manufacturers set name = 'ジャガー' where slug = 'jaguar' and name is distinct from 'ジャガー';
+update manufacturers set name = 'デイムラー' where slug = 'daimler' and name is distinct from 'デイムラー';
+
 -- 車種
 insert into models (manufacturer_id, name, slug) values
-  ((select id from manufacturers where name = 'ジャガー'), 'XJ', 'xj'),
-  ((select id from manufacturers where name = 'ジャガー'), 'Xタイプ', 'x-type'),
-  ((select id from manufacturers where name = 'ジャガー'), 'Sタイプ', 's-type'),
-  ((select id from manufacturers where name = 'ジャガー'), 'XJ-S', 'xj-s'),
-  ((select id from manufacturers where name = 'デイムラー'), 'ダブルシックス', 'double-six')
+  ((select id from manufacturers where slug = 'jaguar'), 'XJ', 'xj'),
+  ((select id from manufacturers where slug = 'jaguar'), 'Xタイプ', 'x-type'),
+  ((select id from manufacturers where slug = 'jaguar'), 'Sタイプ', 's-type'),
+  ((select id from manufacturers where slug = 'jaguar'), 'XJ-S', 'xj-s'),
+  ((select id from manufacturers where slug = 'daimler'), 'ダブルシックス', 'double-six')
 on conflict (slug) do nothing;
 
 -- 車両本体
@@ -142,7 +147,7 @@ insert into vehicles (
   sales_comment, other_notes, display_order
 ) values
   ('c0000000-0000-4000-8000-000000000001',
-   (select id from manufacturers where name = 'ジャガー'),
+   (select id from manufacturers where slug = 'jaguar'),
    (select id from models where slug = 'xj'),
    'published', true, 590000, 730000, 4200, 2007, 187000, false,
    'valid_until', '2027-02-01', 'included', 'with', 1, 1000,
@@ -150,14 +155,14 @@ insert into vehicles (
    '車検: 2027年2月（満了日は車検証で要確認）', 1),
 
   ('c0000000-0000-4000-8000-000000000002',
-   (select id from manufacturers where name = 'ジャガー'),
+   (select id from manufacturers where slug = 'jaguar'),
    (select id from models where slug = 'xj'),
    'published', false, 880000, 1150000, 3500, 2004, 88000, false,
    'inspection_included', null, 'included', 'with', 1, 1000,
    'XJ8 3.5。法定整備付・保証付（1ヶ月/1000km）。', '車検: 車検整備付', 2),
 
   ('c0000000-0000-4000-8000-000000000003',
-   (select id from manufacturers where name = 'ジャガー'),
+   (select id from manufacturers where slug = 'jaguar'),
    (select id from models where slug = 'x-type'),
    'published', false, 390000, 550000, 2100, 2008, 64000, true,
    'valid_until', '2027-05-01', 'included', 'with', 1, 1000,
@@ -165,77 +170,77 @@ insert into vehicles (
    '車検: 2027年5月（満了日は車検証で要確認）／修復歴あり', 3),
 
   ('c0000000-0000-4000-8000-000000000004',
-   (select id from manufacturers where name = 'ジャガー'),
+   (select id from manufacturers where slug = 'jaguar'),
    (select id from models where slug = 'xj'),
    'published', false, 2980000, 3150000, 4200, 2008, 52000, false,
    'inspection_included', null, 'included', 'with', 1, 1000,
    'XJ ポートフォリオ。法定整備付・保証付（1ヶ月/1000km）。', '車検: 車検整備付', 4),
 
   ('c0000000-0000-4000-8000-000000000005',
-   (select id from manufacturers where name = 'ジャガー'),
+   (select id from manufacturers where slug = 'jaguar'),
    (select id from models where slug = 'xj'),
    'published', false, 980000, 1230000, 3500, 2003, 75000, false,
    'inspection_included', null, 'included', 'with', 1, 1000,
    'XJ8 3.5。法定整備付・保証付（1ヶ月/1000km）。', '車検: 車検整備付', 5),
 
   ('c0000000-0000-4000-8000-000000000006',
-   (select id from manufacturers where name = 'ジャガー'),
+   (select id from manufacturers where slug = 'jaguar'),
    (select id from models where slug = 'xj'),
    'published', false, 1580000, 1790000, 3200, 1995, 49000, false,
    'inspection_included', null, 'included', 'with', 1, 1000,
    'XJ6 3.2。法定整備付・保証付（1ヶ月/1000km）。', '車検: 車検整備付', 6),
 
   ('c0000000-0000-4000-8000-000000000007',
-   (select id from manufacturers where name = 'ジャガー'),
+   (select id from manufacturers where slug = 'jaguar'),
    (select id from models where slug = 'xj'),
    'published', false, 3280000, 3490000, 4200, 1983, 86000, false,
    'inspection_included', null, 'included', 'with', 1, 1000,
    'XJ6 4.2 シリーズII。法定整備付・保証付（1ヶ月/1000km）。', '車検: 車検整備付', 7),
 
   ('c0000000-0000-4000-8000-000000000008',
-   (select id from manufacturers where name = 'ジャガー'),
+   (select id from manufacturers where slug = 'jaguar'),
    (select id from models where slug = 'xj'),
    'published', false, 980000, 1230000, 3200, 1998, 59000, false,
    'inspection_included', null, 'included', 'with', 1, 1000,
    'XJ エグゼクティブ 3.2 V8。法定整備付・保証付（1ヶ月/1000km）。', '車検: 車検整備付', 8),
 
   ('c0000000-0000-4000-8000-000000000009',
-   (select id from manufacturers where name = 'ジャガー'),
+   (select id from manufacturers where slug = 'jaguar'),
    (select id from models where slug = 'xj'),
    'published', false, 2380000, 2530000, 3200, 1993, 68000, false,
    'inspection_included', null, 'included', 'with', 1, 1000,
    'XJ6 3.2。法定整備付・保証付（1ヶ月/1000km）。', '車検: 車検整備付', 9),
 
   ('c0000000-0000-4000-8000-000000000010',
-   (select id from manufacturers where name = 'ジャガー'),
+   (select id from manufacturers where slug = 'jaguar'),
    (select id from models where slug = 's-type'),
    'published', false, 390000, 630000, 3000, 2004, 87000, false,
    'inspection_included', null, 'included', 'with', 1, 1000,
    'Sタイプ 3.0 V6。法定整備付・保証付（1ヶ月/1000km）。', '車検: 車検整備付', 10),
 
   ('c0000000-0000-4000-8000-000000000011',
-   (select id from manufacturers where name = 'デイムラー'),
+   (select id from manufacturers where slug = 'daimler'),
    (select id from models where slug = 'double-six'),
    'published', false, 4350000, 4550000, 5300, 1990, 59000, false,
    'inspection_included', null, 'included', 'with', 1, 1000,
    'デイムラー ダブルシックス。法定整備付・保証付（1ヶ月/1000km）。', '車検: 車検整備付', 11),
 
   ('c0000000-0000-4000-8000-000000000012',
-   (select id from manufacturers where name = 'ジャガー'),
+   (select id from manufacturers where slug = 'jaguar'),
    (select id from models where slug = 'xj'),
    'published', false, 1780000, 1970000, 4000, 1995, 100000, false,
    'inspection_included', null, 'included', 'with', 1, 1000,
    'XJR 4.0 スーパーチャージド。法定整備付・保証付（1ヶ月/1000km）。', '車検: 車検整備付', 12),
 
   ('c0000000-0000-4000-8000-000000000013',
-   (select id from manufacturers where name = 'ジャガー'),
+   (select id from manufacturers where slug = 'jaguar'),
    (select id from models where slug = 'xj'),
    'published', false, 1980000, 2150000, 3200, 1994, 77000, false,
    'none', null, 'included', 'with', 1, 1000,
    'XJ6 3.2。法定整備付・保証付（1ヶ月/1000km）。', '車検: なし', 13),
 
   ('c0000000-0000-4000-8000-000000000014',
-   (select id from manufacturers where name = 'ジャガー'),
+   (select id from manufacturers where slug = 'jaguar'),
    (select id from models where slug = 'xj-s'),
    'published', false, 3980000, 4230000, 4000, 2002, 150000, false,
    'inspection_included', null, 'included', 'with', 1, 1000,
@@ -243,7 +248,7 @@ insert into vehicles (
    '車検: 車検整備付／年式は掲載情報のまま登録（XJ-Sの生産は1996年までのため、年式または車種名の確認を推奨）', 14),
 
   ('c0000000-0000-4000-8000-000000000015',
-   (select id from manufacturers where name = 'デイムラー'),
+   (select id from manufacturers where slug = 'daimler'),
    (select id from models where slug = 'double-six'),
    'published', false, 2980000, 3160000, 6000, 1995, 66000, false,
    'inspection_included', null, 'included', 'with', 1, 1000,
