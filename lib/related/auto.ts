@@ -318,7 +318,7 @@ export async function getSimilarVehicles(
 export async function getVehiclesRelatedToTitle(
   title: string,
   limit = 4,
-): Promise<SimilarVehicle[]> {
+): Promise<{ modelName: string | null; vehicles: SimilarVehicle[] }> {
   const supabase = createAdminClient();
 
   const { data: models } = await supabase
@@ -334,9 +334,12 @@ export async function getVehiclesRelatedToTitle(
     .sort((a, b) => String(b.name).length - String(a.name).length)[0] as
     { id: string; name: string } | undefined;
 
-  if (!matched) return [];
+  if (!matched) return { modelName: null, vehicles: [] };
 
-  return getSimilarVehicles(
+  // 見出しには記事タイトルではなく、一致した車種名を使う。
+  // ブログ記事「なぜEタイプは最も美しい車と呼ばれるのか」に対して
+  // 「なぜEタイプは…の在庫車両」という見出しになるのを避けるため。
+  const vehicles = await getSimilarVehicles(
     {
       id: "",
       model_id: matched.id,
@@ -345,4 +348,6 @@ export async function getVehiclesRelatedToTitle(
     },
     limit,
   );
+
+  return { modelName: matched.name, vehicles };
 }

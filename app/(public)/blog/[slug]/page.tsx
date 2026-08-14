@@ -5,6 +5,10 @@ import remarkGfm from "remark-gfm";
 import { getPublicArticleBySlug } from "@/lib/content/queries";
 import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { RelatedInventorySection } from "@/components/related/related-discovery";
+import { getVehiclesRelatedToTitle } from "@/lib/related/auto";
+import { getLeadVehiclePhotoPaths } from "@/lib/inventory/queries";
+import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
 import {
   buildArticleStructuredData,
   serializeStructuredData,
@@ -57,6 +61,18 @@ export default async function Page({
     }),
   );
 
+  // 記事の話題に対応する在庫車両（FR-ENC-005と同じ考え方の逆方向導線）。
+  // 読み物として満足して終わらせず、実車へ進める道を残す。
+  const { modelName: relatedModelName, vehicles: relatedVehicles } =
+    await getVehiclesRelatedToTitle(article.title);
+  const relatedPhotoPaths = await getLeadVehiclePhotoPaths(
+    relatedVehicles.map((v) => v.id),
+  );
+  const relatedPhotoUrls = relatedVehicles.map((v) => {
+    const path = relatedPhotoPaths.get(v.id);
+    return path ? getVehiclePhotoPublicUrl(path) : undefined;
+  });
+
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
       <script
@@ -83,6 +99,11 @@ export default async function Page({
           {article.body}
         </ReactMarkdown>
       </div>
+      <RelatedInventorySection
+        vehicles={relatedVehicles}
+        photoUrls={relatedPhotoUrls}
+        topic={relatedModelName ?? ""}
+      />
     </main>
   );
 }

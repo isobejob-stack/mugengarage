@@ -10,6 +10,10 @@ import { getSiteSettings } from "@/lib/settings/queries";
 import { Button } from "@/components/ui/button";
 import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { RelatedInventorySection } from "@/components/related/related-discovery";
+import { getVehiclesRelatedToTitle } from "@/lib/related/auto";
+import { getLeadVehiclePhotoPaths } from "@/lib/inventory/queries";
+import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
 
 // 各詳細ページに固有のtitle/descriptionを与える。従来はルートlayoutの値を継承しており、
 // 検索結果でどのページも同じ文言になっていた（docs/tasks/ISSUE-005）。
@@ -53,6 +57,18 @@ export default async function Page({
     "repair",
     record.title,
   );
+
+  // 記事の話題に対応する在庫車両（FR-ENC-005と同じ考え方の逆方向導線）。
+  // 読み物として満足して終わらせず、実車へ進める道を残す。
+  const { modelName: relatedModelName, vehicles: relatedVehicles } =
+    await getVehiclesRelatedToTitle(record.title);
+  const relatedPhotoPaths = await getLeadVehiclePhotoPaths(
+    relatedVehicles.map((v) => v.id),
+  );
+  const relatedPhotoUrls = relatedVehicles.map((v) => {
+    const path = relatedPhotoPaths.get(v.id);
+    return path ? getVehiclePhotoPublicUrl(path) : undefined;
+  });
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
@@ -104,6 +120,11 @@ export default async function Page({
       <RelatedContentList
         items={related}
         title="関連車種・関連図鑑・関連ブログ"
+      />
+      <RelatedInventorySection
+        vehicles={relatedVehicles}
+        photoUrls={relatedPhotoUrls}
+        topic={relatedModelName ?? ""}
       />
     </main>
   );

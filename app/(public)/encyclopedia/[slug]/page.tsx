@@ -50,7 +50,8 @@ export default async function Page({
 
   // FR-ENC-005: この項目に対応する在庫車両。
   // 図鑑は在庫に依存しない設計（FR-ENC-003）を保ったまま、表示側だけで結びつける。
-  const relatedVehicles = await getVehiclesRelatedToTitle(entry.title);
+  const { modelName: relatedModelName, vehicles: relatedVehicles } =
+    await getVehiclesRelatedToTitle(entry.title);
   const relatedPhotoPaths = await getLeadVehiclePhotoPaths(
     relatedVehicles.map((v) => v.id),
   );
@@ -106,7 +107,7 @@ export default async function Page({
       <RelatedInventorySection
         vehicles={relatedVehicles}
         photoUrls={relatedPhotoUrls}
-        topic={entry.title}
+        topic={relatedModelName ?? ""}
       />
     </main>
   );
