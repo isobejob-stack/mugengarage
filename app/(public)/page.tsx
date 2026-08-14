@@ -20,6 +20,8 @@ import {
 import { VehicleFeatureBadges } from "@/components/ui/status-badge";
 import { VehicleCardPrice } from "@/components/inventory/vehicle-price";
 import { VehicleCardSpecs } from "@/components/inventory/vehicle-card-specs";
+import { VehicleQuickSearch } from "@/components/inventory/vehicle-quick-search";
+import { getVehicleSearchFacetOptions } from "@/lib/inventory/search";
 
 // トップページは掲載中の車両をDBから取得しているため、静的生成されると車両を登録・公開しても
 // 次回デプロイまでトップに出ない（最も目に付く画面で更新が反映されない状態になる）。
@@ -41,9 +43,10 @@ const KNOWLEDGE_NAV = siteNav.find((item) => item.label === "Jaguarを知る");
 
 // SCR-PUB-001: トップページ（FR-INV-005, FR-LINE-001, FR-SEO-001）
 export default async function Page() {
-  const [vehicles, settings] = await Promise.all([
+  const [vehicles, settings, facets] = await Promise.all([
     listPublicVehicles(),
     getSiteSettings(),
+    getVehicleSearchFacetOptions(),
   ]);
   // トップに出す在庫の上限。3カラムのグリッドがちょうど3行で埋まる9台とする
   // （10台前後で打ち切る想定だが、9なら最終行に1台だけ余るような欠けが出ない）。
@@ -135,15 +138,22 @@ export default async function Page() {
       )}
 
       <div className="mx-auto max-w-5xl px-4">
+        {/* ヒーローの直後に検索ブロックを置く。
+            この店に来た人の第一の用件は「車を探す」であり、
+            その入口をスクロールさせずに渡す。 */}
+        {vehicles.length > 0 && (
+          <div className="mt-8">
+            <VehicleQuickSearch
+              models={facets.models}
+              totalCount={vehicles.length}
+            />
+          </div>
+        )}
+
         <section className="mt-10">
           <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
-            在庫車両
+            掲載中の車両
           </h2>
-          {vehicles.length > 0 && (
-            <p className="text-foreground-muted mt-2">
-              現在{vehicles.length}台を掲載しています。
-            </p>
-          )}
           {featuredVehicles.length === 0 ? (
             <p className="text-foreground-muted mt-4">
               現在公開中の車両はありません。
