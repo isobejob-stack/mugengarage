@@ -74,8 +74,12 @@ export function SelectField({
 }) {
   return (
     <label className="block">
-      <span className="text-sm font-medium text-charcoal-900">{label}</span>
-      <select name={name} defaultValue={defaultValue ?? ""} className="input mt-1">
+      <span className="text-charcoal-900 text-sm font-medium">{label}</span>
+      <select
+        name={name}
+        defaultValue={defaultValue ?? ""}
+        className="input mt-1"
+      >
         <option value="">{placeholder}</option>
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -113,7 +117,7 @@ export function RangeSelectField({
 }) {
   return (
     <div className="block">
-      <span className="text-sm font-medium text-charcoal-900">{label}</span>
+      <span className="text-charcoal-900 text-sm font-medium">{label}</span>
       <div className="mt-1 flex items-center gap-2">
         <select
           name={fromName}
@@ -128,7 +132,7 @@ export function RangeSelectField({
             </option>
           ))}
         </select>
-        <span aria-hidden="true" className="shrink-0 text-foreground-muted">
+        <span aria-hidden="true" className="text-foreground-muted shrink-0">
           〜
         </span>
         <select
@@ -170,12 +174,12 @@ export function CheckboxField({
         name={name}
         value="1"
         defaultChecked={defaultChecked}
-        className="size-5 shrink-0 accent-primary-700"
+        className="accent-primary-700 size-5 shrink-0"
       />
       <span>
-        <span className="text-sm font-medium text-charcoal-900">{label}</span>
+        <span className="text-charcoal-900 text-sm font-medium">{label}</span>
         {description && (
-          <span className="mt-0.5 block text-xs text-foreground-muted">
+          <span className="text-foreground-muted mt-0.5 block text-xs">
             {description}
           </span>
         )}
@@ -193,8 +197,10 @@ export function FilterSection({
 }) {
   return (
     <div>
-      <p className="text-sm font-bold text-charcoal-900">{title}</p>
-      <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">{children}</div>
+      <p className="text-charcoal-900 text-sm font-bold">{title}</p>
+      <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {children}
+      </div>
     </div>
   );
 }

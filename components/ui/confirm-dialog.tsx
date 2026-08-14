@@ -37,10 +37,12 @@ export function ConfirmDialog({
     <dialog
       ref={dialogRef}
       onCancel={onCancel}
-      className="w-full max-w-sm rounded-2xl border border-neutral-200 bg-white p-6 shadow-medium backdrop:bg-black/40"
+      className="shadow-medium w-full max-w-sm rounded-2xl border border-neutral-200 bg-white p-6 backdrop:bg-black/40"
     >
-      <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">{title}</h2>
-      <p className="mt-2 text-base text-foreground-muted">{description}</p>
+      <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
+        {title}
+      </h2>
+      <p className="text-foreground-muted mt-2 text-base">{description}</p>
       <div className="mt-6 flex justify-end gap-3">
         <Button type="button" variant="outline" onClick={onCancel}>
           {cancelLabel}

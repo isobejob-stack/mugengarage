@@ -10,7 +10,7 @@ export default async function Page() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
       <div className="flex items-center justify-between">
-        <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+        <h1 className="text-charcoal-900 font-serif text-2xl font-bold">
           Jaguar年表
         </h1>
         <div className="flex items-center gap-3">
@@ -24,7 +24,7 @@ export default async function Page() {
       </div>
 
       {events.length === 0 ? (
-        <p className="mt-8 text-base text-foreground-muted">
+        <p className="text-foreground-muted mt-8 text-base">
           年表イベントはまだありません。
         </p>
       ) : (
@@ -34,10 +34,10 @@ export default async function Page() {
               <Card>
                 <CardBody className="flex flex-row items-center justify-between gap-4 p-4">
                   <div>
-                    <p className="text-base text-foreground-muted">
+                    <p className="text-foreground-muted text-base">
                       {e.event_date}（{timelineCategoryLabels[e.category]}）
                     </p>
-                    <p className="text-lg font-semibold text-charcoal-900">
+                    <p className="text-charcoal-900 text-lg font-semibold">
                       {e.title}
                     </p>
                   </div>

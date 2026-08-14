@@ -195,7 +195,7 @@ export function VehicleForm({
       className="flex flex-col gap-10 pb-24"
     >
       <section>
-        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+        <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
           基本情報
         </h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -433,7 +433,9 @@ export function VehicleForm({
           <Field label="修復歴">
             <select
               className="input"
-              {...register("accident_history", { setValueAs: toNullableBoolean })}
+              {...register("accident_history", {
+                setValueAs: toNullableBoolean,
+              })}
               value={booleanSelectValue(watch("accident_history"))}
             >
               <option value="">未設定</option>
@@ -593,7 +595,9 @@ export function VehicleForm({
           <Field label="記録簿">
             <select
               className="input"
-              {...register("has_record_book", { setValueAs: toNullableBoolean })}
+              {...register("has_record_book", {
+                setValueAs: toNullableBoolean,
+              })}
               value={booleanSelectValue(watch("has_record_book"))}
             >
               <option value="">未設定</option>
@@ -639,7 +643,7 @@ export function VehicleForm({
       </section>
 
       <section>
-        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+        <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
           自由入力コンテンツ（Markdown）
         </h2>
         <div className="mt-4 flex flex-col gap-4">
@@ -683,7 +687,7 @@ export function VehicleForm({
       </section>
 
       <section>
-        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+        <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
           写真・動画
         </h2>
         <div className="mt-4">
@@ -694,7 +698,7 @@ export function VehicleForm({
               initialVideos={initialVideos ?? []}
             />
           ) : (
-            <p className="text-base text-foreground-muted">
+            <p className="text-foreground-muted text-base">
               写真・動画の登録は、車両を登録した後に編集画面から行えます。まずは基本情報を入力して登録してください。
             </p>
           )}
@@ -702,7 +706,7 @@ export function VehicleForm({
       </section>
 
       <section>
-        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+        <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
           関連コンテンツ
         </h2>
         <div className="mt-4">
@@ -718,7 +722,7 @@ export function VehicleForm({
       </section>
 
       <section>
-        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+        <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
           タグ
         </h2>
         <div className="mt-4">
@@ -734,7 +738,7 @@ export function VehicleForm({
       </section>
 
       <section>
-        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+        <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
           公開設定
         </h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -748,18 +752,18 @@ export function VehicleForm({
             </select>
           </Field>
           <div className="flex items-end gap-6">
-            <label className="flex min-h-11 items-center gap-2 text-base text-charcoal-900">
+            <label className="text-charcoal-900 flex min-h-11 items-center gap-2 text-base">
               <input
                 type="checkbox"
-                className="h-5 w-5 accent-primary-600"
+                className="accent-primary-600 h-5 w-5"
                 {...register("is_recommended")}
               />
               おすすめ
             </label>
-            <label className="flex min-h-11 items-center gap-2 text-base text-charcoal-900">
+            <label className="text-charcoal-900 flex min-h-11 items-center gap-2 text-base">
               <input
                 type="checkbox"
-                className="h-5 w-5 accent-primary-600"
+                className="accent-primary-600 h-5 w-5"
                 {...register("is_new_arrival")}
               />
               新着
@@ -778,7 +782,7 @@ export function VehicleForm({
               })}
               value={toDatetimeLocalValue(watch("scheduled_publish_at"))}
             />
-            <p className="mt-1 text-base text-foreground-muted">
+            <p className="text-foreground-muted mt-1 text-base">
               指定日時になると自動的に公開ステータスに変わります（公開ステータスが「非公開」の場合のみ有効です）。
             </p>
           </Field>
@@ -787,7 +791,7 @@ export function VehicleForm({
 
       {isEdit && (
         <section>
-          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+          <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
             SEO・URL設定
           </h2>
           <div className="mt-4 flex flex-col gap-4">
@@ -800,7 +804,7 @@ export function VehicleForm({
                 value={watch("slug") ?? ""}
               />
             </Field>
-            <p className="text-base text-foreground-muted">
+            <p className="text-foreground-muted text-base">
               URLが変更されます。変更前のURLは自動的に新しいURLへリダイレクトされます。
             </p>
             <SeoFieldsSection
@@ -828,7 +832,7 @@ export function VehicleForm({
           <h2 className="font-serif text-lg font-bold text-red-700">
             危険な操作
           </h2>
-          <p className="mt-1 text-base text-foreground-muted">
+          <p className="text-foreground-muted mt-1 text-base">
             この車両を削除すると公開ページから即座に非表示になります。この操作は元に戻せません。
           </p>
           {deleteError && (
@@ -849,7 +853,7 @@ export function VehicleForm({
         </section>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-white p-4 shadow-medium pb-[env(safe-area-inset-bottom)]">
+      <div className="shadow-medium fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-white p-4 pb-[env(safe-area-inset-bottom)]">
         <Button
           type="submit"
           disabled={isSubmitting}
@@ -900,7 +904,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-base font-medium text-charcoal-900">{label}</span>
+      <span className="text-charcoal-900 text-base font-medium">{label}</span>
       <div className="mt-1">{children}</div>
       {error && (
         <p className="mt-1 text-base text-red-600" role="alert">

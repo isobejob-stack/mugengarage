@@ -66,16 +66,21 @@ export function AdminNav() {
   };
 
   return (
-    <header className="sticky top-0 z-20 border-b border-neutral-200 bg-white shadow-soft">
+    <header className="shadow-soft sticky top-0 z-20 border-b border-neutral-200 bg-white">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
         <Link
           href="/admin"
-          className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl"
+          className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl"
         >
           M-GARAGE 管理画面
         </Link>
         <div className="flex items-center gap-2">
-          <Button type="button" onClick={handleLogout} variant="outline" size="sm">
+          <Button
+            type="button"
+            onClick={handleLogout}
+            variant="outline"
+            size="sm"
+          >
             ログアウト
           </Button>
           <button
@@ -83,7 +88,7 @@ export function AdminNav() {
             onClick={() => setIsMobileMenuOpen((open) => !open)}
             aria-expanded={isMobileMenuOpen}
             aria-controls="admin-nav-menu"
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-md border border-neutral-300 text-charcoal-800 md:hidden"
+            className="text-charcoal-800 flex min-h-11 min-w-11 items-center justify-center rounded-md border border-neutral-300 md:hidden"
           >
             <span className="sr-only">メニューを開く</span>
             <span aria-hidden="true" className="text-xl leading-none">
@@ -112,13 +117,13 @@ export function AdminNav() {
               aria-label={`${group.label}メニュー`}
               className={`flex flex-col gap-1 md:flex-row md:flex-wrap md:items-center ${
                 groupIndex > 0
-                  ? "border-t border-neutral-200 pt-3 md:ml-2 md:border-l md:border-t-0 md:pl-2 md:pt-0"
+                  ? "border-t border-neutral-200 pt-3 md:ml-2 md:border-t-0 md:border-l md:pt-0 md:pl-2"
                   : ""
               }`}
             >
               <span
                 aria-hidden="true"
-                className="mb-1 mr-1 mt-1 text-sm font-semibold uppercase tracking-wide text-neutral-400 md:mt-0"
+                className="mt-1 mr-1 mb-1 text-sm font-semibold tracking-wide text-neutral-400 uppercase md:mt-0"
               >
                 {group.label}
               </span>
@@ -129,10 +134,10 @@ export function AdminNav() {
                     key={item.href}
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex min-h-11 w-full items-center justify-start rounded-md px-3 text-base transition-colors duration-200 ease-standard md:w-auto md:justify-center ${
+                    className={`ease-standard flex min-h-11 w-full items-center justify-start rounded-md px-3 text-base transition-colors duration-200 md:w-auto md:justify-center ${
                       isActive
-                        ? "bg-primary-50 font-semibold text-primary-700"
-                        : "text-charcoal-700 hover:bg-neutral-100 hover:text-primary-700"
+                        ? "bg-primary-50 text-primary-700 font-semibold"
+                        : "text-charcoal-700 hover:text-primary-700 hover:bg-neutral-100"
                     }`}
                   >
                     {item.label}

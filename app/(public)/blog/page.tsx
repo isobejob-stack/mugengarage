@@ -22,12 +22,12 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
+      <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         ブログ
       </h1>
 
       {articles.length === 0 ? (
-        <p className="mt-8 text-foreground-muted">まだ記事はありません。</p>
+        <p className="text-foreground-muted mt-8">まだ記事はありません。</p>
       ) : (
         <ul className="mt-6 flex flex-col gap-4">
           {articles.map((a) => (

@@ -27,9 +27,7 @@ export function QuickVehicleRegister({
   const [price, setPrice] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [createdVehicleId, setCreatedVehicleId] = useState<string | null>(
-    null,
-  );
+  const [createdVehicleId, setCreatedVehicleId] = useState<string | null>(null);
 
   const canSubmit = manufacturerId !== "" && modelId !== "" && !submitting;
 
@@ -69,7 +67,7 @@ export function QuickVehicleRegister({
       <div className="flex flex-col gap-6">
         <Card>
           <CardBody>
-            <p className="text-base font-medium text-charcoal-900">
+            <p className="text-charcoal-900 text-base font-medium">
               車両を登録しました。続きの詳細情報（諸元・コメント等）は後で入力できます。
             </p>
             <Button
@@ -84,10 +82,10 @@ export function QuickVehicleRegister({
         </Card>
 
         <div>
-          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+          <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
             写真
           </h2>
-          <p className="mt-1 text-base text-foreground-muted">
+          <p className="text-foreground-muted mt-1 text-base">
             その場で車の写真を撮ってアップロードできます。並び替え・削除は編集画面からも行えます。
           </p>
           <div className="mt-4">
@@ -163,7 +161,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-base font-medium text-charcoal-900">
+      <span className="text-charcoal-900 text-base font-medium">
         {label}
         {required && <span className="ml-1 text-red-600">必須</span>}
       </span>

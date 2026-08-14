@@ -25,14 +25,14 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+      <h1 className="text-charcoal-900 font-serif text-2xl font-bold">
         ダッシュボード
       </h1>
 
       <Card href="/admin/inquiries" className="mt-6 hover:-translate-y-0.5">
         <CardBody className="flex flex-row items-center justify-between gap-4 p-6">
           <div>
-            <p className="text-base text-foreground-muted">
+            <p className="text-foreground-muted text-base">
               未対応の問い合わせ
             </p>
             <p
@@ -52,7 +52,7 @@ export default async function Page() {
 
       {favoriteCounts.length > 0 && (
         <>
-          <h2 className="mt-8 font-serif text-lg font-bold text-charcoal-900">
+          <h2 className="text-charcoal-900 mt-8 font-serif text-lg font-bold">
             お気に入り登録数（上位）
           </h2>
           <Card className="mt-3">
@@ -67,7 +67,7 @@ export default async function Page() {
                       {v.manufacturers?.name} {v.models?.name}
                       {v.model_year ? `（${v.model_year}年）` : ""}
                     </span>
-                    <span className="font-mono font-semibold text-primary-700">
+                    <span className="text-primary-700 font-mono font-semibold">
                       ♥ {v.favoriteCount}
                     </span>
                   </li>
@@ -78,7 +78,7 @@ export default async function Page() {
         </>
       )}
 
-      <h2 className="mt-8 font-serif text-lg font-bold text-charcoal-900">
+      <h2 className="text-charcoal-900 mt-8 font-serif text-lg font-bold">
         よく使う操作
       </h2>
       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">

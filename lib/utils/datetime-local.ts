@@ -13,7 +13,9 @@
  * （タイムゾーン情報なしの "YYYY-MM-DDTHH:mm"、ブラウザのローカル時刻）に変換する。
  * null・空文字・不正な値の場合は空文字を返す（未入力として扱う）。
  */
-export function toDatetimeLocalValue(isoString: string | null | undefined): string {
+export function toDatetimeLocalValue(
+  isoString: string | null | undefined,
+): string {
   if (!isoString) return "";
 
   const date = new Date(isoString);

@@ -28,19 +28,19 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
+      <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         Jaguar図鑑
       </h1>
-      <p className="mt-2 text-foreground-muted">
+      <p className="text-foreground-muted mt-2">
         ブランド・シリーズ・車種・世代・エンジン・技術・歴史・用語をまとめた図鑑です。
       </p>
 
       {grouped.length === 0 ? (
-        <p className="mt-8 text-foreground-muted">まだ項目がありません。</p>
+        <p className="text-foreground-muted mt-8">まだ項目がありません。</p>
       ) : (
         grouped.map((g) => (
           <section key={g.category} className="mt-8">
-            <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+            <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
               {g.label}
             </h2>
             <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">

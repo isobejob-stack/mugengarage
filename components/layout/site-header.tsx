@@ -9,9 +9,12 @@ export async function SiteHeader() {
   const settings = await getSiteSettings();
 
   return (
-    <header className="border-b border-neutral-200 bg-surface shadow-soft">
+    <header className="bg-surface shadow-soft border-b border-neutral-200">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4">
-        <Link href="/" className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+        <Link
+          href="/"
+          className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl"
+        >
           M-GARAGE
         </Link>
 

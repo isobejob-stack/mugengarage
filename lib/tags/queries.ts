@@ -42,7 +42,12 @@ export async function createTag(values: { name: string; slug: string }) {
 export async function deleteTag(id: string) {
   const supabase = createAdminClient();
   await supabase.from("taggings").delete().eq("tag_id", id);
-  return supabase.from("tags").delete().eq("id", id).select().maybeSingle<Tag>();
+  return supabase
+    .from("tags")
+    .delete()
+    .eq("id", id)
+    .select()
+    .maybeSingle<Tag>();
 }
 
 // 特定コンテンツ（車両・記事）に紐付いたタグ一覧を取得する

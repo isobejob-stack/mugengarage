@@ -274,7 +274,7 @@ export function VehicleMediaManager({
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h3 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+        <h3 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
           写真
         </h3>
 
@@ -340,11 +340,11 @@ export function VehicleMediaManager({
           <div className="mt-3 w-full max-w-sm">
             <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-200">
               <div
-                className="h-2 rounded-full bg-primary-600 transition-all duration-200 ease-standard"
+                className="bg-primary-600 ease-standard h-2 rounded-full transition-all duration-200"
                 style={{ width: `${uploadProgress}%` }}
               />
             </div>
-            <p className="mt-1 text-base text-foreground-muted">
+            <p className="text-foreground-muted mt-1 text-base">
               アップロード中... {uploadProgress}%
             </p>
           </div>
@@ -363,7 +363,7 @@ export function VehicleMediaManager({
         )}
 
         {photos.length === 0 ? (
-          <p className="mt-4 text-base text-foreground-muted">
+          <p className="text-foreground-muted mt-4 text-base">
             写真はまだ登録されていません
           </p>
         ) : (
@@ -379,10 +379,10 @@ export function VehicleMediaManager({
                   </span>
                 )}
 
-                <label className="absolute top-3 left-3 z-20 inline-flex h-11 w-11 items-center justify-center rounded bg-white shadow-medium">
+                <label className="shadow-medium absolute top-3 left-3 z-20 inline-flex h-11 w-11 items-center justify-center rounded bg-white">
                   <input
                     type="checkbox"
-                    className="h-5 w-5 accent-primary-600"
+                    className="accent-primary-600 h-5 w-5"
                     checked={selectedPhotoIds.has(photo.id)}
                     onChange={() => togglePhotoSelection(photo.id)}
                     aria-label="この写真を選択"
@@ -410,7 +410,7 @@ export function VehicleMediaManager({
                         disabled={index === 0 || reordering}
                         onClick={() => movePhoto(index, -1)}
                         aria-label="前に並び替え"
-                        className="flex min-h-11 min-w-11 items-center justify-center rounded border border-neutral-300 text-charcoal-900 transition-colors duration-200 ease-standard hover:border-primary-400 hover:bg-primary-50 disabled:opacity-40"
+                        className="text-charcoal-900 ease-standard hover:border-primary-400 hover:bg-primary-50 flex min-h-11 min-w-11 items-center justify-center rounded border border-neutral-300 transition-colors duration-200 disabled:opacity-40"
                       >
                         ↑
                       </button>
@@ -419,7 +419,7 @@ export function VehicleMediaManager({
                         disabled={index === photos.length - 1 || reordering}
                         onClick={() => movePhoto(index, 1)}
                         aria-label="後に並び替え"
-                        className="flex min-h-11 min-w-11 items-center justify-center rounded border border-neutral-300 text-charcoal-900 transition-colors duration-200 ease-standard hover:border-primary-400 hover:bg-primary-50 disabled:opacity-40"
+                        className="text-charcoal-900 ease-standard hover:border-primary-400 hover:bg-primary-50 flex min-h-11 min-w-11 items-center justify-center rounded border border-neutral-300 transition-colors duration-200 disabled:opacity-40"
                       >
                         ↓
                       </button>
@@ -439,7 +439,7 @@ export function VehicleMediaManager({
                       type="button"
                       disabled={index === 0 || reordering}
                       onClick={() => movePhotoToStart(index)}
-                      className="min-h-11 flex-1 rounded border border-neutral-300 text-base text-charcoal-900 transition-colors duration-200 ease-standard hover:border-primary-400 hover:bg-primary-50 disabled:opacity-40"
+                      className="text-charcoal-900 ease-standard hover:border-primary-400 hover:bg-primary-50 min-h-11 flex-1 rounded border border-neutral-300 text-base transition-colors duration-200 disabled:opacity-40"
                     >
                       先頭へ
                     </button>
@@ -447,7 +447,7 @@ export function VehicleMediaManager({
                       type="button"
                       disabled={index === photos.length - 1 || reordering}
                       onClick={() => movePhotoToEnd(index)}
-                      className="min-h-11 flex-1 rounded border border-neutral-300 text-base text-charcoal-900 transition-colors duration-200 ease-standard hover:border-primary-400 hover:bg-primary-50 disabled:opacity-40"
+                      className="text-charcoal-900 ease-standard hover:border-primary-400 hover:bg-primary-50 min-h-11 flex-1 rounded border border-neutral-300 text-base transition-colors duration-200 disabled:opacity-40"
                     >
                       末尾へ
                     </button>
@@ -460,7 +460,7 @@ export function VehicleMediaManager({
       </div>
 
       <div>
-        <h3 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+        <h3 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
           動画（YouTube等の外部URL）
         </h3>
 
@@ -499,7 +499,7 @@ export function VehicleMediaManager({
         )}
 
         {videos.length === 0 ? (
-          <p className="mt-4 text-base text-foreground-muted">
+          <p className="text-foreground-muted mt-4 text-base">
             動画はまだ登録されていません
           </p>
         ) : (
@@ -513,7 +513,7 @@ export function VehicleMediaManager({
                   href={video.video_url}
                   target="_blank"
                   rel="noreferrer"
-                  className="truncate text-base text-primary-700 underline"
+                  className="text-primary-700 truncate text-base underline"
                 >
                   {video.video_url}
                 </a>

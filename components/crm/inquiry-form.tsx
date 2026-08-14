@@ -44,7 +44,7 @@ export function InquiryForm() {
 
   if (submitted) {
     return (
-      <div className="rounded-2xl border border-green-200 bg-green-50 p-6 shadow-soft">
+      <div className="shadow-soft rounded-2xl border border-green-200 bg-green-50 p-6">
         <p className="font-medium text-green-800">
           お問い合わせありがとうございます。担当者より折り返しご連絡いたします。
         </p>
@@ -89,7 +89,10 @@ export function InquiryForm() {
           サーバー側で値の有無をスパム判定に使う（app/api/inquiries/route.ts）。
           display:none ではなく位置を画面外へ飛ばすのは、display:none の項目を
           無視するボットに気付かれにくくするため。 */}
-      <div aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
+      <div
+        aria-hidden="true"
+        className="absolute left-[-9999px] h-0 w-0 overflow-hidden"
+      >
         <label htmlFor="website">
           この欄は入力しないでください
           <input
@@ -122,7 +125,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-base font-medium text-charcoal-900">{label}</span>
+      <span className="text-charcoal-900 text-base font-medium">{label}</span>
       <div className="mt-1">{children}</div>
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
     </label>

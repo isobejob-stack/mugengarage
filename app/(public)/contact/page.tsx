@@ -21,19 +21,19 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
+      <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         お問い合わせ
       </h1>
-      <p className="mt-2 text-foreground-muted">
+      <p className="text-foreground-muted mt-2">
         購入・修理・売却・部品・その他、Jaguarのことなら何でもご相談ください。お急ぎの方は下記からLINEでご相談いただけます。
       </p>
 
       {/* FR-LINE-002: カテゴリ別のLINE相談導線 */}
-      <div className="mt-8 rounded-2xl border border-neutral-200 bg-white p-4 shadow-soft sm:p-6">
+      <div className="shadow-soft mt-8 rounded-2xl border border-neutral-200 bg-white p-4 sm:p-6">
         <LineConsultationMenu lineUrl={settings.line_url} />
       </div>
 
-      <p className="mt-6 text-sm text-foreground-muted">
+      <p className="text-foreground-muted mt-6 text-sm">
         LINEでのご相談は即時性が高くおすすめです。じっくり文章で伝えたい方は下記フォームをご利用ください。
       </p>
 

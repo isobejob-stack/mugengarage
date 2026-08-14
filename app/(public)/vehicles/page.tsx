@@ -11,12 +11,7 @@ import {
   buildPaginationMeta,
 } from "@/lib/api/pagination";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardImage,
-  CardBody,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardImage, CardBody, CardTitle } from "@/components/ui/card";
 import { VehicleFeatureBadges } from "@/components/ui/status-badge";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { VehicleCardPrice } from "@/components/inventory/vehicle-price";
@@ -31,6 +26,12 @@ import {
   DISPLACEMENT_OPTIONS,
 } from "@/components/inventory/vehicle-search-fields";
 import { VehicleCardSpecs } from "@/components/inventory/vehicle-card-specs";
+import { VehicleActiveFilters } from "@/components/inventory/vehicle-active-filters";
+import { VehicleSortSelect } from "@/components/inventory/vehicle-sort-select";
+import { Pagination } from "@/components/ui/pagination";
+import { FavoriteIconButton } from "@/components/engagement/favorite-icon-button";
+import { getSessionId } from "@/lib/engagement/session";
+import { listFavoriteVehicleIds } from "@/lib/engagement/queries";
 
 type SearchParams = Record<string, string | undefined>;
 
@@ -40,14 +41,10 @@ function toNumber(value: string | undefined) {
   return Number.isFinite(n) ? n : undefined;
 }
 
-function buildQueryString(params: SearchParams, overrides: SearchParams) {
-  const merged = new URLSearchParams();
-  for (const [key, value] of Object.entries({ ...params, ...overrides })) {
-    if (value) merged.set(key, value);
-  }
-  const qs = merged.toString();
-  return qs ? `/vehicles?${qs}` : "/vehicles";
-}
+// 一覧の先頭何枚を優先読み込みにするか。
+// スマートフォンの初期表示に入るのは概ね1〜2枚のため、そこだけ遅延読み込みを外す
+// （画面外まで優先すると帯域を奪い合ってかえって遅くなる）。
+const PRIORITY_IMAGE_COUNT = 2;
 
 export const metadata = buildPageMetadata({
   title: "在庫車両",
@@ -91,31 +88,40 @@ export default async function Page({
   // 詳細検索の条件が1つでも指定されていれば、再訪時に折りたたみを開いた状態にする
   const hasAdvancedFilters = Boolean(
     params.series ||
-      params.generation ||
-      params.grade ||
-      params.drivetrain ||
-      params.displacement_min ||
-      params.displacement_max ||
-      params.exterior_color,
+    params.generation ||
+    params.grade ||
+    params.drivetrain ||
+    params.displacement_min ||
+    params.displacement_max ||
+    params.exterior_color,
   );
 
-  const [{ vehicles, totalCount }, facets] = await Promise.all([
+  const sessionId = await getSessionId();
+  const [{ vehicles, totalCount }, facets, favoriteIds] = await Promise.all([
     searchPublicVehicles(filters, pagination),
     getVehicleSearchFacetOptions(),
+    sessionId ? listFavoriteVehicleIds(sessionId) : Promise.resolve([]),
   ]);
   const meta = buildPaginationMeta(pagination, totalCount);
 
   // 一覧表示用に、各車両の先頭写真のみを1クエリでまとめて取得する（N+1クエリ回避）
-  const leadPhotoPaths = await getLeadVehiclePhotoPaths(vehicles.map((v) => v.id));
+  const leadPhotoPaths = await getLeadVehiclePhotoPaths(
+    vehicles.map((v) => v.id),
+  );
   const photoUrls = vehicles.map((v) => {
     const path = leadPhotoPaths.get(v.id);
     return path ? getVehiclePhotoPublicUrl(path) : undefined;
   });
 
+  // 「21台中 1〜20台を表示」のための範囲。
+  // 総件数だけだと、今どのあたりを見ているのかが分からない。
+  const rangeStart = (meta.page - 1) * meta.per_page + 1;
+  const rangeEnd = Math.min(meta.page * meta.per_page, totalCount);
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
       <div className="flex items-center justify-between">
-        <h1 className="font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
+        <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
           在庫車両一覧
         </h1>
         <Link href="/vehicles/ranking" className="text-sm hover:underline">
@@ -163,18 +169,11 @@ export default async function Page({
             options={MILEAGE_OPTIONS}
             placeholder="上限なし"
           />
-          <SelectField
-            label="並び替え"
-            name="sort"
-            defaultValue={params.sort}
-            options={[
-              { value: "new", label: "新着順" },
-              { value: "price_asc", label: "価格が安い順" },
-              { value: "price_desc", label: "価格が高い順" },
-            ]}
-            placeholder="おすすめ順"
-          />
         </FilterSection>
+
+        {/* 並び替えは検索結果の直上に移したが、条件を変えて再検索したときに
+            選んでいた並び順が消えないよう、フォーム側でも引き継ぐ。 */}
+        {params.sort && <input type="hidden" name="sort" value={params.sort} />}
 
         {/* ISSUE-006: 中古車サイトで最も使われる2条件。折りたたみの中ではなく
             常に見える位置に置く（条件を1つも開かずに絞り込める状態を作る）。 */}
@@ -197,7 +196,7 @@ export default async function Page({
           className="rounded-md border border-neutral-200 p-4"
           open={hasAdvancedFilters}
         >
-          <summary className="min-h-11 cursor-pointer py-2 text-base font-medium text-charcoal-900">
+          <summary className="text-charcoal-900 min-h-11 cursor-pointer py-2 text-base font-medium">
             詳細検索（車種階層・エンジン諸元・色ほか）
           </summary>
 
@@ -207,19 +206,28 @@ export default async function Page({
                 label="シリーズ"
                 name="series"
                 defaultValue={params.series}
-                options={facets.series.map((x) => ({ value: x.id, label: x.name }))}
+                options={facets.series.map((x) => ({
+                  value: x.id,
+                  label: x.name,
+                }))}
               />
               <SelectField
                 label="世代"
                 name="generation"
                 defaultValue={params.generation}
-                options={facets.generations.map((x) => ({ value: x.id, label: x.name }))}
+                options={facets.generations.map((x) => ({
+                  value: x.id,
+                  label: x.name,
+                }))}
               />
               <SelectField
                 label="グレード"
                 name="grade"
                 defaultValue={params.grade}
-                options={facets.grades.map((x) => ({ value: x.id, label: x.name }))}
+                options={facets.grades.map((x) => ({
+                  value: x.id,
+                  label: x.name,
+                }))}
               />
             </FilterSection>
 
@@ -236,13 +244,19 @@ export default async function Page({
                 label="駆動方式"
                 name="drivetrain"
                 defaultValue={params.drivetrain}
-                options={facets.drivetrains.map((d) => ({ value: d, label: d }))}
+                options={facets.drivetrains.map((d) => ({
+                  value: d,
+                  label: d,
+                }))}
               />
               <SelectField
                 label="外装色"
                 name="exterior_color"
                 defaultValue={params.exterior_color}
-                options={facets.exteriorColors.map((c) => ({ value: c, label: c }))}
+                options={facets.exteriorColors.map((c) => ({
+                  value: c,
+                  label: c,
+                }))}
               />
             </FilterSection>
           </div>
@@ -258,17 +272,61 @@ export default async function Page({
         </div>
       </form>
 
-      <p className="mt-4 text-sm text-neutral-500">{totalCount}台</p>
+      <VehicleActiveFilters params={params} facets={facets} />
+
+      {/* 件数と並び替えを結果の直上にまとめる。
+          「今いくつ出ていて、どの順で並んでいるか」は必ずセットで確認されるため。 */}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 pb-4">
+        <p className="text-charcoal-900 text-base">
+          該当{" "}
+          <strong className="text-xl font-bold tabular-nums">
+            {totalCount}
+          </strong>
+          台
+          {totalCount > 0 && (
+            <span className="text-foreground-muted ml-2 text-sm">
+              （{rangeStart}〜{rangeEnd}台目を表示）
+            </span>
+          )}
+        </p>
+        {totalCount > 0 && <VehicleSortSelect params={params} />}
+      </div>
 
       {vehicles.length === 0 ? (
-        <p className="mt-8 text-neutral-500">
-          条件に一致する車両が見つかりませんでした。
-        </p>
+        // 0件で行き止まりにしない。中古車は在庫が数十台規模のため条件を重ねると
+        // すぐ0件になり、ここで戻る導線が無いと離脱する。
+        <div className="bg-cream-100 mt-8 rounded-2xl border border-neutral-200 p-6 text-center">
+          <p className="text-charcoal-900 text-lg font-bold">
+            条件に一致する車両が見つかりませんでした
+          </p>
+          <p className="text-foreground-muted mt-2 text-base">
+            条件を少なくすると見つかることがあります。
+            お探しの車両が見つからない場合は、ご希望をお聞かせいただければ
+            入荷時にご案内いたします。
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Button href="/vehicles" variant="primary" size="md">
+              条件をクリアしてすべて見る
+            </Button>
+            <Button href="/contact" variant="outline" size="md">
+              希望の車両を相談する
+            </Button>
+          </div>
+        </div>
       ) : (
         <ul className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 md:gap-8">
-          {vehicles.map((v, index) =>
-            v.slug ? (
-              <li key={v.id}>
+          {vehicles.map((v, index) => {
+            if (!v.slug) return null;
+            const vehicleName =
+              `${v.manufacturers?.name ?? ""} ${v.models?.name ?? ""}`.trim();
+            return (
+              // お気に入りボタンをカード（リンク）の外側に重ねるため、liを基準位置にする
+              <li key={v.id} className="relative">
+                <FavoriteIconButton
+                  vehicleId={v.id}
+                  initialFavorited={favoriteIds.includes(v.id)}
+                  vehicleName={vehicleName}
+                />
                 <Card href={`/vehicles/${v.slug}`}>
                   <VehicleFeatureBadges
                     isRecommended={v.is_recommended}
@@ -276,13 +334,15 @@ export default async function Page({
                   />
                   <CardImage
                     src={photoUrls[index]}
-                    alt={`${v.manufacturers?.name ?? ""} ${v.models?.name ?? ""}`}
+                    alt={vehicleName}
+                    priority={index < PRIORITY_IMAGE_COUNT}
                   />
                   <CardBody>
-                    <CardTitle>
-                      {v.manufacturers?.name} {v.models?.name}
-                    </CardTitle>
-                    <VehicleCardPrice price={v.price} totalPrice={v.total_price} />
+                    <CardTitle>{vehicleName}</CardTitle>
+                    <VehicleCardPrice
+                      price={v.price}
+                      totalPrice={v.total_price}
+                    />
                     <VehicleCardSpecs
                       modelYear={v.model_year}
                       mileageKm={v.mileage_km}
@@ -293,34 +353,17 @@ export default async function Page({
                   </CardBody>
                 </Card>
               </li>
-            ) : null,
-          )}
+            );
+          })}
         </ul>
       )}
 
-      {meta.total_pages > 1 && (
-        <div className="mt-8 flex items-center justify-center gap-4">
-          {meta.page > 1 && (
-            <Link
-              href={buildQueryString(params, { page: String(meta.page - 1) })}
-              className="min-h-11 rounded-md border border-neutral-300 px-4 py-2 text-sm"
-            >
-              前へ
-            </Link>
-          )}
-          <span className="text-sm text-neutral-500">
-            {meta.page} / {meta.total_pages}
-          </span>
-          {meta.page < meta.total_pages && (
-            <Link
-              href={buildQueryString(params, { page: String(meta.page + 1) })}
-              className="min-h-11 rounded-md border border-neutral-300 px-4 py-2 text-sm"
-            >
-              次へ
-            </Link>
-          )}
-        </div>
-      )}
+      <Pagination
+        basePath="/vehicles"
+        params={params}
+        page={meta.page}
+        totalPages={meta.total_pages}
+      />
     </main>
   );
 }

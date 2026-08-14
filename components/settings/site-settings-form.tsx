@@ -65,10 +65,10 @@ export function SiteSettingsForm({
       className="mt-8 flex flex-col gap-10"
     >
       <section>
-        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+        <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
           店舗情報
         </h2>
-        <p className="mt-2 text-base text-foreground-muted">
+        <p className="text-foreground-muted mt-2 text-base">
           入力した内容は「店舗情報・アクセス」ページとフッターに反映されます。
           空欄の項目は公開サイトに表示されません。
         </p>
@@ -130,10 +130,7 @@ export function SiteSettingsForm({
             />
           </Field>
 
-          <Field
-            label="代表者名"
-            error={errors.representative_name?.message}
-          >
+          <Field label="代表者名" error={errors.representative_name?.message}>
             <input
               type="text"
               className="input"
@@ -154,10 +151,10 @@ export function SiteSettingsForm({
       </section>
 
       <section>
-        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+        <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
           トップページの写真
         </h2>
-        <p className="mt-2 text-base text-foreground-muted">
+        <p className="text-foreground-muted mt-2 text-base">
           店舗やガレージ、車両の写真を1枚設定すると、トップページの最上部に大きく表示されます。
           未設定の場合は文字だけの表示になります。
         </p>
@@ -168,10 +165,10 @@ export function SiteSettingsForm({
       </section>
 
       <section>
-        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+        <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
           LINE相談のURL
         </h2>
-        <p className="mt-2 text-base text-foreground-muted">
+        <p className="text-foreground-muted mt-2 text-base">
           公式LINEアカウントのURLです。サイト全体の「LINEで相談する」ボタンの遷移先になります。
           <strong className="text-charcoal-900">
             未設定のあいだはLINEボタンを表示しません。
@@ -190,17 +187,17 @@ export function SiteSettingsForm({
       </section>
 
       <section>
-        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+        <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
           掲載媒体・公式SNS
         </h2>
-        <p className="mt-2 text-base text-foreground-muted">
+        <p className="text-foreground-muted mt-2 text-base">
           グーネット、車選びドットコム、Instagram、Facebookなどのリンクです。
           フッターと店舗情報ページに、ここで並べた順に表示されます。
         </p>
 
         <div className="mt-6 flex flex-col gap-4">
           {fields.length === 0 && (
-            <p className="text-base text-foreground-muted">
+            <p className="text-foreground-muted text-base">
               まだリンクが登録されていません。
             </p>
           )}
@@ -208,7 +205,7 @@ export function SiteSettingsForm({
           {fields.map((field, index) => (
             <div
               key={field.id}
-              className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-soft"
+              className="shadow-soft rounded-2xl border border-neutral-200 bg-white p-4"
             >
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Field
@@ -266,9 +263,7 @@ export function SiteSettingsForm({
               type="button"
               variant="outline"
               size="md"
-              onClick={() =>
-                append({ label: "", url: "", description: null })
-              }
+              onClick={() => append({ label: "", url: "", description: null })}
             >
               リンクを追加
             </Button>
@@ -282,7 +277,7 @@ export function SiteSettingsForm({
         </p>
       )}
       {saved && (
-        <p className="text-base text-primary-700" role="status">
+        <p className="text-primary-700 text-base" role="status">
           保存しました。公開サイトに反映されています。
         </p>
       )}
@@ -372,7 +367,7 @@ function HeroImageField({
   return (
     <div className="mt-6">
       {previewUrl && (
-        <div className="relative mb-4 aspect-[16/9] w-full max-w-xl overflow-hidden rounded-2xl border border-neutral-200 shadow-soft">
+        <div className="shadow-soft relative mb-4 aspect-[16/9] w-full max-w-xl overflow-hidden rounded-2xl border border-neutral-200">
           <Image
             src={previewUrl}
             alt="設定中のトップページ写真"
@@ -433,7 +428,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-base font-medium text-charcoal-900">{label}</span>
+      <span className="text-charcoal-900 text-base font-medium">{label}</span>
       <div className="mt-1">{children}</div>
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
     </label>

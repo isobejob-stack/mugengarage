@@ -7,12 +7,12 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+      <h1 className="text-charcoal-900 font-serif text-2xl font-bold">
         顧客一覧
       </h1>
 
       {customers.length === 0 ? (
-        <p className="mt-8 text-base text-foreground-muted">
+        <p className="text-foreground-muted mt-8 text-base">
           登録された顧客はまだいません。
         </p>
       ) : (
@@ -22,10 +22,10 @@ export default async function Page() {
               <Card href={`/admin/customers/${c.id}`}>
                 <CardBody className="flex flex-row items-center justify-between gap-4 p-4">
                   <div>
-                    <p className="text-lg font-semibold text-charcoal-900">
+                    <p className="text-charcoal-900 text-lg font-semibold">
                       {c.name}
                     </p>
-                    <p className="text-base text-foreground-muted">
+                    <p className="text-foreground-muted text-base">
                       {[c.phone, c.email].filter(Boolean).join(" / ") ||
                         "連絡先未登録"}
                     </p>

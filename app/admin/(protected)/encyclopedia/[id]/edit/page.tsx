@@ -41,7 +41,7 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+      <h1 className="text-charcoal-900 font-serif text-2xl font-bold">
         図鑑項目編集
       </h1>
       <div className="mt-6">

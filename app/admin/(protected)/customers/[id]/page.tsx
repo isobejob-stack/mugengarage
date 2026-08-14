@@ -32,7 +32,7 @@ function SectionHeading({
   children: ReactNode;
 }) {
   return (
-    <h2 className="flex items-center gap-2 font-serif text-lg font-bold text-charcoal-900">
+    <h2 className="text-charcoal-900 flex items-center gap-2 font-serif text-lg font-bold">
       <span aria-hidden="true" className="text-primary-600">
         {icon}
       </span>
@@ -86,7 +86,7 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+      <h1 className="text-charcoal-900 font-serif text-2xl font-bold">
         {customer.name}
       </h1>
 
@@ -116,10 +116,11 @@ export default async function Page({
           <CardBody>
             <SectionHeading icon={<Icon path={ICON_PATHS.favorite} />}>
               お気に入り登録車両
-              {favoriteVehicles.length > 0 && `（${favoriteVehicles.length}件）`}
+              {favoriteVehicles.length > 0 &&
+                `（${favoriteVehicles.length}件）`}
             </SectionHeading>
             {favoriteVehicles.length === 0 ? (
-              <p className="mt-4 text-base text-foreground-muted">
+              <p className="text-foreground-muted mt-4 text-base">
                 お気に入り登録した車両はまだありません。
               </p>
             ) : (
@@ -128,21 +129,23 @@ export default async function Page({
                   <li key={v.id}>
                     <Link
                       href={`/admin/vehicles/${v.id}/edit`}
-                      className="flex flex-col gap-1 rounded-lg border border-neutral-200 p-3 transition-colors duration-200 ease-standard hover:border-primary-300 hover:bg-primary-50"
+                      className="ease-standard hover:border-primary-300 hover:bg-primary-50 flex flex-col gap-1 rounded-lg border border-neutral-200 p-3 transition-colors duration-200"
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <span className="text-base font-semibold text-charcoal-900">
+                        <span className="text-charcoal-900 text-base font-semibold">
                           {v.manufacturers?.name} {v.models?.name}
                           {v.model_year ? `（${v.model_year}年）` : ""}
                         </span>
-                        <VehicleStatusBadge status={v.status as VehicleStatus} />
+                        <VehicleStatusBadge
+                          status={v.status as VehicleStatus}
+                        />
                       </div>
-                      <div className="flex items-center justify-between text-base text-foreground-muted">
+                      <div className="text-foreground-muted flex items-center justify-between text-base">
                         <span>
                           お気に入り登録日:{" "}
                           {new Date(v.favoritedAt).toLocaleDateString("ja-JP")}
                         </span>
-                        <span className="font-mono text-base font-bold text-primary-700">
+                        <span className="text-primary-700 font-mono text-base font-bold">
                           ¥{v.price.toLocaleString()}
                         </span>
                       </div>
@@ -187,7 +190,7 @@ export default async function Page({
         </SectionHeading>
 
         {timeline.length === 0 ? (
-          <p className="mt-4 text-base text-foreground-muted">
+          <p className="text-foreground-muted mt-4 text-base">
             まだ履歴がありません。
           </p>
         ) : (
@@ -198,19 +201,19 @@ export default async function Page({
                   <CardBody className="p-4">
                     {entry.type === "inquiry" && (
                       <div>
-                        <p className="text-base text-foreground-muted">
+                        <p className="text-foreground-muted text-base">
                           問い合わせ・{channelLabels[entry.data.channel]}・
                           {inquiryCategoryLabels[entry.data.category]}・
                           {new Date(entry.data.received_at).toLocaleString(
                             "ja-JP",
                           )}
                         </p>
-                        <p className="mt-1 whitespace-pre-wrap text-base text-charcoal-900">
+                        <p className="text-charcoal-900 mt-1 text-base whitespace-pre-wrap">
                           {entry.data.message}
                         </p>
                         <Link
                           href={`/admin/inquiries/${entry.data.id}`}
-                          className="mt-2 inline-block text-base text-primary-700 hover:underline"
+                          className="text-primary-700 mt-2 inline-block text-base hover:underline"
                         >
                           問い合わせ詳細を見る
                         </Link>
@@ -219,13 +222,13 @@ export default async function Page({
 
                     {entry.type === "note" && (
                       <div>
-                        <p className="text-base text-foreground-muted">
+                        <p className="text-foreground-muted text-base">
                           メモ・
                           {new Date(entry.data.created_at).toLocaleString(
                             "ja-JP",
                           )}
                         </p>
-                        <p className="mt-1 whitespace-pre-wrap text-base text-charcoal-900">
+                        <p className="text-charcoal-900 mt-1 text-base whitespace-pre-wrap">
                           {entry.data.body}
                         </p>
                       </div>
@@ -234,11 +237,11 @@ export default async function Page({
                     {entry.type === "reminder" && (
                       <div className="flex items-center justify-between gap-4">
                         <div>
-                          <p className="text-base text-foreground-muted">
+                          <p className="text-foreground-muted text-base">
                             リマインダー・期日 {entry.data.due_date}
                             {entry.data.is_completed && "（完了）"}
                           </p>
-                          <p className="mt-1 text-base text-charcoal-900">
+                          <p className="text-charcoal-900 mt-1 text-base">
                             {entry.data.title}
                           </p>
                         </div>

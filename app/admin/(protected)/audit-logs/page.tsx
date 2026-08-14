@@ -49,56 +49,56 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+      <h1 className="text-charcoal-900 font-serif text-2xl font-bold">
         監査ログ
       </h1>
-      <p className="mt-2 text-base text-foreground-muted">
+      <p className="text-foreground-muted mt-2 text-base">
         SCR-ADM-023 ・ FR-ADM-005
       </p>
 
       {logs.length === 0 ? (
-        <p className="mt-8 text-base text-foreground-muted">
+        <p className="text-foreground-muted mt-8 text-base">
           監査ログはまだありません。
         </p>
       ) : (
         <>
-          <p className="mt-6 text-sm text-foreground-muted sm:hidden">
+          <p className="text-foreground-muted mt-6 text-sm sm:hidden">
             → 表は横にスクロールできます
           </p>
           <Card className="mt-2 sm:mt-6">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-base">
-              <thead>
-                <tr className="border-b border-neutral-200 bg-cream-50 text-left text-foreground-muted">
-                  <th className="py-3 pl-4 pr-4 font-semibold">操作日時</th>
-                  <th className="py-3 pr-4 font-semibold">操作者</th>
-                  <th className="py-3 pr-4 font-semibold">操作対象</th>
-                  <th className="py-3 pr-4 font-semibold">アクション</th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map((log) => (
-                  <tr
-                    key={log.id}
-                    className="border-b border-neutral-100 last:border-b-0"
-                  >
-                    <td className="py-3 pl-4 pr-4 text-foreground-muted">
-                      {new Date(log.created_at).toLocaleString("ja-JP")}
-                    </td>
-                    <td className="py-3 pr-4 text-charcoal-900">
-                      {actorLabel(log)}
-                    </td>
-                    <td className="py-3 pr-4 font-mono text-charcoal-900">
-                      {targetTypeLabel(log.target_type)} / {log.target_id}
-                    </td>
-                    <td className="py-3 pr-4 text-charcoal-900">
-                      {ACTION_LABELS[log.action] ?? log.action}
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-base">
+                <thead>
+                  <tr className="bg-cream-50 text-foreground-muted border-b border-neutral-200 text-left">
+                    <th className="py-3 pr-4 pl-4 font-semibold">操作日時</th>
+                    <th className="py-3 pr-4 font-semibold">操作者</th>
+                    <th className="py-3 pr-4 font-semibold">操作対象</th>
+                    <th className="py-3 pr-4 font-semibold">アクション</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {logs.map((log) => (
+                    <tr
+                      key={log.id}
+                      className="border-b border-neutral-100 last:border-b-0"
+                    >
+                      <td className="text-foreground-muted py-3 pr-4 pl-4">
+                        {new Date(log.created_at).toLocaleString("ja-JP")}
+                      </td>
+                      <td className="text-charcoal-900 py-3 pr-4">
+                        {actorLabel(log)}
+                      </td>
+                      <td className="text-charcoal-900 py-3 pr-4 font-mono">
+                        {targetTypeLabel(log.target_type)} / {log.target_id}
+                      </td>
+                      <td className="text-charcoal-900 py-3 pr-4">
+                        {ACTION_LABELS[log.action] ?? log.action}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </Card>
         </>
       )}

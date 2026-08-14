@@ -25,10 +25,11 @@ export async function PATCH(
     });
   }
 
-  const { data: vehicle, error, restoredStatus } = await restoreVehicle(
-    id,
-    existing.status,
-  );
+  const {
+    data: vehicle,
+    error,
+    restoredStatus,
+  } = await restoreVehicle(id, existing.status);
   if (error || !vehicle) {
     return apiInternalError(error);
   }

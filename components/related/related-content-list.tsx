@@ -14,7 +14,7 @@ export function RelatedContentList({
 
   return (
     <section className="mt-16">
-      <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+      <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
         {title}
       </h2>
       <ul className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">

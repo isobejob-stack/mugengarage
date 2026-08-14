@@ -28,12 +28,12 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+      <h1 className="text-charcoal-900 font-serif text-2xl font-bold">
         問い合わせ
       </h1>
 
       {inquiries.length === 0 ? (
-        <p className="mt-8 text-base text-foreground-muted">
+        <p className="text-foreground-muted mt-8 text-base">
           問い合わせはまだありません。
         </p>
       ) : (
@@ -43,15 +43,15 @@ export default async function Page() {
               <Card href={`/admin/inquiries/${i.id}`}>
                 <CardBody className="flex flex-row items-center justify-between gap-4 p-4">
                   <div>
-                    <p className="text-lg font-semibold text-charcoal-900">
+                    <p className="text-charcoal-900 text-lg font-semibold">
                       {i.customers?.name ?? "（顧客未登録）"}
                     </p>
-                    <p className="text-base text-foreground-muted">
+                    <p className="text-foreground-muted text-base">
                       {channelLabels[i.channel]}・
                       {inquiryCategoryLabels[i.category]}
                     </p>
                     {i.message && (
-                      <p className="mt-1 line-clamp-1 text-base text-foreground-muted">
+                      <p className="text-foreground-muted mt-1 line-clamp-1 text-base">
                         {i.message}
                       </p>
                     )}

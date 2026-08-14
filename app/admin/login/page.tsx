@@ -43,12 +43,12 @@ export default function Page() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-cream-50 px-4 py-8">
-      <div className="w-full max-w-sm rounded-2xl border border-neutral-200 bg-white p-8 shadow-medium">
-        <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+    <main className="bg-cream-50 flex min-h-screen items-center justify-center px-4 py-8">
+      <div className="shadow-medium w-full max-w-sm rounded-2xl border border-neutral-200 bg-white p-8">
+        <h1 className="text-charcoal-900 font-serif text-2xl font-bold">
           ログイン
         </h1>
-        <p className="mt-2 text-base text-foreground-muted">
+        <p className="text-foreground-muted mt-2 text-base">
           M-GARAGE Platform 管理画面
         </p>
 
@@ -59,7 +59,7 @@ export default function Page() {
           <div>
             <label
               htmlFor="email"
-              className="block text-base font-medium text-charcoal-900"
+              className="text-charcoal-900 block text-base font-medium"
             >
               メールアドレス
             </label>
@@ -80,7 +80,7 @@ export default function Page() {
           <div>
             <label
               htmlFor="password"
-              className="block text-base font-medium text-charcoal-900"
+              className="text-charcoal-900 block text-base font-medium"
             >
               パスワード
             </label>

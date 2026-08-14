@@ -37,10 +37,10 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
+      <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         整備実績
       </h1>
-      <p className="mt-2 text-foreground-muted">
+      <p className="text-foreground-muted mt-2">
         修理・レストア・整備の実績と作業ポイントを紹介します。
       </p>
 
@@ -62,7 +62,7 @@ export default async function Page({
       )}
 
       {filtered.length === 0 ? (
-        <p className="mt-8 text-foreground-muted">整備実績はまだありません。</p>
+        <p className="text-foreground-muted mt-8">整備実績はまだありません。</p>
       ) : (
         <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
           {filtered.map((r) => (

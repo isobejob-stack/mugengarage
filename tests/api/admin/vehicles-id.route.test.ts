@@ -4,7 +4,10 @@ import {
   createSupabaseAdminMock,
   type SupabaseAdminMock,
 } from "../../support/supabase-admin-mock";
-import { buildPatchPayload, buildVehicleRecord } from "../../support/vehicle-fixtures";
+import {
+  buildPatchPayload,
+  buildVehicleRecord,
+} from "../../support/vehicle-fixtures";
 
 // このテストは docs/tasks/ISSUE-004-soft-delete-restore-ui-and-test-coverage.md 課題2 に対応する。
 // 対象は app/api/admin/vehicles/[id]/route.ts の DELETE / PATCH ハンドラで、
@@ -77,14 +80,11 @@ function makeParams(id: string = VEHICLE_ID) {
 }
 
 function makePatchRequest(body: unknown) {
-  return new NextRequest(
-    `http://localhost/api/admin/vehicles/${VEHICLE_ID}`,
-    {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(body),
-    },
-  );
+  return new NextRequest(`http://localhost/api/admin/vehicles/${VEHICLE_ID}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
 }
 
 beforeEach(() => {
@@ -164,7 +164,9 @@ describe("DELETE /api/admin/vehicles/[id]", () => {
     expect(vehiclesCalls.some((c) => c.method === "delete")).toBe(false);
     const updateCall = vehiclesCalls.find((c) => c.method === "update");
     expect(updateCall).toBeDefined();
-    expect(updateCall?.args[0]).toMatchObject({ deleted_at: expect.any(String) });
+    expect(updateCall?.args[0]).toMatchObject({
+      deleted_at: expect.any(String),
+    });
 
     expect(recordAuditLog).toHaveBeenCalledWith(
       expect.objectContaining({ action: "delete", targetId: VEHICLE_ID }),
@@ -187,7 +189,10 @@ describe("PATCH /api/admin/vehicles/[id]", () => {
       },
     });
 
-    const payload = buildPatchPayload({ price: 6_000_000, status: "published" });
+    const payload = buildPatchPayload({
+      price: 6_000_000,
+      status: "published",
+    });
     const response = await PATCH(makePatchRequest(payload), makeParams());
     const json = await response.json();
 
@@ -216,7 +221,10 @@ describe("PATCH /api/admin/vehicles/[id]", () => {
       vehicles: { data: existing, error: null },
     });
 
-    const payload = buildPatchPayload({ price: 5_000_000, status: "published" });
+    const payload = buildPatchPayload({
+      price: 5_000_000,
+      status: "published",
+    });
     const response = await PATCH(makePatchRequest(payload), makeParams());
 
     expect(response.status).toBe(200);

@@ -27,50 +27,50 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+      <h1 className="text-charcoal-900 font-serif text-2xl font-bold">
         問い合わせ詳細
       </h1>
 
       <Card className="mt-6">
         <CardBody className="p-6">
-          <p className="text-base text-foreground-muted">
+          <p className="text-foreground-muted text-base">
             {channelLabels[inquiry.channel]}・
             {inquiryCategoryLabels[inquiry.category]}・
             {new Date(inquiry.received_at).toLocaleString("ja-JP")}
           </p>
 
           <div className="mt-4">
-            <p className="text-base font-medium text-foreground-muted">
+            <p className="text-foreground-muted text-base font-medium">
               顧客情報
             </p>
             {inquiry.customers ? (
-              <div className="mt-1 text-base text-charcoal-900">
+              <div className="text-charcoal-900 mt-1 text-base">
                 <p>{inquiry.customers.name}</p>
                 {inquiry.customers.phone && <p>{inquiry.customers.phone}</p>}
                 {inquiry.customers.email && <p>{inquiry.customers.email}</p>}
                 <Link
                   href={`/admin/customers/${inquiry.customers.id}`}
-                  className="mt-1 inline-block text-base text-primary-700 hover:underline"
+                  className="text-primary-700 mt-1 inline-block text-base hover:underline"
                 >
                   顧客詳細を見る
                 </Link>
               </div>
             ) : (
-              <p className="mt-1 text-base text-foreground-muted">未登録</p>
+              <p className="text-foreground-muted mt-1 text-base">未登録</p>
             )}
           </div>
 
           <div className="mt-4">
-            <p className="text-base font-medium text-foreground-muted">
+            <p className="text-foreground-muted text-base font-medium">
               お問い合わせ内容
             </p>
-            <p className="mt-1 whitespace-pre-wrap text-base text-charcoal-900">
+            <p className="text-charcoal-900 mt-1 text-base whitespace-pre-wrap">
               {inquiry.message}
             </p>
           </div>
 
           <div className="mt-6">
-            <p className="text-base font-medium text-foreground-muted">
+            <p className="text-foreground-muted text-base font-medium">
               対応ステータス
             </p>
             <div className="mt-1 max-w-xs">

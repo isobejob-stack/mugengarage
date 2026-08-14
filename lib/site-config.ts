@@ -56,26 +56,32 @@ export const siteNav: ReadonlyArray<SiteNavItem> = [
 // 開発者を介さないと最重要導線を直せない状態になっていた（docs/tasks/ISSUE-005）。
 // 取得は lib/settings/queries.ts の getSiteSettings() を使う。
 
-
 // FR-LINE-002: 相談カテゴリ表示。02_functional_requirements.md 記載の6カテゴリ
 // （購入／修理／売却／部品／Jaguar全般／カーライフ相談）を定義する。
 // presetTextはLINEトーク画面に事前入力する相談内容の初期テキストとして使う。
 export type LineConsultationCategory =
-  | "purchase"
-  | "repair"
-  | "sell"
-  | "parts"
-  | "general"
-  | "carlife";
+  "purchase" | "repair" | "sell" | "parts" | "general" | "carlife";
 
 export const LINE_CONSULTATION_CATEGORIES: ReadonlyArray<{
   id: LineConsultationCategory;
   label: string;
   presetText: string;
 }> = [
-  { id: "purchase", label: "購入", presetText: "車両の購入について相談したいです。" },
-  { id: "repair", label: "修理", presetText: "車両の修理について相談したいです。" },
-  { id: "sell", label: "売却", presetText: "車両の売却について相談したいです。" },
+  {
+    id: "purchase",
+    label: "購入",
+    presetText: "車両の購入について相談したいです。",
+  },
+  {
+    id: "repair",
+    label: "修理",
+    presetText: "車両の修理について相談したいです。",
+  },
+  {
+    id: "sell",
+    label: "売却",
+    presetText: "車両の売却について相談したいです。",
+  },
   { id: "parts", label: "部品", presetText: "部品について相談したいです。" },
   {
     id: "general",

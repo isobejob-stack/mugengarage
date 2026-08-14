@@ -23,10 +23,10 @@ export default function Error({
 
   return (
     <main className="mx-auto flex max-w-2xl flex-col items-center px-4 py-20 text-center">
-      <h1 className="font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
+      <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         ページを表示できませんでした
       </h1>
-      <p className="mt-4 text-foreground-muted">
+      <p className="text-foreground-muted mt-4">
         一時的な不具合が発生しています。お手数ですが、少し時間をおいて再度お試しください。
         お急ぎの場合はLINEからお気軽にご相談ください。
       </p>
@@ -43,7 +43,7 @@ export default function Error({
       {/* 問い合わせ時に状況を特定できるよう、Next.jsが付与するエラーIDのみ控えめに表示する。
           例外の内容そのものは利用者に見せない（内部情報の露出を避ける）。 */}
       {error.digest && (
-        <p className="mt-8 font-mono text-sm text-foreground-muted">
+        <p className="text-foreground-muted mt-8 font-mono text-sm">
           エラーID: {error.digest}
         </p>
       )}

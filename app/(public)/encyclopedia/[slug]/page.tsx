@@ -46,7 +46,7 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <nav className="text-sm text-foreground-muted">
+      <nav className="text-foreground-muted text-sm">
         <Link href="/encyclopedia" className="hover:underline">
           図鑑
         </Link>
@@ -65,10 +65,10 @@ export default async function Page({
         {entry.title}
       </nav>
 
-      <p className="mt-2 text-sm text-foreground-muted">
+      <p className="text-foreground-muted mt-2 text-sm">
         {encyclopediaCategoryLabels[entry.category]}
       </p>
-      <h1 className="mt-1 font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
+      <h1 className="text-charcoal-900 mt-1 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         {entry.title}
       </h1>
 
@@ -78,7 +78,7 @@ export default async function Page({
 
       {children.length > 0 && (
         <section className="mt-10">
-          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+          <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
             関連項目
           </h2>
           <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">

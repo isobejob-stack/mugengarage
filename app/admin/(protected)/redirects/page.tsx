@@ -9,52 +9,52 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+      <h1 className="text-charcoal-900 font-serif text-2xl font-bold">
         リダイレクト一覧
       </h1>
-      <p className="mt-2 text-base text-foreground-muted">
+      <p className="text-foreground-muted mt-2 text-base">
         SCR-ADM-025 ・ FR-SEO-003
       </p>
 
       {redirects.length === 0 ? (
-        <p className="mt-8 text-base text-foreground-muted">
+        <p className="text-foreground-muted mt-8 text-base">
           リダイレクトはまだ登録されていません。
         </p>
       ) : (
         <>
-          <p className="mt-6 text-sm text-foreground-muted sm:hidden">
+          <p className="text-foreground-muted mt-6 text-sm sm:hidden">
             → 表は横にスクロールできます
           </p>
           <Card className="mt-2 sm:mt-6">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-base">
-              <thead>
-                <tr className="border-b border-neutral-200 bg-cream-50 text-left text-foreground-muted">
-                  <th className="py-3 pl-4 pr-4 font-semibold">旧URL</th>
-                  <th className="py-3 pr-4 font-semibold">新URL</th>
-                  <th className="py-3 pr-4 font-semibold">作成日時</th>
-                </tr>
-              </thead>
-              <tbody>
-                {redirects.map((r) => (
-                  <tr
-                    key={r.id}
-                    className="border-b border-neutral-100 last:border-b-0"
-                  >
-                    <td className="py-3 pl-4 pr-4 font-mono text-charcoal-900">
-                      {r.old_path}
-                    </td>
-                    <td className="py-3 pr-4 font-mono text-charcoal-900">
-                      {r.new_path}
-                    </td>
-                    <td className="py-3 pr-4 text-foreground-muted">
-                      {new Date(r.created_at).toLocaleString("ja-JP")}
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-base">
+                <thead>
+                  <tr className="bg-cream-50 text-foreground-muted border-b border-neutral-200 text-left">
+                    <th className="py-3 pr-4 pl-4 font-semibold">旧URL</th>
+                    <th className="py-3 pr-4 font-semibold">新URL</th>
+                    <th className="py-3 pr-4 font-semibold">作成日時</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {redirects.map((r) => (
+                    <tr
+                      key={r.id}
+                      className="border-b border-neutral-100 last:border-b-0"
+                    >
+                      <td className="text-charcoal-900 py-3 pr-4 pl-4 font-mono">
+                        {r.old_path}
+                      </td>
+                      <td className="text-charcoal-900 py-3 pr-4 font-mono">
+                        {r.new_path}
+                      </td>
+                      <td className="text-foreground-muted py-3 pr-4">
+                        {new Date(r.created_at).toLocaleString("ja-JP")}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </Card>
         </>
       )}

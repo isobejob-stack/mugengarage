@@ -64,7 +64,10 @@ export async function getVehicleHierarchyOptions() {
 // FR-INV-001 / BR-DATA-003:
 // メーカーの新規作成（車両登録フォームの「その他（手入力）」から呼ばれる）。
 // name/slugの重複はmanufacturersテーブルのUNIQUE制約で防ぐ（呼び出し側でerror.code==="23505"を判定する）
-export async function createManufacturer(values: { name: string; slug: string }) {
+export async function createManufacturer(values: {
+  name: string;
+  slug: string;
+}) {
   const supabase = createAdminClient();
   return supabase
     .from("manufacturers")
@@ -286,7 +289,9 @@ export async function getLeadVehiclePhotoPaths(vehicleIds: string[]) {
     .in("vehicle_id", vehicleIds)
     .is("deleted_at", null)
     .order("display_order", { ascending: true })
-    .returns<Pick<VehiclePhoto, "vehicle_id" | "storage_path" | "display_order">[]>();
+    .returns<
+      Pick<VehiclePhoto, "vehicle_id" | "storage_path" | "display_order">[]
+    >();
 
   const result = new Map<string, string>();
   for (const row of data ?? []) {

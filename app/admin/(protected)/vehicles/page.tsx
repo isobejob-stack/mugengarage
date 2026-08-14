@@ -11,7 +11,7 @@ export default async function Page() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+        <h1 className="text-charcoal-900 font-serif text-2xl font-bold">
           車両一覧
         </h1>
         <div className="flex items-center gap-3">
@@ -20,7 +20,11 @@ export default async function Page() {
           </Button>
           {/* FR-INV-001: 現地（車の目の前）でメーカー・車種・価格のみですぐ登録し、
               その場で写真アップロードへ進む簡易フロー。通常の新規登録と区別するためsecondaryにする */}
-          <Button href="/admin/vehicles/quick-new" variant="secondary" size="md">
+          <Button
+            href="/admin/vehicles/quick-new"
+            variant="secondary"
+            size="md"
+          >
             現地でクイック登録
           </Button>
           <Button href="/admin/vehicles/new" variant="primary" size="md">
@@ -30,7 +34,7 @@ export default async function Page() {
       </div>
 
       {vehicles.length === 0 ? (
-        <p className="mt-8 text-base text-foreground-muted">
+        <p className="text-foreground-muted mt-8 text-base">
           登録された車両はまだありません。
         </p>
       ) : (
@@ -40,11 +44,11 @@ export default async function Page() {
               <Card>
                 <CardBody className="flex flex-row flex-wrap items-center justify-between gap-4 p-4">
                   <div>
-                    <p className="text-lg font-semibold text-charcoal-900">
+                    <p className="text-charcoal-900 text-lg font-semibold">
                       {v.manufacturers?.name} {v.models?.name}
                       {v.model_year ? `（${v.model_year}年）` : ""}
                     </p>
-                    <p className="text-base text-foreground-muted">
+                    <p className="text-foreground-muted text-base">
                       ¥{v.price.toLocaleString()}
                     </p>
                   </div>

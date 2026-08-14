@@ -19,7 +19,11 @@ import { VehicleMediaGallery } from "@/components/inventory/vehicle-media-galler
 import { getSeoMeta } from "@/lib/seo/queries";
 import { buildPublicPath } from "@/lib/seo/paths";
 import { buildVehicleStructuredData } from "@/lib/seo/structured-data";
-import { SITE_NAME, SITE_URL, buildLineConsultationUrl } from "@/lib/site-config";
+import {
+  SITE_NAME,
+  SITE_URL,
+  buildLineConsultationUrl,
+} from "@/lib/site-config";
 import { getSiteSettings } from "@/lib/settings/queries";
 import { absoluteTitle } from "@/lib/seo/metadata";
 import {
@@ -201,7 +205,10 @@ export default async function Page({
             : `${vehicle.registration_year}年`,
         ),
         spec("走行距離", formatMileage(vehicle.mileage_km)),
-        spec("車検", formatShakenValue(vehicle.shaken_status, vehicle.shaken_expiry)),
+        spec(
+          "車検",
+          formatShakenValue(vehicle.shaken_status, vehicle.shaken_expiry),
+        ),
         spec("修復歴", formatYesNo(vehicle.accident_history)),
         spec("記録簿", formatYesNo(vehicle.has_record_book)),
         spec("型式", vehicle.model_code),
@@ -249,7 +256,10 @@ export default async function Page({
     {
       title: "販売条件",
       rows: [
-        spec("法定整備", formatLegalMaintenanceValue(vehicle.legal_maintenance)),
+        spec(
+          "法定整備",
+          formatLegalMaintenanceValue(vehicle.legal_maintenance),
+        ),
         spec(
           "保証",
           formatWarrantyValue(
@@ -292,7 +302,7 @@ export default async function Page({
         dangerouslySetInnerHTML={{ __html: structuredDataJson }}
       />
       <VehicleStatusBadge status={vehicle.status} />
-      <h1 className="mt-3 font-serif text-3xl font-bold text-charcoal-900">
+      <h1 className="text-charcoal-900 mt-3 font-serif text-3xl font-bold">
         {vehicle.manufacturers?.name} {vehicle.models?.name}
         {vehicle.model_year ? `（${vehicle.model_year}年）` : ""}
       </h1>
@@ -302,21 +312,21 @@ export default async function Page({
       <div className="mt-2">
         {vehicle.total_price !== null ? (
           <>
-            <p className="font-mono text-3xl font-bold tabular-nums text-primary-700">
+            <p className="text-primary-700 font-mono text-3xl font-bold tabular-nums">
               ¥{vehicle.total_price.toLocaleString()}
-              <span className="ml-2 font-sans text-base font-medium text-foreground-muted">
+              <span className="text-foreground-muted ml-2 font-sans text-base font-medium">
                 支払総額（税込）
               </span>
             </p>
-            <p className="mt-1 font-mono text-lg tabular-nums text-foreground-muted">
+            <p className="text-foreground-muted mt-1 font-mono text-lg tabular-nums">
               ¥{vehicle.price.toLocaleString()}
               <span className="ml-2 font-sans text-base">車両本体価格</span>
             </p>
           </>
         ) : (
-          <p className="font-mono text-3xl font-bold tabular-nums text-primary-700">
+          <p className="text-primary-700 font-mono text-3xl font-bold tabular-nums">
             ¥{vehicle.price.toLocaleString()}
-            <span className="ml-2 font-sans text-base font-medium text-foreground-muted">
+            <span className="text-foreground-muted ml-2 font-sans text-base font-medium">
               車両本体価格（税込）
             </span>
           </p>
@@ -344,16 +354,22 @@ export default async function Page({
 
       {specGroups.map((group) => (
         <section key={group.title} className="mt-14">
-          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+          <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
             {group.title}
           </h2>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {group.rows.map((row) => (
               <div
                 key={row.label}
-                className={row.fullWidth ? "col-span-2 sm:col-span-3" : undefined}
+                className={
+                  row.fullWidth ? "col-span-2 sm:col-span-3" : undefined
+                }
               >
-                <Row label={row.label} value={row.value} breakAll={row.breakAll} />
+                <Row
+                  label={row.label}
+                  value={row.value}
+                  breakAll={row.breakAll}
+                />
               </div>
             ))}
           </div>
@@ -364,7 +380,7 @@ export default async function Page({
         .filter(([, body]) => Boolean(body))
         .map(([title, body]) => (
           <section key={title} className="mt-14">
-            <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+            <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
               {title}
             </h2>
             <div className="prose mt-3 max-w-none">
@@ -388,7 +404,7 @@ export default async function Page({
           発生するため不採用）。<main>側にバー高さ分のpadding-bottomを確保済み。 */}
       {/* LINEのURLが未設定のあいだは、空のバーだけが残らないよう固定バーごと非表示にする */}
       {lineConsultUrl && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-white/95 shadow-strong backdrop-blur-sm pb-[env(safe-area-inset-bottom)]">
+        <div className="shadow-strong fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm">
           <div className="mx-auto flex h-14 max-w-3xl items-center justify-center px-4 sm:h-16">
             <Button
               href={lineConsultUrl}
@@ -419,10 +435,10 @@ function Row({
   breakAll?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-neutral-200 bg-cream-50 px-4 py-3 shadow-soft">
-      <p className="text-base font-medium text-foreground-muted">{label}</p>
+    <div className="bg-cream-50 shadow-soft rounded-xl border border-neutral-200 px-4 py-3">
+      <p className="text-foreground-muted text-base font-medium">{label}</p>
       <p
-        className={`mt-1 text-base font-semibold text-charcoal-900 ${
+        className={`text-charcoal-900 mt-1 text-base font-semibold ${
           breakAll ? "break-all" : "break-words"
         }`}
       >

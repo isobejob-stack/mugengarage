@@ -87,30 +87,30 @@ export default async function Page() {
         dangerouslySetInnerHTML={{ __html: structuredDataJson }}
       />
 
-      <h1 className="font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
+      <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         店舗情報・アクセス
       </h1>
-      <p className="mt-4 text-foreground-muted">
+      <p className="text-foreground-muted mt-4">
         エムガレージは、クラシックJaguarを専門に取り扱う販売・整備工場です。
         Eタイプ、XK、Mark2をはじめとする往年のJaguarについて、販売から整備・修理・買取まで一貫して承っております。
       </p>
 
       {storeInfoRows.length > 0 && (
         <section className="mt-12">
-          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+          <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
             店舗情報
           </h2>
           <dl className="mt-6 divide-y divide-neutral-200 border-y border-neutral-200">
             {storeInfoRows.map(([label, value]) => (
               <div key={label} className="flex flex-col gap-1 py-4 sm:flex-row">
-                <dt className="font-medium text-charcoal-900 sm:w-32 sm:shrink-0">
+                <dt className="text-charcoal-900 font-medium sm:w-32 sm:shrink-0">
                   {label}
                 </dt>
                 <dd className="text-foreground-muted">
                   {label === "電話番号" ? (
                     <a
                       href={`tel:${value.replace(/[^0-9+]/g, "")}`}
-                      className="transition-colors duration-200 ease-standard hover:text-primary-700 hover:underline"
+                      className="ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
                     >
                       {value}
                     </a>
@@ -126,11 +126,11 @@ export default async function Page() {
 
       {settings.access_info && (
         <section className="mt-12">
-          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+          <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
             アクセス
           </h2>
           {/* 改行を保持して表示する（管理画面のテキストエリアで改行して入力されるため） */}
-          <p className="mt-4 whitespace-pre-wrap text-foreground-muted">
+          <p className="text-foreground-muted mt-4 whitespace-pre-wrap">
             {settings.access_info}
           </p>
         </section>
@@ -138,10 +138,10 @@ export default async function Page() {
 
       {settings.external_links.length > 0 && (
         <section className="mt-12">
-          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+          <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
             在庫車両の掲載媒体・公式SNS
           </h2>
-          <p className="mt-2 text-foreground-muted">
+          <p className="text-foreground-muted mt-2">
             最新の入庫状況や日々の作業の様子は、各媒体でもご覧いただけます。
           </p>
           <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -152,17 +152,17 @@ export default async function Page() {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="ease-premium block rounded-2xl border border-neutral-200 bg-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:border-primary-200 hover:shadow-medium motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                  className="ease-premium shadow-soft hover:border-primary-200 hover:shadow-medium block rounded-2xl border border-neutral-200 bg-white transition-all duration-300 hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
                 >
                   <div className="space-y-2 p-6">
-                    <p className="text-lg font-bold text-charcoal-900">
+                    <p className="text-charcoal-900 text-lg font-bold">
                       {link.label}
                       <span className="sr-only">
                         （外部サイトを新しいタブで開きます）
                       </span>
                     </p>
                     {link.description && (
-                      <p className="text-base text-foreground-muted">
+                      <p className="text-foreground-muted text-base">
                         {link.description}
                       </p>
                     )}
@@ -175,10 +175,10 @@ export default async function Page() {
       )}
 
       <section className="mt-12">
-        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+        <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
           お問い合わせ
         </h2>
-        <p className="mt-2 text-foreground-muted">
+        <p className="text-foreground-muted mt-2">
           ご来店をご希望の場合は、在庫状況と対応可能なお時間をご案内しますので、事前にご連絡ください。
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
@@ -194,7 +194,7 @@ export default async function Page() {
       </section>
 
       <section className="mt-12">
-        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+        <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
           取り扱い内容
         </h2>
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">

@@ -11,10 +11,10 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+      <h1 className="text-charcoal-900 font-serif text-2xl font-bold">
         現地でクイック登録
       </h1>
-      <p className="mt-2 text-base text-foreground-muted">
+      <p className="text-foreground-muted mt-2 text-base">
         メーカー・車種・参考価格だけ入力してすぐに登録し、その場で写真を撮ってアップロードできます。諸元やコメントなどの詳細情報は後から入力できます。
       </p>
       <div className="mt-6">

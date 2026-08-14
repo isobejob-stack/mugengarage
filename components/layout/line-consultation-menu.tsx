@@ -14,7 +14,7 @@ export function LineConsultationMenu({ lineUrl }: { lineUrl: string | null }) {
     ...category,
     href: buildLineConsultationUrl(lineUrl, category.id),
   })).filter(
-    (category): category is (typeof category) & { href: string } =>
+    (category): category is typeof category & { href: string } =>
       category.href !== null,
   );
 
@@ -24,11 +24,11 @@ export function LineConsultationMenu({ lineUrl }: { lineUrl: string | null }) {
     <section aria-labelledby="line-consultation-menu-heading">
       <h2
         id="line-consultation-menu-heading"
-        className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl"
+        className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl"
       >
         カテゴリから相談する
       </h2>
-      <p className="mt-1 text-sm text-foreground-muted">
+      <p className="text-foreground-muted mt-1 text-sm">
         ご相談内容に近いカテゴリをお選びください。
       </p>
       <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -38,7 +38,7 @@ export function LineConsultationMenu({ lineUrl }: { lineUrl: string | null }) {
               href={category.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-l-4 border-neutral-200 border-l-[#06C755] bg-white px-4 py-3 text-center text-sm font-medium text-charcoal-800 shadow-soft transition-all duration-200 ease-standard hover:-translate-y-0.5 hover:border-[#06C755] hover:bg-[#06C755]/5 hover:shadow-medium active:translate-y-0"
+              className="text-charcoal-800 shadow-soft ease-standard hover:shadow-medium flex min-h-11 items-center justify-center gap-2 rounded-lg border border-l-4 border-neutral-200 border-l-[#06C755] bg-white px-4 py-3 text-center text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 hover:border-[#06C755] hover:bg-[#06C755]/5 active:translate-y-0"
             >
               {category.label}
             </a>

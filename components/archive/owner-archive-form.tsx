@@ -33,7 +33,10 @@ export function OwnerArchiveForm({
 
   const onSubmit = async (values: OwnerArchiveEntryFormValues) => {
     setSubmitError(null);
-    const result = await patchJson(`/api/admin/owners-archive/${vehicleId}`, values);
+    const result = await patchJson(
+      `/api/admin/owners-archive/${vehicleId}`,
+      values,
+    );
 
     if (!result.ok) {
       setSubmitError(result.message);
@@ -65,10 +68,10 @@ export function OwnerArchiveForm({
         <textarea rows={4} className="input" {...register("owner_comment")} />
       </Field>
 
-      <label className="flex min-h-11 items-center gap-2 text-base font-medium text-charcoal-900">
+      <label className="text-charcoal-900 flex min-h-11 items-center gap-2 text-base font-medium">
         <input
           type="checkbox"
-          className="h-5 w-5 accent-primary-600"
+          className="accent-primary-600 h-5 w-5"
           {...register("is_published")}
         />
         アーカイブページで公開する
@@ -80,7 +83,7 @@ export function OwnerArchiveForm({
         </p>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-white p-4 shadow-medium pb-[env(safe-area-inset-bottom)]">
+      <div className="shadow-medium fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-white p-4 pb-[env(safe-area-inset-bottom)]">
         <Button
           type="submit"
           disabled={isSubmitting}
@@ -104,7 +107,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-base font-medium text-charcoal-900">{label}</span>
+      <span className="text-charcoal-900 text-base font-medium">{label}</span>
       <div className="mt-1">{children}</div>
     </label>
   );

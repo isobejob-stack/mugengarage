@@ -70,7 +70,10 @@ export async function POST(request: NextRequest) {
 
   const { error: updateError } = await supabase
     .from("site_settings")
-    .update({ hero_image_path: storagePath, updated_at: new Date().toISOString() })
+    .update({
+      hero_image_path: storagePath,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", "singleton");
 
   if (updateError) {
@@ -95,7 +98,10 @@ export async function POST(request: NextRequest) {
   });
 
   return NextResponse.json({
-    data: { hero_image_path: storagePath, public_url: getSiteAssetPublicUrl(storagePath) },
+    data: {
+      hero_image_path: storagePath,
+      public_url: getSiteAssetPublicUrl(storagePath),
+    },
   });
 }
 

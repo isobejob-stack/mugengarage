@@ -17,7 +17,10 @@ type CardAsDivProps = CardOwnProps &
   };
 
 type CardAsLinkProps = CardOwnProps &
-  Omit<ComponentPropsWithoutRef<typeof Link>, "className" | "children" | "href"> & {
+  Omit<
+    ComponentPropsWithoutRef<typeof Link>,
+    "className" | "children" | "href"
+  > & {
     href: string;
   };
 
@@ -105,10 +108,10 @@ export function CardImage({
           // 配信するため、ブラウザに選択させる候補幅のヒントを与える。
           sizes="(min-width: 640px) 33vw, 100vw"
           priority={priority}
-          className="object-cover transition-transform duration-500 ease-premium group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+          className="ease-premium object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
         />
       ) : (
-        <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-cream-200 text-foreground-muted">
+        <div className="bg-cream-200 text-foreground-muted flex h-full w-full flex-col items-center justify-center gap-2">
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -149,7 +152,7 @@ export function CardTitle({
   children: ReactNode;
 }): ReactNode {
   return (
-    <p className={cx("text-lg font-semibold text-charcoal-900", className)}>
+    <p className={cx("text-charcoal-900 text-lg font-semibold", className)}>
       {children}
     </p>
   );
@@ -163,7 +166,7 @@ export function CardMeta({
   children: ReactNode;
 }): ReactNode {
   return (
-    <p className={cx("text-base text-foreground-muted", className)}>
+    <p className={cx("text-foreground-muted text-base", className)}>
       {children}
     </p>
   );
@@ -179,7 +182,7 @@ export function CardPrice({
   return (
     <p
       className={cx(
-        "font-mono text-xl font-bold tabular-nums text-primary-700",
+        "text-primary-700 font-mono text-xl font-bold tabular-nums",
         className,
       )}
     >

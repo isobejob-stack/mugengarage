@@ -1,13 +1,22 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { listPublicVehicles, getLeadVehiclePhotoPaths } from "@/lib/inventory/queries";
+import {
+  listPublicVehicles,
+  getLeadVehiclePhotoPaths,
+} from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
 import { getSiteAssetPublicUrl } from "@/lib/settings/storage";
 import { SITE_URL, siteNav } from "@/lib/site-config";
 import { getSiteSettings } from "@/lib/settings/queries";
 import { LineConsultationMenu } from "@/components/layout/line-consultation-menu";
 import { Button } from "@/components/ui/button";
-import { Card, CardImage, CardBody, CardTitle, CardMeta } from "@/components/ui/card";
+import {
+  Card,
+  CardImage,
+  CardBody,
+  CardTitle,
+  CardMeta,
+} from "@/components/ui/card";
 import { VehicleFeatureBadges } from "@/components/ui/status-badge";
 import { VehicleCardPrice } from "@/components/inventory/vehicle-price";
 import { VehicleCardSpecs } from "@/components/inventory/vehicle-card-specs";
@@ -74,11 +83,11 @@ export default async function Page() {
           {/* 写真の明るさは差し替えのたびに変わるため、文字の可読性を写真任せにしない。
               下方向へ濃くなるスクリムを重ね、白文字とのコントラストを常に確保する（WCAG 1.4.3）。 */}
           <div
-            className="absolute inset-0 bg-gradient-to-t from-charcoal-900 via-charcoal-900/70 to-charcoal-900/20"
+            className="from-charcoal-900 via-charcoal-900/70 to-charcoal-900/20 absolute inset-0 bg-gradient-to-t"
             aria-hidden="true"
           />
           <div className="relative mx-auto w-full max-w-5xl px-4 pb-12 sm:pb-16">
-            <p className="text-xs font-medium uppercase tracking-[0.15em] text-accent-400">
+            <p className="text-accent-400 text-xs font-medium tracking-[0.15em] uppercase">
               Classic Jaguar Specialist
             </p>
             <h1 className="mt-3 font-serif text-4xl font-bold tracking-tight text-balance text-white sm:text-5xl">
@@ -101,8 +110,8 @@ export default async function Page() {
         </section>
       ) : (
         <div className="mx-auto max-w-5xl px-4 pt-8">
-          <section className="rounded-2xl bg-charcoal-900 px-6 py-12 text-white shadow-medium sm:px-10 sm:py-16">
-            <p className="text-xs font-medium uppercase tracking-[0.15em] text-accent-400">
+          <section className="bg-charcoal-900 shadow-medium rounded-2xl px-6 py-12 text-white sm:px-10 sm:py-16">
+            <p className="text-accent-400 text-xs font-medium tracking-[0.15em] uppercase">
               Classic Jaguar Specialist
             </p>
             <h1 className="mt-3 font-serif text-3xl font-bold sm:text-4xl">
@@ -126,93 +135,96 @@ export default async function Page() {
       )}
 
       <div className="mx-auto max-w-5xl px-4">
-      <section className="mt-10">
-        <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
-          在庫車両
-        </h2>
-        {vehicles.length > 0 && (
-          <p className="mt-2 text-foreground-muted">
-            現在{vehicles.length}台を掲載しています。
-          </p>
-        )}
-        {featuredVehicles.length === 0 ? (
-          <p className="mt-4 text-foreground-muted">
-            現在公開中の車両はありません。
-          </p>
-        ) : (
-          <ul className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {featuredVehicles.map((v, index) =>
-              v.slug ? (
-                <li key={v.id}>
-                  <Card href={`/vehicles/${v.slug}`}>
-                    <VehicleFeatureBadges
-                      isRecommended={v.is_recommended}
-                      isNewArrival={v.is_new_arrival}
-                    />
-                    {/* 先頭カードの写真はファーストビューに入りLCPになりやすいため、
-                        遅延読み込みを外して表示を前倒しする（2枚目以降は遅延のまま） */}
-                    <CardImage
-                      src={featuredPhotoUrls[index] ?? undefined}
-                      alt={`${v.manufacturers?.name ?? ""} ${v.models?.name ?? ""}`}
-                      priority={index === 0}
-                    />
-                    <CardBody>
-                      <CardTitle>
-                        {v.manufacturers?.name} {v.models?.name}
-                      </CardTitle>
-                      <VehicleCardPrice price={v.price} totalPrice={v.total_price} />
-                      <VehicleCardSpecs
-                        modelYear={v.model_year}
-                        mileageKm={v.mileage_km}
-                        shakenStatus={v.shaken_status}
-                        shakenExpiry={v.shaken_expiry}
-                        accidentHistory={v.accident_history}
+        <section className="mt-10">
+          <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
+            在庫車両
+          </h2>
+          {vehicles.length > 0 && (
+            <p className="text-foreground-muted mt-2">
+              現在{vehicles.length}台を掲載しています。
+            </p>
+          )}
+          {featuredVehicles.length === 0 ? (
+            <p className="text-foreground-muted mt-4">
+              現在公開中の車両はありません。
+            </p>
+          ) : (
+            <ul className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+              {featuredVehicles.map((v, index) =>
+                v.slug ? (
+                  <li key={v.id}>
+                    <Card href={`/vehicles/${v.slug}`}>
+                      <VehicleFeatureBadges
+                        isRecommended={v.is_recommended}
+                        isNewArrival={v.is_new_arrival}
                       />
-                    </CardBody>
-                  </Card>
-                </li>
-              ) : null,
-            )}
-          </ul>
-        )}
+                      {/* 先頭カードの写真はファーストビューに入りLCPになりやすいため、
+                        遅延読み込みを外して表示を前倒しする（2枚目以降は遅延のまま） */}
+                      <CardImage
+                        src={featuredPhotoUrls[index] ?? undefined}
+                        alt={`${v.manufacturers?.name ?? ""} ${v.models?.name ?? ""}`}
+                        priority={index === 0}
+                      />
+                      <CardBody>
+                        <CardTitle>
+                          {v.manufacturers?.name} {v.models?.name}
+                        </CardTitle>
+                        <VehicleCardPrice
+                          price={v.price}
+                          totalPrice={v.total_price}
+                        />
+                        <VehicleCardSpecs
+                          modelYear={v.model_year}
+                          mileageKm={v.mileage_km}
+                          shakenStatus={v.shaken_status}
+                          shakenExpiry={v.shaken_expiry}
+                          accidentHistory={v.accident_history}
+                        />
+                      </CardBody>
+                    </Card>
+                  </li>
+                ) : null,
+              )}
+            </ul>
+          )}
 
-        {/* 掲載台数が上限を超えたら、続きは在庫一覧へ送る。
+          {/* 掲載台数が上限を超えたら、続きは在庫一覧へ送る。
             従来は小さな文字リンクだったため見落としやすく、スマートフォンでは
             タップ領域も足りていなかった。ボタンとして明示する。 */}
-        {hasMoreVehicles && (
-          <div className="mt-6 flex justify-center">
-            <Button href="/vehicles" variant="outline" size="lg">
-              在庫車両をすべて見る（{vehicles.length}台）
-            </Button>
-          </div>
-        )}
-      </section>
-
-      {/* FR-LINE-002: 相談カテゴリ表示（購入／修理／売却／部品／Jaguar全般／カーライフ相談） */}
-      <div className="mt-10">
-        <LineConsultationMenu lineUrl={settings.line_url} />
-      </div>
-
-      {KNOWLEDGE_NAV?.children && (
-        <section className="mt-10">
-          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
-            {KNOWLEDGE_NAV.label}
-          </h2>
-          <p className="mt-2 text-foreground-muted">
-            クラシックJaguarをより深く知るための読み物です。
-          </p>
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {KNOWLEDGE_NAV.children.map((item) => (
-              <Card key={item.href} href={item.href}>
-                <CardBody>
-                  <CardTitle>{item.label}</CardTitle>
-                  <CardMeta>{item.description}</CardMeta>
-                </CardBody>
-              </Card>
-            ))}
-          </div>
+          {hasMoreVehicles && (
+            <div className="mt-6 flex justify-center">
+              <Button href="/vehicles" variant="outline" size="lg">
+                在庫車両をすべて見る（{vehicles.length}台）
+              </Button>
+            </div>
+          )}
         </section>
-      )}
+
+        {/* FR-LINE-002: 相談カテゴリ表示（購入／修理／売却／部品／Jaguar全般／カーライフ相談） */}
+        <div className="mt-10">
+          <LineConsultationMenu lineUrl={settings.line_url} />
+        </div>
+
+        {KNOWLEDGE_NAV?.children && (
+          <section className="mt-10">
+            <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
+              {KNOWLEDGE_NAV.label}
+            </h2>
+            <p className="text-foreground-muted mt-2">
+              クラシックJaguarをより深く知るための読み物です。
+            </p>
+            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+              {KNOWLEDGE_NAV.children.map((item) => (
+                <Card key={item.href} href={item.href}>
+                  <CardBody>
+                    <CardTitle>{item.label}</CardTitle>
+                    <CardMeta>{item.description}</CardMeta>
+                  </CardBody>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </main>
   );

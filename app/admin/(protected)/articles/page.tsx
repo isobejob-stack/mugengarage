@@ -10,7 +10,7 @@ export default async function Page() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+        <h1 className="text-charcoal-900 font-serif text-2xl font-bold">
           ブログ記事
         </h1>
         <div className="flex items-center gap-3">
@@ -24,7 +24,7 @@ export default async function Page() {
       </div>
 
       {articles.length === 0 ? (
-        <p className="mt-8 text-base text-foreground-muted">
+        <p className="text-foreground-muted mt-8 text-base">
           記事はまだありません。
         </p>
       ) : (
@@ -36,7 +36,7 @@ export default async function Page() {
                   key={a.id}
                   className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <p className="text-base font-medium text-charcoal-900">
+                  <p className="text-charcoal-900 text-base font-medium">
                     {a.title}
                   </p>
                   <div className="flex items-center gap-3">

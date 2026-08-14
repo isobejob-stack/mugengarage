@@ -38,7 +38,7 @@ export function VehicleCardSpecs({
   if (specs.length === 0) return null;
 
   return (
-    <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-foreground-muted">
+    <ul className="text-foreground-muted mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm">
       {specs.map((spec) => (
         <li
           key={spec}

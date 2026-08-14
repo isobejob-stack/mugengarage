@@ -31,7 +31,9 @@ export async function listDeletedArticles() {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("articles")
-    .select("id, title, slug, status, category, published_at, updated_at, deleted_at")
+    .select(
+      "id, title, slug, status, category, published_at, updated_at, deleted_at",
+    )
     .not("deleted_at", "is", null)
     .order("deleted_at", { ascending: false });
 
@@ -54,7 +56,10 @@ export async function getDeletedArticleById(id: string) {
 // ISSUE-004課題1 / BR-DEL-002: 論理削除された記事の復元（deleted_atをnullに戻す）
 // 開発部長レビュー指摘（重大）: lib/inventory/queries.ts の restoreVehicle と同じ理由で、
 // 削除前がpublishedだった記事は復元時にdraftへ落とす（誤操作での即時再公開を防ぐ）。
-export async function restoreArticle(id: string, previousStatus: Article["status"]) {
+export async function restoreArticle(
+  id: string,
+  previousStatus: Article["status"],
+) {
   const supabase = createAdminClient();
   const restoredStatus =
     previousStatus === "published" ? "draft" : previousStatus;

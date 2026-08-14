@@ -9,21 +9,29 @@ export default async function Page() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
       <div className="flex items-center justify-between">
-        <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+        <h1 className="text-charcoal-900 font-serif text-2xl font-bold">
           整備実績
         </h1>
         <div className="flex items-center gap-3">
-          <Button href="/admin/maintenance-records/deleted" variant="ghost" size="sm">
+          <Button
+            href="/admin/maintenance-records/deleted"
+            variant="ghost"
+            size="sm"
+          >
             削除済みを見る
           </Button>
-          <Button href="/admin/maintenance-records/new" variant="primary" size="md">
+          <Button
+            href="/admin/maintenance-records/new"
+            variant="primary"
+            size="md"
+          >
             新規作成
           </Button>
         </div>
       </div>
 
       {records.length === 0 ? (
-        <p className="mt-8 text-base text-foreground-muted">
+        <p className="text-foreground-muted mt-8 text-base">
           整備実績はまだありません。
         </p>
       ) : (
@@ -34,11 +42,11 @@ export default async function Page() {
                 <CardBody className="flex flex-row items-center justify-between gap-4 p-4">
                   <div>
                     {r.category && (
-                      <p className="text-base text-foreground-muted">
+                      <p className="text-foreground-muted text-base">
                         {r.category}
                       </p>
                     )}
-                    <p className="text-lg font-semibold text-charcoal-900">
+                    <p className="text-charcoal-900 text-lg font-semibold">
                       {r.title}
                     </p>
                   </div>

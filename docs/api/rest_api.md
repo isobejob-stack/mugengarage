@@ -152,17 +152,17 @@ Next.js（ADR-001）上に実装するAPIエンドポイント（Route Handlers�
 
 ## 16. Administration（管理画面共通）
 
-| メソッド | パス                            | 認証 | 対応FR-ID  | 説明                         |
-| -------- | ------------------------------- | ---- | ---------- | ---------------------------- |
-| GET      | `/api/admin/media`              | 必須 | FR-ADM-003 | アップロード済みメディア一覧 |
-| POST     | `/api/admin/media`              | 必須 | FR-ADM-003 | メディアアップロード         |
-| GET      | `/api/admin/templates`          | 必須 | FR-ADM-004 | グレード別テンプレート一覧   |
-| PATCH    | `/api/admin/templates/:gradeId` | 必須 | FR-ADM-004 | テンプレート編集             |
-| GET      | `/api/admin/audit-logs`         | 必須 | FR-ADM-005 | 監査ログ一覧                 |
-| GET      | `/api/admin/tags`               | 必須 | —          | タグマスタ一覧               |
-| POST     | `/api/admin/tags`               | 必須 | —          | タグ新規作成（BR-DATA-003）  |
+| メソッド | パス                            | 認証 | 対応FR-ID  | 説明                                     |
+| -------- | ------------------------------- | ---- | ---------- | ---------------------------------------- |
+| GET      | `/api/admin/media`              | 必須 | FR-ADM-003 | アップロード済みメディア一覧             |
+| POST     | `/api/admin/media`              | 必須 | FR-ADM-003 | メディアアップロード                     |
+| GET      | `/api/admin/templates`          | 必須 | FR-ADM-004 | グレード別テンプレート一覧               |
+| PATCH    | `/api/admin/templates/:gradeId` | 必須 | FR-ADM-004 | テンプレート編集                         |
+| GET      | `/api/admin/audit-logs`         | 必須 | FR-ADM-005 | 監査ログ一覧                             |
+| GET      | `/api/admin/tags`               | 必須 | —          | タグマスタ一覧                           |
+| POST     | `/api/admin/tags`               | 必須 | —          | タグ新規作成（BR-DATA-003）              |
 | DELETE   | `/api/admin/tags/:id`           | 必須 | —          | タグ削除（物理削除、taggingsも連動削除） |
-| GET      | `/api/admin/redirects`          | 必須 | FR-SEO-003 | 301リダイレクト一覧          |
+| GET      | `/api/admin/redirects`          | 必須 | FR-SEO-003 | 301リダイレクト一覧                      |
 
 ## 17. AI補助機能
 

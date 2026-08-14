@@ -31,7 +31,7 @@ export default function Loading() {
         {Array.from({ length: 6 }).map((_, index) => (
           <div
             key={index}
-            className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-soft"
+            className="shadow-soft overflow-hidden rounded-2xl border border-neutral-200 bg-white"
           >
             {/* 画像領域。CardImageと同じ4:3にしておくと、実データ描画時のズレが小さい */}
             <div className="aspect-[4/3] w-full animate-pulse bg-neutral-200" />

@@ -27,7 +27,10 @@ export async function proxy(request: NextRequest) {
   if (!isAuthorized(request)) {
     return new NextResponse("Authentication required.", {
       status: 401,
-      headers: { "WWW-Authenticate": 'Basic realm="M-GARAGE (limited access)", charset="UTF-8"' },
+      headers: {
+        "WWW-Authenticate":
+          'Basic realm="M-GARAGE (limited access)", charset="UTF-8"',
+      },
     });
   }
 

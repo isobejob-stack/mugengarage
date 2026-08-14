@@ -26,9 +26,7 @@ export function VehicleCardPrice({
   return (
     <>
       <CardPrice>¥{totalPrice.toLocaleString()}</CardPrice>
-      <CardMeta>
-        支払総額（税込） ／ 本体 ¥{price.toLocaleString()}
-      </CardMeta>
+      <CardMeta>支払総額（税込） ／ 本体 ¥{price.toLocaleString()}</CardMeta>
     </>
   );
 }

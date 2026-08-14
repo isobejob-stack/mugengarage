@@ -8,17 +8,17 @@ export async function SiteFooter() {
   const settings = await getSiteSettings();
 
   return (
-    <footer className="mt-16 border-t border-neutral-200 bg-cream-100">
-      <div className="mx-auto max-w-5xl px-4 py-10 text-sm text-charcoal-700">
-        <p className="font-serif text-base font-medium text-charcoal-900">
+    <footer className="bg-cream-100 mt-16 border-t border-neutral-200">
+      <div className="text-charcoal-700 mx-auto max-w-5xl px-4 py-10 text-sm">
+        <p className="text-charcoal-900 font-serif text-base font-medium">
           エムガレージ
         </p>
-        <p className="mt-1 text-foreground-muted">クラシックJaguar専門店</p>
+        <p className="text-foreground-muted mt-1">クラシックJaguar専門店</p>
 
         {/* 住所・電話番号は実店舗の信頼性に直結する情報のため、全ページのフッターに出す。
             未設定の項目は表示しない（空欄や誤情報を見せない）。 */}
         {(settings.address || settings.phone) && (
-          <address className="mt-3 not-italic text-foreground-muted">
+          <address className="text-foreground-muted mt-3 not-italic">
             {settings.address && (
               <p>
                 {settings.postal_code && `〒${settings.postal_code} `}
@@ -31,7 +31,7 @@ export async function SiteFooter() {
                 {/* 電話は最も確実な連絡手段。スマートフォンからそのまま発信できるようにする */}
                 <a
                   href={`tel:${settings.phone.replace(/[^0-9+]/g, "")}`}
-                  className="transition-colors duration-200 ease-standard hover:text-primary-700 hover:underline"
+                  className="ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
                 >
                   {settings.phone}
                 </a>
@@ -47,19 +47,19 @@ export async function SiteFooter() {
         <div className="mt-6 flex flex-wrap items-center gap-4">
           <Link
             href="/about"
-            className="text-charcoal-700 transition-colors duration-200 ease-standard hover:text-primary-700 hover:underline"
+            className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
           >
             店舗情報・アクセス
           </Link>
           <Link
             href="/owners-archive"
-            className="text-charcoal-700 transition-colors duration-200 ease-standard hover:text-primary-700 hover:underline"
+            className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
           >
             オーナーズアーカイブ
           </Link>
           <Link
             href="/contact"
-            className="text-charcoal-700 transition-colors duration-200 ease-standard hover:text-primary-700 hover:underline"
+            className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
           >
             お問い合わせ
           </Link>
@@ -78,7 +78,7 @@ export async function SiteFooter() {
         <div className="mt-6">
           <Link
             href="/admin"
-            className="inline-flex min-h-11 items-center rounded-lg px-2 text-foreground-muted transition-colors duration-200 ease-standard hover:text-primary-700 hover:underline active:text-primary-800 motion-reduce:transition-none"
+            className="text-foreground-muted ease-standard hover:text-primary-700 active:text-primary-800 inline-flex min-h-11 items-center rounded-lg px-2 transition-colors duration-200 hover:underline motion-reduce:transition-none"
           >
             管理画面にログイン
           </Link>
@@ -89,7 +89,7 @@ export async function SiteFooter() {
             （高額商材では「実在する店か」の確認が購買判断に直結するため）。 */}
         {settings.external_links.length > 0 && (
           <div className="mt-8 border-t border-neutral-200 pt-6">
-            <p className="font-medium text-charcoal-900">公式SNS・掲載媒体</p>
+            <p className="text-charcoal-900 font-medium">公式SNS・掲載媒体</p>
             <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
               {settings.external_links.map((link) => (
                 <li key={link.url}>
@@ -97,7 +97,7 @@ export async function SiteFooter() {
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-charcoal-700 transition-colors duration-200 ease-standard hover:text-primary-700 hover:underline"
+                    className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
                   >
                     {link.label}
                     <span className="sr-only">

@@ -52,10 +52,10 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
+      <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         ライブラリ
       </h1>
-      <p className="mt-2 text-foreground-muted">
+      <p className="text-foreground-muted mt-2">
         Jaguar関連の用語・知識を辞典形式でまとめています。
       </p>
 
@@ -94,7 +94,7 @@ export default async function Page({
       )}
 
       {filtered.length === 0 ? (
-        <p className="mt-8 text-foreground-muted">項目はまだありません。</p>
+        <p className="text-foreground-muted mt-8">項目はまだありません。</p>
       ) : (
         <ul className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {filtered.map((e) => (

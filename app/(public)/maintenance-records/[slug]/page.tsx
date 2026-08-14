@@ -56,9 +56,9 @@ export default async function Page({
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
       {record.category && (
-        <p className="text-sm text-foreground-muted">{record.category}</p>
+        <p className="text-foreground-muted text-sm">{record.category}</p>
       )}
-      <h1 className="mt-1 font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
+      <h1 className="text-charcoal-900 mt-1 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         {record.title}
       </h1>
 
@@ -74,18 +74,18 @@ export default async function Page({
       )}
 
       {record.issue_description && (
-        <section className="mt-6 rounded-xl border border-neutral-200 bg-cream-50 p-4 shadow-soft">
-          <h2 className="text-sm font-medium text-foreground-muted">
+        <section className="bg-cream-50 shadow-soft mt-6 rounded-xl border border-neutral-200 p-4">
+          <h2 className="text-foreground-muted text-sm font-medium">
             故障事例
           </h2>
-          <p className="mt-1 whitespace-pre-wrap text-charcoal-900">
+          <p className="text-charcoal-900 mt-1 whitespace-pre-wrap">
             {record.issue_description}
           </p>
         </section>
       )}
 
       {record.cost !== null && (
-        <p className="mt-4 text-sm text-foreground-muted">
+        <p className="text-foreground-muted mt-4 text-sm">
           費用目安：{record.cost.toLocaleString("ja-JP")}円
         </p>
       )}

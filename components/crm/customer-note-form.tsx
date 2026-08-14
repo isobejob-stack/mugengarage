@@ -27,7 +27,10 @@ export function CustomerNoteForm({ customerId }: { customerId: string }) {
 
   const onSubmit = async (values: CustomerNoteFormValues) => {
     setSubmitError(null);
-    const result = await postJson(`/api/admin/customers/${customerId}/notes`, values);
+    const result = await postJson(
+      `/api/admin/customers/${customerId}/notes`,
+      values,
+    );
 
     if (!result.ok) {
       setSubmitError(result.message);

@@ -58,9 +58,7 @@ export function ManufacturerModelFields({
   const [modelCustomMode, setModelCustomMode] = useState(false);
   const [newModelName, setNewModelName] = useState("");
   const [creatingModel, setCreatingModel] = useState(false);
-  const [modelCreateError, setModelCreateError] = useState<string | null>(
-    null,
-  );
+  const [modelCreateError, setModelCreateError] = useState<string | null>(null);
 
   // メーカーが変わったら、直前のメーカーに対する車種の手入力途中状態を引きずらないようにする
   // （既存の<select>実装でメーカー変更時に車種選択が常に空へ戻るのと同じ挙動）。
@@ -136,7 +134,11 @@ export function ManufacturerModelFields({
 
   return (
     <>
-      <PickerField label="メーカー" required={required} error={manufacturerError}>
+      <PickerField
+        label="メーカー"
+        required={required}
+        error={manufacturerError}
+      >
         {!manufacturerCustomMode ? (
           <select
             className="input"
@@ -242,7 +244,9 @@ export function ManufacturerModelFields({
             <Button
               type="button"
               variant="outline"
-              disabled={creatingModel || !newModelName.trim() || !manufacturerId}
+              disabled={
+                creatingModel || !newModelName.trim() || !manufacturerId
+              }
               onClick={() => void createModel()}
             >
               {creatingModel ? "作成中..." : "追加"}
@@ -283,7 +287,7 @@ function PickerField({
 }) {
   return (
     <label className="block">
-      <span className="text-base font-medium text-charcoal-900">
+      <span className="text-charcoal-900 text-base font-medium">
         {label}
         {required && <span className="ml-1 text-red-600">必須</span>}
       </span>

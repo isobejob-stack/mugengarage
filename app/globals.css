@@ -2,44 +2,44 @@
 
 @theme {
   /* Primary: British Racing Green */
-  --color-primary-50: #EFF4F1;
-  --color-primary-100: #DCE8E1;
-  --color-primary-200: #B9D1C4;
-  --color-primary-300: #8FB39F;
-  --color-primary-400: #5C8F76;
-  --color-primary-500: #326B4E;
-  --color-primary-600: #164A34;
-  --color-primary-700: #0F3A29;
-  --color-primary-800: #0B2D20;
+  --color-primary-50: #eff4f1;
+  --color-primary-100: #dce8e1;
+  --color-primary-200: #b9d1c4;
+  --color-primary-300: #8fb39f;
+  --color-primary-400: #5c8f76;
+  --color-primary-500: #326b4e;
+  --color-primary-600: #164a34;
+  --color-primary-700: #0f3a29;
+  --color-primary-800: #0b2d20;
   --color-primary-900: #082019;
   --color-primary-950: #051611;
 
   /* Accent: Brass / Gold */
-  --color-accent-50: #FBF6EC;
-  --color-accent-100: #F5E9CE;
-  --color-accent-200: #EAD29D;
-  --color-accent-300: #DCB86C;
-  --color-accent-400: #C89A44;
-  --color-accent-500: #B08130;
-  --color-accent-600: #96692A;
-  --color-accent-700: #7A5522;
-  --color-accent-800: #5F421B;
+  --color-accent-50: #fbf6ec;
+  --color-accent-100: #f5e9ce;
+  --color-accent-200: #ead29d;
+  --color-accent-300: #dcb86c;
+  --color-accent-400: #c89a44;
+  --color-accent-500: #b08130;
+  --color-accent-600: #96692a;
+  --color-accent-700: #7a5522;
+  --color-accent-800: #5f421b;
   --color-accent-900: #473115;
 
   /* 背景・暗色面 */
-  --color-cream-50: #FAF6EF;
-  --color-cream-100: #F5EEE1;
-  --color-cream-200: #EFE5D2;
-  --color-charcoal-600: #4D443A;
-  --color-charcoal-700: #3A332C;
-  --color-charcoal-800: #2A2521;
-  --color-charcoal-900: #211D1A;
+  --color-cream-50: #faf6ef;
+  --color-cream-100: #f5eee1;
+  --color-cream-200: #efe5d2;
+  --color-charcoal-600: #4d443a;
+  --color-charcoal-700: #3a332c;
+  --color-charcoal-800: #2a2521;
+  --color-charcoal-900: #211d1a;
 
   /* セマンティック */
   --color-background: var(--color-cream-50);
-  --color-surface: #FFFFFF;
+  --color-surface: #ffffff;
   --color-foreground: var(--color-charcoal-900);
-  --color-foreground-muted: #6B6259;
+  --color-foreground-muted: #6b6259;
 
   /* フォント */
   --font-sans: var(--font-zen-kaku), "Hiragino Kaku Gothic ProN", sans-serif;
@@ -47,9 +47,14 @@
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
   /* 影 */
-  --shadow-soft: 0 1px 2px rgba(33,29,26,0.04), 0 1px 3px rgba(33,29,26,0.06);
-  --shadow-medium: 0 4px 6px -1px rgba(33,29,26,0.08), 0 10px 15px -3px rgba(33,29,26,0.06);
-  --shadow-strong: 0 10px 25px -5px rgba(33,29,26,0.15), 0 20px 40px -10px rgba(33,29,26,0.12);
+  --shadow-soft:
+    0 1px 2px rgba(33, 29, 26, 0.04), 0 1px 3px rgba(33, 29, 26, 0.06);
+  --shadow-medium:
+    0 4px 6px -1px rgba(33, 29, 26, 0.08),
+    0 10px 15px -3px rgba(33, 29, 26, 0.06);
+  --shadow-strong:
+    0 10px 25px -5px rgba(33, 29, 26, 0.15),
+    0 20px 40px -10px rgba(33, 29, 26, 0.12);
 
   /* モーション */
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
@@ -100,9 +105,6 @@ h3 {
 @layer components {
   /* 03_ui_rules.md 4章・5章: タップ領域44px以上、視認性の高い入力欄 */
   .input {
-    @apply min-h-11 w-full rounded-lg border border-neutral-300 px-3 text-base
-           text-charcoal-900 transition-colors duration-200 ease-standard
-           focus-visible:outline-none focus-visible:border-primary-400
-           focus-visible:ring-2 focus-visible:ring-primary-500/30;
+    @apply text-charcoal-900 ease-standard focus-visible:border-primary-400 focus-visible:ring-primary-500/30 min-h-11 w-full rounded-lg border border-neutral-300 px-3 text-base transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none;
   }
 }

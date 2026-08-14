@@ -56,13 +56,11 @@ export async function syncSlugAndCreateRedirect(params: {
         .from("seo_metas")
         .update({ slug: newSlug })
         .eq("id", existing.id)
-    : await supabase
-        .from("seo_metas")
-        .insert({
-          target_type: targetType,
-          target_id: targetId,
-          slug: newSlug,
-        });
+    : await supabase.from("seo_metas").insert({
+        target_type: targetType,
+        target_id: targetId,
+        slug: newSlug,
+      });
 
   if (error) {
     if (error.code === "23505") return { ok: false, reason: "SLUG_CONFLICT" };

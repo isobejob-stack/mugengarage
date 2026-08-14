@@ -13,16 +13,14 @@ function broadcastFavoriteChanged(detail: FavoriteChangedDetail) {
   );
 }
 
-// FR-VEH-006 / FR-FAV-001: 車両ページのお気に入りボタン
-export function FavoriteButton({
-  vehicleId,
-  initialFavorited,
-  className = "",
-}: {
-  vehicleId: string;
-  initialFavorited: boolean;
-  className?: string;
-}) {
+// お気に入りの状態とトグル処理。
+// 詳細ページの横長ボタンと、一覧カードのハートアイコンで見た目は違うが、
+// 楽観的更新・失敗時のロールバック・同一車両のボタン間の同期という中身は同じ。
+// 状態管理を2箇所に書くと、片方だけロールバックを直すといったズレが生まれるため共有する。
+export function useFavoriteToggle(
+  vehicleId: string,
+  initialFavorited: boolean,
+) {
   const [favorited, setFavorited] = useState(initialFavorited);
   const [pending, setPending] = useState(false);
 
@@ -37,7 +35,7 @@ export function FavoriteButton({
     return () => window.removeEventListener("favorite-changed", handler);
   }, [vehicleId]);
 
-  const handleClick = async () => {
+  const toggle = async () => {
     if (pending) return;
     setPending(true);
     const next = !favorited;
@@ -59,6 +57,24 @@ export function FavoriteButton({
     setPending(false);
   };
 
+  return { favorited, pending, toggle };
+}
+
+// FR-VEH-006 / FR-FAV-001: 車両ページのお気に入りボタン
+export function FavoriteButton({
+  vehicleId,
+  initialFavorited,
+  className = "",
+}: {
+  vehicleId: string;
+  initialFavorited: boolean;
+  className?: string;
+}) {
+  const { favorited, toggle: handleClick } = useFavoriteToggle(
+    vehicleId,
+    initialFavorited,
+  );
+
   return (
     <button
       type="button"
@@ -66,10 +82,10 @@ export function FavoriteButton({
       aria-pressed={favorited}
       // 共有Buttonコンポーネントのoutline variantをベースに、お気に入り状態の色のみ差し替える
       // （03_ui_rules.md 4章: 重要ボタンはタップ領域44px以上・コントラストを高く保つ）
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border px-5 py-3 text-base font-medium shadow-soft transition-all duration-200 ease-standard active:scale-[0.98] ${
+      className={`shadow-soft ease-standard inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border px-5 py-3 text-base font-medium transition-all duration-200 active:scale-[0.98] ${
         favorited
           ? "border-red-300 bg-red-50 text-red-600 hover:bg-red-100 active:bg-red-100"
-          : "border-neutral-300 bg-white text-charcoal-900 hover:border-primary-400 hover:bg-primary-50 active:bg-primary-100"
+          : "text-charcoal-900 hover:border-primary-400 hover:bg-primary-50 active:bg-primary-100 border-neutral-300 bg-white"
       } ${className}`}
     >
       {favorited ? "♥ お気に入り登録済み" : "♡ お気に入りに登録"}

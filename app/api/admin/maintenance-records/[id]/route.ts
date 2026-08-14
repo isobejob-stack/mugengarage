@@ -112,7 +112,9 @@ export async function PATCH(
     }
 
     // FR-SEO-004 / BR-URL-003: seo_metas.slugはコンテンツ種別内でユニーク
-    if (await isSlugTakenInSeoMetas("maintenance_record", parsed.data.slug, id)) {
+    if (
+      await isSlugTakenInSeoMetas("maintenance_record", parsed.data.slug, id)
+    ) {
       return apiError({
         code: "VALIDATION_ERROR",
         message: "このスラッグは既に使用されています",

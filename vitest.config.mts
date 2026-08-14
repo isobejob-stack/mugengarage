@@ -18,10 +18,7 @@ export default defineConfig({
       // （Next.jsのバンドラのみが "react-server" exports conditionで空ファイルに
       // 差し替える）。Vitest環境ではNext.jsのバンドラを介さないため、
       // パッケージ自身が提供する空実装（empty.js）に差し替える。
-      "server-only": path.resolve(
-        dirname,
-        "node_modules/server-only/empty.js",
-      ),
+      "server-only": path.resolve(dirname, "node_modules/server-only/empty.js"),
     },
   },
   test: {

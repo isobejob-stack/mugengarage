@@ -20,15 +20,15 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
+      <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         オーナーズアーカイブ
       </h1>
-      <p className="mt-2 text-foreground-muted">
+      <p className="text-foreground-muted mt-2">
         これまでにご成約いただいた車両を、当店の実績としてご紹介します。
       </p>
 
       {entries.length === 0 ? (
-        <p className="mt-8 text-foreground-muted">
+        <p className="text-foreground-muted mt-8">
           アーカイブされた車両はまだありません。
         </p>
       ) : (
@@ -39,10 +39,10 @@ export default async function Page() {
                   「ご成約済み＝もう買えない過去の実績」であることを視覚的に区別する（FR-OWN-003）。 */}
               <Link
                 href={`/owners-archive/${e.vehicle_id}`}
-                className="block rounded-2xl border border-neutral-300 bg-cream-100 p-4 shadow-soft transition-colors duration-200 ease-standard hover:border-neutral-400"
+                className="bg-cream-100 shadow-soft ease-standard block rounded-2xl border border-neutral-300 p-4 transition-colors duration-200 hover:border-neutral-400"
               >
                 <StatusBadge label="ご成約済み" tone="neutral" />
-                <p className="mt-2 font-medium text-charcoal-900">
+                <p className="text-charcoal-900 mt-2 font-medium">
                   {e.vehicles?.manufacturers?.name} {e.vehicles?.models?.name}
                   {e.vehicles?.model_year
                     ? `（${e.vehicles.model_year}年）`

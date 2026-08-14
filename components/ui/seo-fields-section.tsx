@@ -27,17 +27,17 @@ export function SeoFieldsSection({
 
   return (
     <details className="group rounded-lg border border-neutral-200 bg-white p-4">
-      <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl marker:content-none [&::-webkit-details-marker]:hidden">
+      <summary className="text-charcoal-900 flex min-h-11 cursor-pointer list-none items-center gap-2 font-serif text-xl font-bold tracking-tight marker:content-none sm:text-2xl [&::-webkit-details-marker]:hidden">
         <span
           aria-hidden
-          className="inline-block text-foreground-muted transition-transform group-open:rotate-90"
+          className="text-foreground-muted inline-block transition-transform group-open:rotate-90"
         >
           ▶
         </span>
         SEO設定（任意）
       </summary>
       <div className="mt-4 flex flex-col gap-4">
-        <p className="text-base text-foreground-muted">
+        <p className="text-foreground-muted text-base">
           未入力の項目は、ページ本文の情報から自動生成された内容が使用されます。
         </p>
         <SeoField label="SEOタイトル" error={errors?.title}>
@@ -90,7 +90,7 @@ function SeoField({
 }) {
   return (
     <label className="block">
-      <span className="text-base font-medium text-charcoal-900">{label}</span>
+      <span className="text-charcoal-900 text-base font-medium">{label}</span>
       <div className="mt-1">{children}</div>
       {error && (
         <p className="mt-1 text-base text-red-600" role="alert">

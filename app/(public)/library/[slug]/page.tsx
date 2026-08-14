@@ -45,9 +45,9 @@ export default async function Page({
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
       {entry.category && (
-        <p className="text-sm text-foreground-muted">{entry.category}</p>
+        <p className="text-foreground-muted text-sm">{entry.category}</p>
       )}
-      <h1 className="mt-1 font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
+      <h1 className="text-charcoal-900 mt-1 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         {entry.title}
       </h1>
 

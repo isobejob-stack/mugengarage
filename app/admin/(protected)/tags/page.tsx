@@ -8,10 +8,10 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="font-serif text-2xl font-bold text-charcoal-900">
+      <h1 className="text-charcoal-900 font-serif text-2xl font-bold">
         タグ管理
       </h1>
-      <p className="mt-2 text-base text-foreground-muted">
+      <p className="text-foreground-muted mt-2 text-base">
         SCR-ADM-024 ・ BR-DATA-003
       </p>
       <TagsManager initialTags={tags} />

@@ -108,7 +108,9 @@ export function formatShakenValue(
   return label.replace(/^車検\s?/, "") || "あり";
 }
 
-export function formatLegalMaintenanceValue(value: string | null): string | null {
+export function formatLegalMaintenanceValue(
+  value: string | null,
+): string | null {
   if (value === "included") return "付き";
   if (value === "separate") return "別途";
   if (value === "none") return "なし";

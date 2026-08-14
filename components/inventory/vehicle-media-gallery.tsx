@@ -49,7 +49,9 @@ export function VehicleMediaGallery({
     <div className="flex flex-col gap-8">
       {photos.length > 0 && (
         <section>
-          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">写真</h2>
+          <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
+            写真
+          </h2>
           <div className="relative mt-3">
             <div
               className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth px-4 pb-2"
@@ -77,7 +79,7 @@ export function VehicleMediaGallery({
                     // 幅がバラバラになり、(1)読み込み完了まで幅が不明でカルーセルがガタつく
                     // （CLS）、(2)スナップ位置が写真ごとに変わりスワイプの手応えが不安定、
                     // という2つの問題があった。4:3固定は一覧のカード（CardImage）とも揃う。
-                    className="relative block aspect-[4/3] h-64 overflow-hidden rounded-2xl shadow-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 sm:h-80"
+                    className="shadow-soft focus-visible:ring-primary-500 relative block aspect-[4/3] h-64 overflow-hidden rounded-2xl focus:outline-none focus-visible:ring-2 sm:h-80"
                   >
                     <Image
                       src={photo.public_url}
@@ -100,7 +102,7 @@ export function VehicleMediaGallery({
                   onClick={() => scrollToIndex(activeIndex - 1)}
                   disabled={activeIndex === 0}
                   aria-label="前の写真へ"
-                  className="absolute top-1/2 left-2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-2xl text-white shadow-medium disabled:opacity-30 md:flex"
+                  className="shadow-medium absolute top-1/2 left-2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-2xl text-white disabled:opacity-30 md:flex"
                 >
                   ‹
                 </button>
@@ -109,7 +111,7 @@ export function VehicleMediaGallery({
                   onClick={() => scrollToIndex(activeIndex + 1)}
                   disabled={activeIndex === photos.length - 1}
                   aria-label="次の写真へ"
-                  className="absolute top-1/2 right-2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-2xl text-white shadow-medium disabled:opacity-30 md:flex"
+                  className="shadow-medium absolute top-1/2 right-2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-2xl text-white disabled:opacity-30 md:flex"
                 >
                   ›
                 </button>
@@ -124,7 +126,7 @@ export function VehicleMediaGallery({
                   key={photo.id}
                   href={`#photo-${photo.id}`}
                   onClick={() => setActiveIndex(index)}
-                  className="relative block h-16 w-16 flex-none overflow-hidden rounded-lg border border-neutral-200 shadow-soft md:h-20 md:w-full"
+                  className="shadow-soft relative block h-16 w-16 flex-none overflow-hidden rounded-lg border border-neutral-200 md:h-20 md:w-full"
                   aria-label={`${index + 1}枚目の写真を表示`}
                 >
                   <Image
@@ -145,14 +147,16 @@ export function VehicleMediaGallery({
 
       {videos.length > 0 && (
         <section>
-          <h2 className="font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">動画</h2>
+          <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
+            動画
+          </h2>
           <div className="mt-3 flex flex-col gap-4">
             {videos.map((video) => {
               const embedUrl = toEmbeddableVideoUrl(video.video_url);
               return (
                 <div key={video.id}>
                   {embedUrl ? (
-                    <div className="aspect-video w-full overflow-hidden rounded-2xl shadow-soft">
+                    <div className="shadow-soft aspect-video w-full overflow-hidden rounded-2xl">
                       <iframe
                         src={embedUrl}
                         title="車両動画"

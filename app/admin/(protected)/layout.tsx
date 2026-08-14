@@ -20,7 +20,7 @@ export default async function AdminProtectedLayout({
   }
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="bg-cream-50 min-h-screen">
       <AdminNav />
       {children}
     </div>

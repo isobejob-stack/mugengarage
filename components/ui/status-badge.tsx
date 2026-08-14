@@ -57,7 +57,7 @@ export function VehicleFeatureBadges({
 }) {
   if (!isRecommended && !isNewArrival) return null;
   return (
-    <div className="absolute left-2 top-2 z-10 flex gap-1">
+    <div className="absolute top-2 left-2 z-10 flex gap-1">
       {isRecommended && <StatusBadge label="おすすめ" tone="warning" />}
       {isNewArrival && <StatusBadge label="新着" tone="info" />}
     </div>

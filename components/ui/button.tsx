@@ -4,12 +4,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react";
 // 共有UIプリミティブ: Button（デザイン刷新プロジェクト フェーズ1）
 // 03_ui_rules.md 4章: タップ領域は最低44px四方、本文は16px以上を確保する（sizeごとの min-h・text を参照）。
 export type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "outline"
-  | "ghost"
-  | "destructive"
-  | "line";
+  "primary" | "secondary" | "outline" | "ghost" | "destructive" | "line";
 
 export type ButtonSize = "sm" | "md" | "lg";
 
@@ -73,7 +68,12 @@ export function buttonClassName({
   size?: ButtonSize;
   className?: string;
 }): string {
-  return cx(BASE_CLASSES, VARIANT_CLASSES[variant], SIZE_CLASSES[size], className);
+  return cx(
+    BASE_CLASSES,
+    VARIANT_CLASSES[variant],
+    SIZE_CLASSES[size],
+    className,
+  );
 }
 
 function isExternalHref(href: string): boolean {
@@ -85,8 +85,7 @@ function isExternalHref(href: string): boolean {
 }
 
 export function Button(props: ButtonProps): ReactNode {
-  const { variant = "primary", size = "md", className, href, ...rest } =
-    props;
+  const { variant = "primary", size = "md", className, href, ...rest } = props;
   const classes = buttonClassName({ variant, size, className });
 
   if (href !== undefined) {

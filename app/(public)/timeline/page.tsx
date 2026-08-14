@@ -44,10 +44,10 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="font-serif text-3xl font-bold tracking-tight text-balance text-charcoal-900 sm:text-4xl">
+      <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         Jaguar年表
       </h1>
-      <p className="mt-2 text-foreground-muted">
+      <p className="text-foreground-muted mt-2">
         Jaguarブランドの歴史を時系列でたどります。
       </p>
 
@@ -55,10 +55,10 @@ export default async function Page({
         <div className="mt-4 flex flex-wrap gap-2">
           <Link
             href="/timeline"
-            className={`flex min-h-11 items-center rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200 ease-standard ${
+            className={`ease-standard flex min-h-11 items-center rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200 ${
               !decade
                 ? "border-primary-600 bg-primary-600 text-white"
-                : "border-neutral-300 bg-white text-charcoal-800 hover:border-primary-400 hover:bg-primary-50"
+                : "text-charcoal-800 hover:border-primary-400 hover:bg-primary-50 border-neutral-300 bg-white"
             }`}
           >
             すべて
@@ -67,10 +67,10 @@ export default async function Page({
             <Link
               key={d}
               href={`/timeline?decade=${encodeURIComponent(d)}`}
-              className={`flex min-h-11 items-center rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200 ease-standard ${
+              className={`ease-standard flex min-h-11 items-center rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200 ${
                 decade === d
                   ? "border-primary-600 bg-primary-600 text-white"
-                  : "border-neutral-300 bg-white text-charcoal-800 hover:border-primary-400 hover:bg-primary-50"
+                  : "text-charcoal-800 hover:border-primary-400 hover:bg-primary-50 border-neutral-300 bg-white"
               }`}
             >
               {d}
@@ -80,7 +80,7 @@ export default async function Page({
       )}
 
       {filtered.length === 0 ? (
-        <p className="mt-8 text-foreground-muted">イベントはまだありません。</p>
+        <p className="text-foreground-muted mt-8">イベントはまだありません。</p>
       ) : (
         <ol className="mt-8 flex flex-col gap-8 border-l border-neutral-200 pl-6">
           {filtered.map((e, i) => (
@@ -88,12 +88,12 @@ export default async function Page({
               <span
                 className={`absolute top-1 -left-[29px] h-3 w-3 rounded-full ${timelineCategoryColors[e.category]}`}
               />
-              <p className="text-sm text-foreground-muted">
+              <p className="text-foreground-muted text-sm">
                 {e.event_date}
                 {" ・ "}
                 {timelineCategoryLabels[e.category]}
               </p>
-              <h2 className="mt-1 font-serif text-xl font-bold tracking-tight text-charcoal-900 sm:text-2xl">
+              <h2 className="text-charcoal-900 mt-1 font-serif text-xl font-bold tracking-tight sm:text-2xl">
                 {e.title}
               </h2>
               {e.body && (

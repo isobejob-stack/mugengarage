@@ -23,10 +23,11 @@ export async function PATCH(
     });
   }
 
-  const { data: article, error, restoredStatus } = await restoreArticle(
-    id,
-    existing.status,
-  );
+  const {
+    data: article,
+    error,
+    restoredStatus,
+  } = await restoreArticle(id, existing.status);
   if (error || !article) {
     return apiInternalError(error);
   }

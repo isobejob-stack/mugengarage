@@ -138,7 +138,7 @@ export function EncyclopediaEntryForm({
           }}
         />
         {isEdit && (
-          <p className="mt-1 text-base text-foreground-muted">
+          <p className="text-foreground-muted mt-1 text-base">
             URLが変更されます。変更前のURLは自動的に新しいURLへリダイレクトされます。
           </p>
         )}
@@ -169,8 +169,10 @@ export function EncyclopediaEntryForm({
 
       {isEdit && (
         <section className="rounded-lg border border-red-200 bg-red-50 p-4">
-          <h2 className="font-serif text-lg font-bold text-red-700">危険な操作</h2>
-          <p className="mt-1 text-base text-foreground-muted">
+          <h2 className="font-serif text-lg font-bold text-red-700">
+            危険な操作
+          </h2>
+          <p className="text-foreground-muted mt-1 text-base">
             この図鑑項目を削除すると公開ページから即座に非表示になります。この操作は元に戻せません。
           </p>
           {deleteError && (
@@ -191,7 +193,7 @@ export function EncyclopediaEntryForm({
         </section>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-white p-4 shadow-medium pb-[env(safe-area-inset-bottom)]">
+      <div className="shadow-medium fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-white p-4 pb-[env(safe-area-inset-bottom)]">
         <Button
           type="submit"
           disabled={isSubmitting}
@@ -230,7 +232,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-base font-medium text-charcoal-900">{label}</span>
+      <span className="text-charcoal-900 text-base font-medium">{label}</span>
       <div className="mt-1">{children}</div>
       {error && (
         <p className="mt-1 text-base text-red-600" role="alert">

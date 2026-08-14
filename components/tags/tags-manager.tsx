@@ -73,12 +73,11 @@ export function TagsManager({ initialTags }: { initialTags: Tag[] }) {
     <div className="mt-6 flex flex-col gap-8">
       <Card>
         <CardBody>
-          <form
-            onSubmit={submit}
-            className="flex flex-wrap items-end gap-3"
-          >
+          <form onSubmit={submit} className="flex flex-wrap items-end gap-3">
             <label className="block">
-              <span className="text-base font-medium text-charcoal-900">タグ名</span>
+              <span className="text-charcoal-900 text-base font-medium">
+                タグ名
+              </span>
               <input
                 type="text"
                 className="input mt-1"
@@ -91,7 +90,9 @@ export function TagsManager({ initialTags }: { initialTags: Tag[] }) {
               />
             </label>
             <label className="block">
-              <span className="text-base font-medium text-charcoal-900">スラッグ</span>
+              <span className="text-charcoal-900 text-base font-medium">
+                スラッグ
+              </span>
               <input
                 type="text"
                 className="input mt-1"
@@ -121,46 +122,55 @@ export function TagsManager({ initialTags }: { initialTags: Tag[] }) {
       )}
 
       {tags.length === 0 ? (
-        <p className="text-base text-foreground-muted">タグはまだ登録されていません。</p>
+        <p className="text-foreground-muted text-base">
+          タグはまだ登録されていません。
+        </p>
       ) : (
         <>
-          <p className="text-sm text-foreground-muted sm:hidden">
+          <p className="text-foreground-muted text-sm sm:hidden">
             → 表は横にスクロールできます
           </p>
           <Card>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-base">
-              <thead>
-                <tr className="border-b border-neutral-200 bg-cream-50 text-left text-foreground-muted">
-                  <th className="px-4 py-3 font-medium">タグ名</th>
-                  <th className="px-4 py-3 font-medium">スラッグ</th>
-                  <th className="px-4 py-3 font-medium">作成日時</th>
-                  <th className="px-4 py-3 font-medium" />
-                </tr>
-              </thead>
-              <tbody>
-                {tags.map((tag) => (
-                  <tr key={tag.id} className="border-b border-neutral-100 last:border-0">
-                    <td className="px-4 py-3 text-charcoal-900">{tag.name}</td>
-                    <td className="px-4 py-3 font-mono text-charcoal-700">{tag.slug}</td>
-                    <td className="px-4 py-3 text-foreground-muted">
-                      {new Date(tag.created_at).toLocaleString("ja-JP")}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => setPendingDeleteId(tag.id)}
-                      >
-                        削除
-                      </Button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-base">
+                <thead>
+                  <tr className="bg-cream-50 text-foreground-muted border-b border-neutral-200 text-left">
+                    <th className="px-4 py-3 font-medium">タグ名</th>
+                    <th className="px-4 py-3 font-medium">スラッグ</th>
+                    <th className="px-4 py-3 font-medium">作成日時</th>
+                    <th className="px-4 py-3 font-medium" />
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {tags.map((tag) => (
+                    <tr
+                      key={tag.id}
+                      className="border-b border-neutral-100 last:border-0"
+                    >
+                      <td className="text-charcoal-900 px-4 py-3">
+                        {tag.name}
+                      </td>
+                      <td className="text-charcoal-700 px-4 py-3 font-mono">
+                        {tag.slug}
+                      </td>
+                      <td className="text-foreground-muted px-4 py-3">
+                        {new Date(tag.created_at).toLocaleString("ja-JP")}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => setPendingDeleteId(tag.id)}
+                        >
+                          削除
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </Card>
         </>
       )}

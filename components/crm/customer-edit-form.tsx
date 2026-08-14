@@ -29,7 +29,10 @@ export function CustomerEditForm({
 
   const onSubmit = async (values: CustomerFormValues) => {
     setSubmitError(null);
-    const result = await patchJson(`/api/admin/customers/${customerId}`, values);
+    const result = await patchJson(
+      `/api/admin/customers/${customerId}`,
+      values,
+    );
 
     if (!result.ok) {
       setSubmitError(result.message);
@@ -42,9 +45,7 @@ export function CustomerEditForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
       <label className="block">
-        <span className="text-base font-medium text-charcoal-900">
-          お名前
-        </span>
+        <span className="text-charcoal-900 text-base font-medium">お名前</span>
         <input type="text" className="input mt-1" {...register("name")} />
         {errors.name && (
           <p className="mt-1 text-base text-red-600" role="alert">
@@ -53,13 +54,13 @@ export function CustomerEditForm({
         )}
       </label>
       <label className="block">
-        <span className="text-base font-medium text-charcoal-900">
+        <span className="text-charcoal-900 text-base font-medium">
           電話番号
         </span>
         <input type="text" className="input mt-1" {...register("phone")} />
       </label>
       <label className="block">
-        <span className="text-base font-medium text-charcoal-900">
+        <span className="text-charcoal-900 text-base font-medium">
           メールアドレス
         </span>
         <input type="text" className="input mt-1" {...register("email")} />
@@ -70,7 +71,7 @@ export function CustomerEditForm({
         )}
       </label>
       <label className="block">
-        <span className="text-base font-medium text-charcoal-900">備考</span>
+        <span className="text-charcoal-900 text-base font-medium">備考</span>
         <textarea rows={3} className="input mt-1" {...register("notes")} />
       </label>
       {submitError && (

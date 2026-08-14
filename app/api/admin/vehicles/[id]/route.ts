@@ -91,8 +91,13 @@ export async function PATCH(
   }
 
   const currentSeo = await getSeoMeta("vehicle", id);
-  const { slug: newSlug, related, tags, seo: _seo, ...vehicleValues } =
-    parsed.data;
+  const {
+    slug: newSlug,
+    related,
+    tags,
+    seo: _seo,
+    ...vehicleValues
+  } = parsed.data;
 
   // FR-SEO-004: Slug変更の事前バリデーション（DB書き込み前にチェックする）
   if (newSlug !== undefined && newSlug !== currentSeo?.slug) {

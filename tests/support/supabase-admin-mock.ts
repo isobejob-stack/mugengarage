@@ -100,7 +100,6 @@ export function createSupabaseAdminMock(
     calls,
     callsFor: (table: string) => calls.filter((c) => c.table === table),
     firstInsertArg: (table: string) =>
-      calls.find((c) => c.table === table && c.method === "insert")
-        ?.args?.[0],
+      calls.find((c) => c.table === table && c.method === "insert")?.args?.[0],
   };
 }

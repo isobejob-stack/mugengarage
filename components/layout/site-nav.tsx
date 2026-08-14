@@ -39,7 +39,9 @@ export function SiteNav() {
   // 現在地判定。詳細ページ（/blog/xxx）でも親の「ブログ」を現在地として扱う。
   // ただし "/" は全パスの接頭辞になってしまうため完全一致に限定する。
   const isCurrentPath = (href: string) =>
-    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+    href === "/"
+      ? pathname === "/"
+      : pathname === href || pathname.startsWith(`${href}/`);
 
   // メニュー外のタップ・Escで閉じる。開いたままスクロールされると
   // 何を操作しているのか分からなくなるため。
@@ -111,7 +113,7 @@ export function SiteNav() {
               {item.label}
               <span
                 aria-hidden="true"
-                className={`text-xs transition-transform duration-200 ease-standard motion-reduce:transition-none ${
+                className={`ease-standard text-xs transition-transform duration-200 motion-reduce:transition-none ${
                   isOpen ? "rotate-180" : ""
                 }`}
               >
@@ -120,7 +122,7 @@ export function SiteNav() {
             </button>
 
             {isOpen && (
-              <div className="absolute left-0 z-40 mt-1 w-64 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-strong">
+              <div className="shadow-strong absolute left-0 z-40 mt-1 w-64 overflow-hidden rounded-2xl border border-neutral-200 bg-white">
                 <ul>
                   {item.children.map((child) => {
                     const childCurrent = isCurrentPath(child.href);
@@ -129,7 +131,7 @@ export function SiteNav() {
                         <Link
                           href={child.href}
                           aria-current={childCurrent ? "page" : undefined}
-                          className={`block border-b border-neutral-100 px-4 py-3 transition-colors duration-200 ease-standard last:border-b-0 hover:bg-primary-50 active:bg-primary-100 motion-reduce:transition-none ${
+                          className={`ease-standard hover:bg-primary-50 active:bg-primary-100 block border-b border-neutral-100 px-4 py-3 transition-colors duration-200 last:border-b-0 motion-reduce:transition-none ${
                             childCurrent ? "bg-primary-50" : ""
                           }`}
                         >
@@ -142,7 +144,7 @@ export function SiteNav() {
                           >
                             {child.label}
                           </span>
-                          <span className="mt-0.5 block text-sm text-foreground-muted">
+                          <span className="text-foreground-muted mt-0.5 block text-sm">
                             {child.description}
                           </span>
                         </Link>

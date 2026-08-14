@@ -62,7 +62,7 @@ export function VehicleMediaLightbox({
         type="button"
         onClick={onClose}
         aria-label="閉じる"
-        className="absolute top-3 right-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-2xl text-white shadow-medium hover:bg-white/20"
+        className="shadow-medium absolute top-3 right-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-2xl text-white hover:bg-white/20"
       >
         ×
       </button>
@@ -75,7 +75,7 @@ export function VehicleMediaLightbox({
             onNavigate(index - 1);
           }}
           aria-label="前の写真へ"
-          className="absolute top-1/2 left-2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-2xl text-white shadow-medium hover:bg-black/70 md:left-4"
+          className="shadow-medium absolute top-1/2 left-2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-2xl text-white hover:bg-black/70 md:left-4"
         >
           ‹
         </button>
@@ -89,7 +89,7 @@ export function VehicleMediaLightbox({
             onNavigate(index + 1);
           }}
           aria-label="次の写真へ"
-          className="absolute top-1/2 right-2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-2xl text-white shadow-medium hover:bg-black/70 md:right-4"
+          className="shadow-medium absolute top-1/2 right-2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-2xl text-white hover:bg-black/70 md:right-4"
         >
           ›
         </button>
@@ -105,7 +105,7 @@ export function VehicleMediaLightbox({
       <img
         src={photo.public_url}
         alt={photo.alt}
-        className="max-h-full max-w-full rounded-xl object-contain shadow-strong"
+        className="shadow-strong max-h-full max-w-full rounded-xl object-contain"
         onClick={(event) => event.stopPropagation()}
       />
 

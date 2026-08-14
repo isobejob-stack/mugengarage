@@ -63,17 +63,17 @@ export function TagPicker({
     <div className="flex flex-col gap-3">
       <div className="flex max-h-48 flex-wrap gap-2 overflow-y-auto rounded-lg border border-neutral-200 bg-white p-3">
         {tags.length === 0 && (
-          <p className="text-base text-foreground-muted">
+          <p className="text-foreground-muted text-base">
             タグはまだ登録されていません
           </p>
         )}
         {tags.map((tag) => (
           <label
             key={tag.id}
-            className={`flex min-h-11 items-center gap-1 rounded-full border px-3 py-1 text-base transition-colors duration-200 ease-standard ${
+            className={`ease-standard flex min-h-11 items-center gap-1 rounded-full border px-3 py-1 text-base transition-colors duration-200 ${
               selectedSet.has(tag.id)
                 ? "border-primary-600 bg-primary-50 text-primary-700"
-                : "border-neutral-300 text-charcoal-700 hover:border-primary-300"
+                : "text-charcoal-700 hover:border-primary-300 border-neutral-300"
             }`}
           >
             <input

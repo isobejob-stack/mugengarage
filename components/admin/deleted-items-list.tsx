@@ -63,7 +63,9 @@ export function DeletedItemsList<
   };
 
   if (list.length === 0) {
-    return <p className="mt-8 text-base text-foreground-muted">{emptyMessage}</p>;
+    return (
+      <p className="text-foreground-muted mt-8 text-base">{emptyMessage}</p>
+    );
   }
 
   return (
@@ -74,13 +76,15 @@ export function DeletedItemsList<
             <Card>
               <CardBody className="flex flex-row flex-wrap items-center justify-between gap-4 p-4">
                 <div>
-                  <p className="text-lg font-semibold text-charcoal-900">
+                  <p className="text-charcoal-900 text-lg font-semibold">
                     {item.title}
                   </p>
                   {item.meta && (
-                    <p className="text-base text-foreground-muted">{item.meta}</p>
+                    <p className="text-foreground-muted text-base">
+                      {item.meta}
+                    </p>
                   )}
-                  <p className="text-sm text-foreground-muted">
+                  <p className="text-foreground-muted text-sm">
                     削除日時:{" "}
                     {item.deleted_at
                       ? new Date(item.deleted_at).toLocaleString("ja-JP")

@@ -24,7 +24,10 @@ export function ReminderForm({ customerId }: { customerId: string }) {
 
   const onSubmit = async (values: ReminderFormValues) => {
     setSubmitError(null);
-    const result = await postJson(`/api/admin/customers/${customerId}/reminders`, values);
+    const result = await postJson(
+      `/api/admin/customers/${customerId}/reminders`,
+      values,
+    );
 
     if (!result.ok) {
       setSubmitError(result.message);
