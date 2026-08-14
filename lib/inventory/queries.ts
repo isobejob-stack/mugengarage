@@ -193,7 +193,7 @@ export async function listPublicVehicles() {
   const { data } = await supabase
     .from("vehicles")
     .select(
-      "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, status, is_recommended, is_new_arrival, manufacturers(name), models(name)",
+      "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, status, is_recommended, is_new_arrival, manufacturers(name), models(name), grades(name)",
     )
     .eq("status", "published")
     .is("deleted_at", null)
@@ -213,6 +213,7 @@ export async function listPublicVehicles() {
     is_new_arrival: boolean;
     manufacturers: { name: string } | null;
     models: { name: string } | null;
+    grades: { name: string } | null;
   }>;
 
   if (vehicles.length === 0) return [];

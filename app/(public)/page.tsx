@@ -22,6 +22,9 @@ import { VehicleCardPrice } from "@/components/inventory/vehicle-price";
 import { VehicleCardSpecs } from "@/components/inventory/vehicle-card-specs";
 import { VehicleQuickSearch } from "@/components/inventory/vehicle-quick-search";
 import { getVehicleSearchFacetOptions } from "@/lib/inventory/search";
+import { FavoriteIconButton } from "@/components/engagement/favorite-icon-button";
+import { getSessionId } from "@/lib/engagement/session";
+import { listFavoriteVehicleIds } from "@/lib/engagement/queries";
 
 // トップページは掲載中の車両をDBから取得しているため、静的生成されると車両を登録・公開しても
 // 次回デプロイまでトップに出ない（最も目に付く画面で更新が反映されない状態になる）。
@@ -43,10 +46,12 @@ const KNOWLEDGE_NAV = siteNav.find((item) => item.label === "Jaguarを知る");
 
 // SCR-PUB-001: トップページ（FR-INV-005, FR-LINE-001, FR-SEO-001）
 export default async function Page() {
-  const [vehicles, settings, facets] = await Promise.all([
+  const sessionId = await getSessionId();
+  const [vehicles, settings, facets, favoriteIds] = await Promise.all([
     listPublicVehicles(),
     getSiteSettings(),
     getVehicleSearchFacetOptions(),
+    sessionId ? listFavoriteVehicleIds(sessionId) : Promise.resolve([]),
   ]);
   // トップに出す在庫の上限。3カラムのグリッドがちょうど3行で埋まる9台とする
   // （10台前後で打ち切る想定だが、9なら最終行に1台だけ余るような欠けが出ない）。
@@ -160,9 +165,24 @@ export default async function Page() {
             </p>
           ) : (
             <ul className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-              {featuredVehicles.map((v, index) =>
-                v.slug ? (
-                  <li key={v.id}>
+              {featuredVehicles.map((v, index) => {
+                if (!v.slug) return null;
+                // 車名は在庫一覧・お気に入り・ランキングと同じくグレードまで出す
+                const vehicleName = [
+                  v.manufacturers?.name,
+                  v.models?.name,
+                  v.grades?.name,
+                ]
+                  .filter(Boolean)
+                  .join(" ");
+                return (
+                  // お気に入りボタンをカード（リンク）の外側に重ねるため、liを基準位置にする
+                  <li key={v.id} className="relative">
+                    <FavoriteIconButton
+                      vehicleId={v.id}
+                      initialFavorited={favoriteIds.includes(v.id)}
+                      vehicleName={vehicleName}
+                    />
                     <Card href={`/vehicles/${v.slug}`}>
                       <VehicleFeatureBadges
                         isRecommended={v.is_recommended}
@@ -172,13 +192,11 @@ export default async function Page() {
                         遅延読み込みを外して表示を前倒しする（2枚目以降は遅延のまま） */}
                       <CardImage
                         src={featuredPhotoUrls[index] ?? undefined}
-                        alt={`${v.manufacturers?.name ?? ""} ${v.models?.name ?? ""}`}
+                        alt={vehicleName}
                         priority={index === 0}
                       />
                       <CardBody>
-                        <CardTitle>
-                          {v.manufacturers?.name} {v.models?.name}
-                        </CardTitle>
+                        <CardTitle>{vehicleName}</CardTitle>
                         <VehicleCardPrice
                           price={v.price}
                           totalPrice={v.total_price}
@@ -193,8 +211,8 @@ export default async function Page() {
                       </CardBody>
                     </Card>
                   </li>
-                ) : null,
-              )}
+                );
+              })}
             </ul>
           )}
 
