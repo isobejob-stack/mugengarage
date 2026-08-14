@@ -1,10 +1,13 @@
 -- ============================================================
 -- エムガレージ サイト セットアップ用SQL（これ1つを実行すれば完了）
+-- 版数: v3
 --
 -- 使い方:
 --   1. https://supabase.com/dashboard を開く
 --   2. プロジェクトを選ぶ
 --   3. 左メニューの「SQL Editor」→「New query」
+--      ※ 前に失敗したタブで「Run」を押し直すと、古い内容のまま実行されます。
+--        必ず「New query」で新しいタブを開いてください。
 --   4. このファイルの中身を全部コピーして貼り付け
 --   5. 右下の「Run」を押す
 --
@@ -115,25 +118,45 @@ alter table audit_logs alter column target_id type text using target_id::text;
 --    あとで管理画面から編集・削除できます。
 -- ============================================================
 
--- メーカー（ダブルシックスはデイムラー名義なので分けています）
-insert into manufacturers (name, slug) values
-  ('ジャガー', 'jaguar'),
-  ('デイムラー', 'daimler')
-on conflict do nothing;
+-- メーカーと車種（ダブルシックスはデイムラー名義なので分けています）
+--
+-- メーカーの登録と車種の登録を1つの命令にまとめています。
+-- 「メーカーを登録 → あとから名前で探し直す」という書き方だと、
+-- 既に別の名前でメーカーが登録済みだったときに探し出せず、
+-- 車種のメーカー欄が空になってエラーになるためです。
+-- この書き方なら、既に登録済みでもそのメーカーのIDをそのまま受け取れます。
+with upserted_manufacturers as (
+  insert into manufacturers (name, slug) values
+    ('ジャガー', 'jaguar'),
+    ('デイムラー', 'daimler')
+  -- 既にある場合は中身を変えずにIDだけ受け取るための書き方です
+  on conflict (slug) do update set slug = excluded.slug
+  returning id, slug
+)
+insert into models (manufacturer_id, name, slug)
+select m.id, v.model_name, v.model_slug
+from (values
+  ('jaguar', 'XJ', 'xj'),
+  ('jaguar', 'Xタイプ', 'x-type'),
+  ('jaguar', 'Sタイプ', 's-type'),
+  ('jaguar', 'XJ-S', 'xj-s'),
+  ('daimler', 'ダブルシックス', 'double-six')
+) as v (manufacturer_slug, model_name, model_slug)
+join upserted_manufacturers m on m.slug = v.manufacturer_slug
+-- 既に車種がある場合は、メーカーの紐付けだけ正しい状態に直します
+on conflict (slug) do update set manufacturer_id = excluded.manufacturer_id;
 
--- 前回までの途中失敗などで、name と slug が食い違った状態の行が
--- 残っている可能性があるため、slug を基準に名前を必ず正しい値へ揃える
-update manufacturers set name = 'ジャガー' where slug = 'jaguar' and name is distinct from 'ジャガー';
-update manufacturers set name = 'デイムラー' where slug = 'daimler' and name is distinct from 'デイムラー';
+-- 以前の登録でメーカー名が英語等になっている場合に日本語表記へ揃えます
+-- （同じ名前の別メーカーが既にある場合は、重複を避けるため何もしません）
+update manufacturers m set name = 'ジャガー'
+ where m.slug = 'jaguar'
+   and m.name is distinct from 'ジャガー'
+   and not exists (select 1 from manufacturers o where o.name = 'ジャガー' and o.id <> m.id);
 
--- 車種
-insert into models (manufacturer_id, name, slug) values
-  ((select id from manufacturers where slug = 'jaguar'), 'XJ', 'xj'),
-  ((select id from manufacturers where slug = 'jaguar'), 'Xタイプ', 'x-type'),
-  ((select id from manufacturers where slug = 'jaguar'), 'Sタイプ', 's-type'),
-  ((select id from manufacturers where slug = 'jaguar'), 'XJ-S', 'xj-s'),
-  ((select id from manufacturers where slug = 'daimler'), 'ダブルシックス', 'double-six')
-on conflict (slug) do nothing;
+update manufacturers m set name = 'デイムラー'
+ where m.slug = 'daimler'
+   and m.name is distinct from 'デイムラー'
+   and not exists (select 1 from manufacturers o where o.name = 'デイムラー' and o.id <> m.id);
 
 -- 車両本体
 -- 価格は「本体価格」「支払総額」の順です。
@@ -277,8 +300,9 @@ on conflict do nothing;
 
 -- ============================================================
 -- 完了確認
---    実行後、下に「15」と表示されれば成功です。
+--    実行後、「登録された車両の台数」が 15 と表示されれば成功です。
+--    （版数は、最新のファイルを貼り付けられているか確認するためのものです）
 -- ============================================================
-select count(*) as 登録された車両の台数
-from vehicles
-where id::text like 'c0000000-0000-4000-8000-%';
+select
+  'v3' as 版数,
+  (select count(*) from vehicles where id::text like 'c0000000-0000-4000-8000-%') as 登録された車両の台数;
