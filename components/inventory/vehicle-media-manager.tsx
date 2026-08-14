@@ -9,6 +9,7 @@ import {
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Button, buttonClassName } from "@/components/ui/button";
 import { deleteJson, patchJson, postJson } from "@/lib/api/client";
+import { prepareVehiclePhotosForUpload } from "@/lib/inventory/image-resize";
 
 export type PhotoWithUrl = {
   id: string;
@@ -41,6 +42,8 @@ export function VehicleMediaManager({
     string | null
   >(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  // 縮小処理中。枚数が多いと数秒かかるため、無反応に見えないよう表示に出す
+  const [preparingPhotos, setPreparingPhotos] = useState(false);
   const [uploadSuccessMessage, setUploadSuccessMessage] = useState<
     string | null
   >(null);
@@ -72,23 +75,37 @@ export function VehicleMediaManager({
   };
 
   // 03_ui_rules.md 6章: アップロード時は進捗（プログレスバー）を表示する
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files;
+    if (!selected || selected.length === 0) return;
 
     setPhotoError(null);
 
-    // 03_non_functional_requirements.md 9章: アップロードファイルのサイズを制限する
-    // （サーバー側でも app/api/admin/vehicles/[id]/photos/route.ts で同じ上限を再チェックする）
-    const oversizedFile = Array.from(files).find(
+    // 送信前にブラウザ内で長辺2400pxまで縮小する。
+    // 以前はここで20MB超を「小さくしてから再度お試しください」と拒否していたが、
+    // 現地でiPhoneから登録する運用では写真を縮小する手段が無く、行き止まりだった。
+    // 縮小により、上限に当たること自体がほぼ無くなり、電波の弱い場所での
+    // 送信時間・失敗率も下がる（lib/inventory/image-resize.ts）。
+    setPreparingPhotos(true);
+    let files: File[];
+    try {
+      files = await prepareVehiclePhotosForUpload(Array.from(selected));
+    } finally {
+      setPreparingPhotos(false);
+    }
+
+    // 縮小しても上限を超える場合のみ弾く（HEIC等、ブラウザが展開できない形式が該当しうる）。
+    // サーバー側でも app/api/admin/vehicles/[id]/photos/route.ts で同じ上限を再チェックする
+    // （03_non_functional_requirements.md 9章）。
+    const oversizedFile = files.find(
       (file) => file.size > MAX_VEHICLE_PHOTO_FILE_SIZE_BYTES,
     );
     if (oversizedFile) {
       resetFileInputs();
       setPhotoError(
-        `「${oversizedFile.name}」のサイズが上限（${
+        `「${oversizedFile.name}」は縮小してもサイズ上限（${
           MAX_VEHICLE_PHOTO_FILE_SIZE_BYTES / (1024 * 1024)
-        }MB）を超えています。ファイルサイズを小さくしてから再度お試しください`,
+        }MB）を超えています。別の形式（JPEG）で保存し直してからお試しください`,
       );
       return;
     }
@@ -96,7 +113,7 @@ export function VehicleMediaManager({
     setUploadProgress(0);
 
     const formData = new FormData();
-    Array.from(files).forEach((file) => formData.append("files", file));
+    files.forEach((file) => formData.append("files", file));
 
     const xhr = new XMLHttpRequest();
     xhr.open("POST", `/api/admin/vehicles/${vehicleId}/photos`);
@@ -307,7 +324,7 @@ export function VehicleMediaManager({
               type="file"
               accept="image/*"
               capture="environment"
-              onChange={handleFileChange}
+              onChange={(e) => void handleFileChange(e)}
               className="hidden"
             />
           </label>
@@ -326,7 +343,7 @@ export function VehicleMediaManager({
               type="file"
               multiple
               accept="image/*"
-              onChange={handleFileChange}
+              onChange={(e) => void handleFileChange(e)}
               className="hidden"
             />
           </label>
@@ -344,6 +361,12 @@ export function VehicleMediaManager({
             </Button>
           )}
         </div>
+
+        {preparingPhotos && (
+          <p className="text-foreground-muted mt-3 text-base">
+            写真を送信用に縮小しています...
+          </p>
+        )}
 
         {uploadProgress !== null && (
           <div className="mt-3 w-full max-w-sm">
@@ -448,9 +471,11 @@ export function VehicleMediaManager({
                       type="button"
                       disabled={index === 0 || reordering}
                       onClick={() => movePhotoToStart(index)}
+                      // 「先頭へ」では何が起きるか分からない。この操作の実際の意味は
+                      // 「一覧・トップに出るサムネイルをこの写真にする」なので、そう書く。
                       className="text-charcoal-900 ease-standard hover:border-primary-400 hover:bg-primary-50 min-h-11 flex-1 rounded border border-neutral-300 text-base transition-colors duration-200 disabled:opacity-40"
                     >
-                      先頭へ
+                      メインにする
                     </button>
                     <button
                       type="button"
