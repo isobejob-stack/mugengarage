@@ -6,6 +6,7 @@ import {
   getPublicVehicleBySlug,
   getVehiclePhotos,
   getVehicleVideos,
+  getLeadVehiclePhotoPaths,
 } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
 import { VehicleStatusBadge } from "@/components/ui/status-badge";
@@ -15,6 +16,11 @@ import { getSessionId } from "@/lib/engagement/session";
 import { listFavoriteVehicleIds } from "@/lib/engagement/queries";
 import { listRelatedContents } from "@/lib/related/queries";
 import { RelatedContentList } from "@/components/related/related-content-list";
+import {
+  KnowledgeLinksSection,
+  SimilarVehiclesSection,
+} from "@/components/related/related-discovery";
+import { getAutoRelatedForVehicle } from "@/lib/related/auto";
 import { VehicleMediaGallery } from "@/components/inventory/vehicle-media-gallery";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { CarIcon } from "@/components/ui/car-icon";
@@ -153,6 +159,26 @@ export default async function Page({
     getVehicleVideos(vehicle.id),
   ]);
   const isFavorited = favoriteIds.includes(vehicle.id);
+
+  // 自動関連（回遊の土台）。手動指定と重複するものは自動側を落とす。
+  const { similarVehicles, knowledge } = await getAutoRelatedForVehicle({
+    id: vehicle.id,
+    model_id: vehicle.model_id,
+    model_year: vehicle.model_year,
+    models: vehicle.models,
+  });
+  const manualKeys = new Set(related.map((r) => `${r.type}:${r.id}`));
+  const autoKnowledge = knowledge.filter(
+    (item) => !manualKeys.has(`${item.type}:${item.id}`),
+  );
+
+  const similarPhotoPaths = await getLeadVehiclePhotoPaths(
+    similarVehicles.map((v) => v.id),
+  );
+  const similarPhotoUrls = similarVehicles.map((v) => {
+    const path = similarPhotoPaths.get(v.id);
+    return path ? getVehiclePhotoPublicUrl(path) : undefined;
+  });
   const photosWithUrl = photos.map((photo) => ({
     id: photo.id,
     public_url: getVehiclePhotoPublicUrl(photo.storage_path),
@@ -477,7 +503,21 @@ export default async function Page({
           </section>
         ))}
 
+      {/* 店主が手で選んだ関連は従来どおり最優先で出す */}
       <RelatedContentList items={related} title="関連コンテンツ" />
+
+      {/* 手動で紐付いていないぶんを自動判定で補う（lib/related/auto.ts）。
+          「この車をもっと知りたい」から図鑑・年表・整備実績へ進めるようにする。 */}
+      <KnowledgeLinksSection
+        items={autoKnowledge}
+        title={`${vehicle.models?.name ?? "この車"}をもっと知る`}
+        description="この車種にまつわる解説・歴史・整備の記録です。"
+      />
+
+      <SimilarVehiclesSection
+        vehicles={similarVehicles}
+        photoUrls={similarPhotoUrls}
+      />
 
       <div className="mt-16 flex flex-wrap items-center gap-3 border-t border-neutral-200 pt-8">
         <FavoriteButton vehicleId={vehicle.id} initialFavorited={isFavorited} />

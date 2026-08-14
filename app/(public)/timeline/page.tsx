@@ -84,7 +84,14 @@ export default async function Page({
       ) : (
         <ol className="mt-8 flex flex-col gap-8 border-l border-neutral-200 pl-6">
           {filtered.map((e, i) => (
-            <li key={e.id} className="relative">
+            // 車両詳細などから /timeline#event-<id> で該当の出来事へ直接飛べるようにする。
+            // 年表は縦に長く、飛び先の位置が分からないと結局探し直しになるため。
+            // scroll-mt はヘッダーに隠れないための余白。
+            <li
+              key={e.id}
+              id={`event-${e.id}`}
+              className="relative scroll-mt-24"
+            >
               <span
                 className={`absolute top-1 -left-[29px] h-3 w-3 rounded-full ${timelineCategoryColors[e.category]}`}
               />

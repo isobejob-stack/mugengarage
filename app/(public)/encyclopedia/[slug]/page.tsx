@@ -7,6 +7,10 @@ import { encyclopediaCategoryLabels } from "@/lib/knowledge/schema";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { RelatedInventorySection } from "@/components/related/related-discovery";
+import { getVehiclesRelatedToTitle } from "@/lib/related/auto";
+import { getLeadVehiclePhotoPaths } from "@/lib/inventory/queries";
+import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
 
 // 各詳細ページに固有のtitle/descriptionを与える。従来はルートlayoutの値を継承しており、
 // 検索結果でどのページも同じ文言になっていた（docs/tasks/ISSUE-005）。
@@ -43,6 +47,17 @@ export default async function Page({
   }
 
   const { entry, parent, children } = result;
+
+  // FR-ENC-005: この項目に対応する在庫車両。
+  // 図鑑は在庫に依存しない設計（FR-ENC-003）を保ったまま、表示側だけで結びつける。
+  const relatedVehicles = await getVehiclesRelatedToTitle(entry.title);
+  const relatedPhotoPaths = await getLeadVehiclePhotoPaths(
+    relatedVehicles.map((v) => v.id),
+  );
+  const relatedPhotoUrls = relatedVehicles.map((v) => {
+    const path = relatedPhotoPaths.get(v.id);
+    return path ? getVehiclePhotoPublicUrl(path) : undefined;
+  });
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
@@ -87,6 +102,12 @@ export default async function Page({
           </ul>
         </section>
       )}
+
+      <RelatedInventorySection
+        vehicles={relatedVehicles}
+        photoUrls={relatedPhotoUrls}
+        topic={entry.title}
+      />
     </main>
   );
 }
