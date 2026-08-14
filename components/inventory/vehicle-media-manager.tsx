@@ -243,6 +243,15 @@ export function VehicleMediaManager({
 
   const submitVideo = async () => {
     setVideoError(null);
+
+    // ブラウザの required を外した分の入力チェックをここで行う。
+    // 空のまま「追加する」を押したときに、無駄な通信をせずその場で伝える
+    // （URLの形式そのものはサーバーの vehicleVideoFormSchema でも検証される）。
+    if (videoUrl.trim() === "") {
+      setVideoError("動画URLを入力してください");
+      return;
+    }
+
     setVideoSubmitting(true);
 
     const result = await postJson<VehicleVideo>(
@@ -468,9 +477,23 @@ export function VehicleMediaManager({
             <form>にできない（<form>のネストは無効でハイドレーションエラーの原因になる）。
             送信ボタンのclickとEnterキー押下の両方でsubmitVideoを呼ぶ。 */}
         <div className="mt-3 flex flex-wrap gap-3">
+          {/*
+            type="url" と required を付けてはいけない。
+            この入力欄は車両編集フォーム（<form>）の内側にあるため、
+            ブラウザの標準バリデーションは「親フォームの送信時」にここも検査する。
+            required が付いていると、動画を登録しないかぎり
+            **車両情報そのものが保存できない**という状態になっていた。
+            同じ理由で type="url" も使えない（書きかけのURLが残っていると
+            車両の保存がブロックされる）。
+
+            URLの検証はこの欄の「追加する」を押したときだけ行えばよいので、
+            submitVideo 側（およびサーバーの vehicleVideoFormSchema）に任せる。
+            inputMode="url" はキーボードの出し分けのためだけのもので、
+            バリデーションには影響しない。
+          */}
           <input
-            type="url"
-            required
+            type="text"
+            inputMode="url"
             placeholder="https://www.youtube.com/watch?v=..."
             className="input flex-1"
             value={videoUrl}
