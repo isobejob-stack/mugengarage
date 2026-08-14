@@ -20,7 +20,10 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { CarIcon } from "@/components/ui/car-icon";
 import { getSeoMeta } from "@/lib/seo/queries";
 import { buildPublicPath } from "@/lib/seo/paths";
-import { buildVehicleStructuredData } from "@/lib/seo/structured-data";
+import {
+  buildVehicleStructuredData,
+  serializeStructuredData,
+} from "@/lib/seo/structured-data";
 import {
   SITE_NAME,
   SITE_URL,
@@ -181,12 +184,9 @@ export default async function Page({
 
   // レビュー指摘対応（必須修正4）: JSON-LDの中身は車両詳細（管理者入力を含む）から組み立てているため、
   // `</script>` 等のシーケンスが紛れ込んでいた場合にscriptタグを閉じてしまう
-  // スクリプトインジェクションを防ぐ。`<` を `<` にエスケープすることでHTMLタグとして解釈されなくする
-  // （JSON構文上は問題なく、JSON.parseで元の文字列に戻る）。
-  const structuredDataJson = JSON.stringify(structuredData).replace(
-    /</g,
-    "\\u003c",
-  );
+  // スクリプトインジェクションを防ぐ。エスケープ処理は他ページのJSON-LDと共有する
+  // （ページごとに書くと1箇所で忘れた瞬間に穴になるため）。
+  const structuredDataJson = serializeStructuredData(structuredData);
 
   // 主要諸元（ISSUE-006）。カーセンサー・グーネット等の中古車サイトと同じく、
   // 全項目を1つの表に並べるのではなく意味のまとまりごとに見出しを付ける。

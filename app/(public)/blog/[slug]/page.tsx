@@ -5,6 +5,11 @@ import remarkGfm from "remark-gfm";
 import { getPublicArticleBySlug } from "@/lib/content/queries";
 import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import {
+  buildArticleStructuredData,
+  serializeStructuredData,
+} from "@/lib/seo/structured-data";
+import { SITE_URL } from "@/lib/site-config";
 
 // 各詳細ページに固有のtitle/descriptionを与える。従来はルートlayoutの値を継承しており、
 // 検索結果でどのページも同じ文言になっていた（docs/tasks/ISSUE-005）。
@@ -39,8 +44,25 @@ export default async function Page({
     notFound();
   }
 
+  // FR-SEO-002: 記事の構造化データ。canonicalはgenerateMetadataと同じ導出にする
+  const articleUrl = `${SITE_URL}/blog/${slug}`;
+  const structuredDataJson = serializeStructuredData(
+    buildArticleStructuredData({
+      title: article.title,
+      description: excerptFromMarkdown(article.body),
+      url: articleUrl,
+      publishedAt: article.published_at,
+      updatedAt: article.updated_at,
+      category: article.category,
+    }),
+  );
+
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: structuredDataJson }}
+      />
       <Breadcrumb
         items={[{ label: "ブログ", href: "/blog" }, { label: article.title }]}
       />

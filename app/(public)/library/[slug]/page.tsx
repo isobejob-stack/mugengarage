@@ -7,6 +7,11 @@ import { listRelatedContents } from "@/lib/related/queries";
 import { RelatedContentList } from "@/components/related/related-content-list";
 import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import {
+  buildDefinedTermStructuredData,
+  serializeStructuredData,
+} from "@/lib/seo/structured-data";
+import { SITE_URL } from "@/lib/site-config";
 
 // 各詳細ページに固有のtitle/descriptionを与える。従来はルートlayoutの値を継承しており、
 // 検索結果でどのページも同じ文言になっていた（docs/tasks/ISSUE-005）。
@@ -43,8 +48,24 @@ export default async function Page({
 
   const related = await listRelatedContents("library_entry", entry.id);
 
+  // FR-SEO-002: このページが用語の定義であることを示す。
+  // 「SUキャブレターとは」のような語義を探す検索に対して、
+  // 投入済みの用語30件をそのまま検索露出に変えるための実装（ISSUE-005 4章）。
+  const structuredDataJson = serializeStructuredData(
+    buildDefinedTermStructuredData({
+      term: entry.title,
+      description: excerptFromMarkdown(entry.body),
+      url: `${SITE_URL}/library/${slug}`,
+      category: entry.category,
+    }),
+  );
+
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: structuredDataJson }}
+      />
       <Breadcrumb
         items={[
           { label: "ライブラリ", href: "/library" },

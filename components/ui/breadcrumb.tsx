@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SITE_URL } from "@/lib/site-config";
+import { serializeStructuredData } from "@/lib/seo/structured-data";
 
 // FR-SEO-006: パンくずリスト。
 //
@@ -39,11 +40,8 @@ export function Breadcrumb({ items }: { items: Crumb[] }) {
   };
 
   // 車両名・記事タイトルは管理画面からの入力を含むため、`</script>` の混入で
-  // scriptタグが閉じられないよう `<` をエスケープする（車両詳細のJSON-LDと同じ方針）。
-  const structuredDataJson = JSON.stringify(structuredData).replace(
-    /</g,
-    "\\u003c",
-  );
+  // scriptタグが閉じられないようエスケープする（他のJSON-LDと共通の処理）。
+  const structuredDataJson = serializeStructuredData(structuredData);
 
   return (
     <>
