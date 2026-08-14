@@ -149,6 +149,41 @@ export function RangeSelectField({
   );
 }
 
+// 「該当するものだけを見る」条件（車検あり・修復歴なし）。
+// 範囲や選択肢を持たずON/OFFしかないため、プルダウンではなくチェックボックスにする。
+// タップ領域を確保するため、チェックボックス単体ではなく行全体をlabelにしている。
+export function CheckboxField({
+  label,
+  name,
+  defaultChecked,
+  description,
+}: {
+  label: string;
+  name: string;
+  defaultChecked?: boolean;
+  description?: string;
+}) {
+  return (
+    <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-1 py-2">
+      <input
+        type="checkbox"
+        name={name}
+        value="1"
+        defaultChecked={defaultChecked}
+        className="size-5 shrink-0 accent-primary-700"
+      />
+      <span>
+        <span className="text-sm font-medium text-charcoal-900">{label}</span>
+        {description && (
+          <span className="mt-0.5 block text-xs text-foreground-muted">
+            {description}
+          </span>
+        )}
+      </span>
+    </label>
+  );
+}
+
 export function FilterSection({
   title,
   children,

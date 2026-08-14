@@ -24,6 +24,7 @@ import {
   FilterSection,
   SelectField,
   RangeSelectField,
+  CheckboxField,
   PRICE_OPTIONS,
   YEAR_OPTIONS,
   MILEAGE_OPTIONS,
@@ -82,6 +83,8 @@ export default async function Page({
     displacementMax: toNumber(params.displacement_max),
     exteriorColor: params.exterior_color || undefined,
     drivetrain: params.drivetrain || undefined,
+    shakenAvailableOnly: params.shaken === "1" || undefined,
+    noAccidentOnly: params.no_accident === "1" || undefined,
     sort: (params.sort as VehicleSearchFilters["sort"]) || undefined,
   };
 
@@ -172,13 +175,30 @@ export default async function Page({
             placeholder="おすすめ順"
           />
         </FilterSection>
+
+        {/* ISSUE-006: 中古車サイトで最も使われる2条件。折りたたみの中ではなく
+            常に見える位置に置く（条件を1つも開かずに絞り込める状態を作る）。 */}
+        <FilterSection title="条件で絞り込む">
+          <CheckboxField
+            label="車検あり"
+            name="shaken"
+            defaultChecked={params.shaken === "1"}
+            description="車検整備付、または車検が残っている車両"
+          />
+          <CheckboxField
+            label="修復歴なし"
+            name="no_accident"
+            defaultChecked={params.no_accident === "1"}
+            description="修復歴なしと確認できている車両"
+          />
+        </FilterSection>
         {/* FR-SRCH-001: シリーズ・世代・グレード〜駆動方式までの詳細条件（画面が煩雑にならないよう折りたたみ） */}
         <details
           className="rounded-md border border-neutral-200 p-4"
           open={hasAdvancedFilters}
         >
           <summary className="min-h-11 cursor-pointer py-2 text-base font-medium text-charcoal-900">
-            詳細検索（車種階層・車検・エンジン諸元・色ほか）
+            詳細検索（車種階層・エンジン諸元・色ほか）
           </summary>
 
           <div className="mt-4 flex flex-col gap-6">

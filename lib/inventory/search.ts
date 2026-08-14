@@ -19,6 +19,10 @@ export interface VehicleSearchFilters {
   displacementMax?: number;
   exteriorColor?: string;
   drivetrain?: string;
+  // ISSUE-006: 中古車サイトで最も使われる2条件。
+  // どちらも「該当するものだけを見たい」用途しかないため、範囲ではなくON/OFFで持つ。
+  shakenAvailableOnly?: boolean;
+  noAccidentOnly?: boolean;
   sort?: "new" | "price_asc" | "price_desc";
 }
 
@@ -154,6 +158,16 @@ export async function searchPublicVehicles(
   }
   if (filters.drivetrain) {
     query = query.eq("drivetrain", filters.drivetrain);
+  }
+  // 「車検整備付」または「満了日が残っている」車両。
+  // 状態が未登録（null）の車両は、車検があるとは言い切れないため含めない。
+  if (filters.shakenAvailableOnly) {
+    query = query.in("shaken_status", ["inspection_included", "valid_until"]);
+  }
+  // 修復歴なし。未登録（null）の車両は「なし」と断定できないため含めない
+  // （購入判断に直結する項目で、推測で対象に含めると実害が出る）。
+  if (filters.noAccidentOnly) {
+    query = query.eq("accident_history", false);
   }
 
   switch (filters.sort) {
