@@ -119,7 +119,7 @@ alter table audit_logs alter column target_id type text using target_id::text;
 insert into manufacturers (name, slug) values
   ('ジャガー', 'jaguar'),
   ('デイムラー', 'daimler')
-on conflict (name) do nothing;
+on conflict do nothing;
 
 -- 車種
 insert into models (manufacturer_id, name, slug) values
@@ -267,7 +267,7 @@ insert into seo_metas (target_type, target_id, slug, title, description) values
   ('vehicle', 'c0000000-0000-4000-8000-000000000013', 'xj6-3-2-1994', 'ジャガー XJ6 3.2 1994年', '走行7.7万km。法定整備付・保証付。'),
   ('vehicle', 'c0000000-0000-4000-8000-000000000014', 'xj-s-4-0-convertible-2002', 'ジャガー XJ-S 4.0 コンバーチブル 2002年', '走行15.0万km。法定整備付・保証付。'),
   ('vehicle', 'c0000000-0000-4000-8000-000000000015', 'daimler-double-six-1995', 'デイムラー ダブルシックス 1995年', '走行6.6万km。法定整備付・保証付。')
-on conflict (slug) do nothing;
+on conflict do nothing;
 
 
 -- ============================================================
