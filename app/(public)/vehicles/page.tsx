@@ -3,14 +3,15 @@ import {
   searchPublicVehicles,
   type VehicleSearchFilters,
 } from "@/lib/inventory/search";
-import { getLeadVehiclePhotoPaths } from "@/lib/inventory/queries";
+import { getVehiclePhotoPathsByVehicle } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
 import {
   parsePaginationParams,
   buildPaginationMeta,
 } from "@/lib/api/pagination";
 import { Button } from "@/components/ui/button";
-import { Card, CardImage, CardBody, CardTitle } from "@/components/ui/card";
+import { Card, CardBody, CardTitle } from "@/components/ui/card";
+import { VehicleCardPhotos } from "@/components/inventory/vehicle-card-photos";
 import { VehicleFeatureBadges } from "@/components/ui/status-badge";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { VehicleCardPrice } from "@/components/inventory/vehicle-price";
@@ -107,14 +108,13 @@ export default async function Page({
   ]);
   const meta = buildPaginationMeta(pagination, totalCount);
 
-  // 一覧表示用に、各車両の先頭写真のみを1クエリでまとめて取得する（N+1クエリ回避）
-  const leadPhotoPaths = await getLeadVehiclePhotoPaths(
+  // 一覧カードで数枚めくれるようにするため、車両ごとに先頭数枚を1クエリで取得する（N+1回避）
+  const photoPaths = await getVehiclePhotoPathsByVehicle(
     vehicles.map((v) => v.id),
   );
-  const photoUrls = vehicles.map((v) => {
-    const path = leadPhotoPaths.get(v.id);
-    return path ? getVehiclePhotoPublicUrl(path) : undefined;
-  });
+  const photoUrlsByVehicle = vehicles.map((v) =>
+    (photoPaths.get(v.id) ?? []).map((p) => getVehiclePhotoPublicUrl(p)),
+  );
 
   // 「21台中 1〜20台を表示」のための範囲。
   // 総件数だけだと、今どのあたりを見ているのかが分からない。
@@ -367,7 +367,10 @@ export default async function Page({
           </div>
         </div>
       ) : (
-        <ul className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 md:gap-8">
+        // スマホでも2列。在庫一覧を開いた瞬間に複数台が視界に入り、
+        // 「他にもこんな車がある」と伝わる状態にする。
+        // 1列だと1画面に1台しか入らず、15台規模の店では品揃えが無いように見える。
+        <ul className="mt-6 grid grid-cols-2 gap-3 sm:gap-6 md:gap-8">
           {vehicles.map((v, index) => {
             if (!v.slug) return null;
             // グレードまで出す。「Jaguar Eタイプ」だけでは同車種内で比較にならない
@@ -391,13 +394,15 @@ export default async function Page({
                     isRecommended={v.is_recommended}
                     isNewArrival={v.is_new_arrival}
                   />
-                  <CardImage
-                    src={photoUrls[index]}
+                  <VehicleCardPhotos
+                    urls={photoUrlsByVehicle[index]}
                     alt={vehicleName}
                     priority={index < PRIORITY_IMAGE_COUNT}
                   />
-                  <CardBody>
-                    <CardTitle>{vehicleName}</CardTitle>
+                  <CardBody className="space-y-1 p-3 sm:space-y-2 sm:p-5">
+                    <CardTitle className="text-sm leading-snug sm:text-lg">
+                      {vehicleName}
+                    </CardTitle>
                     <VehicleCardPrice
                       price={v.price}
                       totalPrice={v.total_price}

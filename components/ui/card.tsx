@@ -153,7 +153,7 @@ export function CardMeta({
   children: ReactNode;
 }): ReactNode {
   return (
-    <p className={cx("text-foreground-muted text-base", className)}>
+    <p className={cx("text-foreground-muted text-xs sm:text-base", className)}>
       {children}
     </p>
   );
@@ -169,7 +169,7 @@ export function CardPrice({
   return (
     <p
       className={cx(
-        "text-primary-700 font-mono text-xl font-bold tabular-nums",
+        "text-primary-700 font-mono text-lg font-bold tabular-nums sm:text-xl",
         className,
       )}
     >

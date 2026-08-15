@@ -66,7 +66,7 @@ export default async function Page() {
             </strong>
             台
           </p>
-          <ul className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 md:gap-8">
+          <ul className="mt-6 grid grid-cols-2 gap-3 sm:gap-6 md:gap-8">
             {vehicles.map((v, index) => {
               if (!v.slug) return null;
               const vehicleName = [
@@ -87,8 +87,10 @@ export default async function Page() {
                   />
                   <Card href={`/vehicles/${v.slug}`}>
                     <CardImage src={photoUrls[index]} alt={vehicleName} />
-                    <CardBody>
-                      <CardTitle>{vehicleName}</CardTitle>
+                    <CardBody className="space-y-1 p-3 sm:space-y-2 sm:p-5">
+                      <CardTitle className="text-sm leading-snug sm:text-lg">
+                        {vehicleName}
+                      </CardTitle>
                       <VehicleCardPrice
                         price={v.price}
                         totalPrice={v.total_price}

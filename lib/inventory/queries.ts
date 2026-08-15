@@ -303,6 +303,38 @@ export async function getLeadVehiclePhotoPaths(vehicleIds: string[]) {
   return result;
 }
 
+// 一覧カードで数枚めくれるようにするため、車両ごとに先頭から数枚を取る（N+1クエリ回避）。
+//
+// 中古車探しは「気になった車の写真を何枚か見て、詳細に入るか決める」という進み方をする。
+// 1枚しか出せないと、その判断のたびに詳細ページへの往復が発生していた。
+export async function getVehiclePhotoPathsByVehicle(
+  vehicleIds: string[],
+  perVehicle = 5,
+) {
+  if (vehicleIds.length === 0) return new Map<string, string[]>();
+
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("vehicle_photos")
+    .select("vehicle_id, storage_path, display_order")
+    .in("vehicle_id", vehicleIds)
+    .is("deleted_at", null)
+    .order("display_order", { ascending: true })
+    .returns<
+      Pick<VehiclePhoto, "vehicle_id" | "storage_path" | "display_order">[]
+    >();
+
+  const result = new Map<string, string[]>();
+  for (const row of data ?? []) {
+    const list = result.get(row.vehicle_id) ?? [];
+    if (list.length < perVehicle) {
+      list.push(row.storage_path);
+      result.set(row.vehicle_id, list);
+    }
+  }
+  return result;
+}
+
 // FR-INV-010: 車両動画一覧（表示順）。table_definitions.md 4.9
 export async function getVehicleVideos(vehicleId: string) {
   const supabase = createAdminClient();

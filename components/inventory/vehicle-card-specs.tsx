@@ -39,13 +39,17 @@ export function VehicleCardSpecs({
 
   return (
     // 年式・走行距離・車検・修復歴は、一覧で比較させるために出している「本文」であって
-    // 補助情報ではない。薄いグレーの14pxだと購買層（50〜60代中心）には読み取りづらいため、
-    // 本文と同じ16px・十分な濃さで出す（03_ui_rules.md 4章）。
-    <ul className="text-charcoal-700 mt-2 flex flex-wrap gap-x-3 gap-y-1 text-base">
+    // 補助情報ではない。従来の薄いグレーをやめ、十分な濃さで出す（03_ui_rules.md 4章）。
+    //
+    // サイズはスマホ14px / sm以上16px。一覧をスマホ2列にしたことでカード幅が
+    // 約170pxになり、16pxのままだと4項目が何度も折り返して比較しづらくなるため。
+    // 「1画面に複数台が入ること」と「1項目あたりの読みやすさ」のうち、
+    // 車を探している場面では前者を優先する。
+    <ul className="text-charcoal-700 mt-2 flex flex-wrap gap-x-2 gap-y-0.5 text-sm sm:gap-x-3 sm:gap-y-1 sm:text-base">
       {specs.map((spec) => (
         <li
           key={spec}
-          className="after:ml-3 after:text-neutral-300 after:content-['|'] last:after:content-none"
+          className="after:ml-2 after:text-neutral-300 after:content-['|'] last:after:content-none sm:after:ml-3"
         >
           {spec}
         </li>
