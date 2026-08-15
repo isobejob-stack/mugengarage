@@ -10,6 +10,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Button, buttonClassName } from "@/components/ui/button";
 import { deleteJson, patchJson, postJson } from "@/lib/api/client";
 import { prepareVehiclePhotosForUpload } from "@/lib/inventory/image-resize";
+import { VehiclePhotoCropper } from "@/components/inventory/vehicle-photo-cropper";
 
 export type PhotoWithUrl = {
   id: string;
@@ -52,6 +53,9 @@ export function VehicleMediaManager({
   const [videoUrl, setVideoUrl] = useState("");
   const [videoSubmitting, setVideoSubmitting] = useState(false);
   const [reordering, setReordering] = useState(false);
+  // トリミング中の写真。1枚ずつ開く
+  const [croppingPhotoId, setCroppingPhotoId] = useState<string | null>(null);
+  const [croppingSaving, setCroppingSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const successMessageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -285,6 +289,49 @@ export function VehicleMediaManager({
     setVideoSubmitting(false);
   };
 
+  // トリミング結果を保存する。写真は差し替え（新しいStorageパスへ保存し行を更新）となり、
+  // 並び順やメイン写真の指定はそのまま保たれる。
+  const saveCrop = async (photoId: string, blob: Blob) => {
+    setCroppingSaving(true);
+    setPhotoError(null);
+
+    const formData = new FormData();
+    formData.append(
+      "file",
+      new File([blob], "cropped.jpg", { type: "image/jpeg" }),
+    );
+
+    try {
+      const res = await fetch(
+        `/api/admin/vehicles/${vehicleId}/photos/${photoId}`,
+        { method: "PATCH", body: formData },
+      );
+      const body = await res.json().catch(() => null);
+      if (!res.ok || !body?.data) {
+        setPhotoError(body?.error?.message ?? "トリミングの保存に失敗しました");
+        return;
+      }
+      setPhotos((prev) =>
+        prev.map((p) =>
+          p.id === photoId
+            ? {
+                ...p,
+                storage_path: body.data.storage_path,
+                public_url: body.data.public_url,
+              }
+            : p,
+        ),
+      );
+      setCroppingPhotoId(null);
+    } catch {
+      setPhotoError(
+        "通信に失敗しました。電波の状況を確認して、もう一度お試しください",
+      );
+    } finally {
+      setCroppingSaving(false);
+    }
+  };
+
   const deleteVideo = async (videoId: string) => {
     setVideoError(null);
     const result = await deleteJson(
@@ -479,6 +526,18 @@ export function VehicleMediaManager({
                     </button>
                     <button
                       type="button"
+                      disabled={reordering}
+                      onClick={() =>
+                        setCroppingPhotoId(
+                          croppingPhotoId === photo.id ? null : photo.id,
+                        )
+                      }
+                      className="text-charcoal-900 ease-standard hover:border-primary-400 hover:bg-primary-50 min-h-11 flex-1 rounded border border-neutral-300 text-base transition-colors duration-200 disabled:opacity-40"
+                    >
+                      範囲を選ぶ
+                    </button>
+                    <button
+                      type="button"
                       disabled={index === photos.length - 1 || reordering}
                       onClick={() => movePhotoToEnd(index)}
                       className="text-charcoal-900 ease-standard hover:border-primary-400 hover:bg-primary-50 min-h-11 flex-1 rounded border border-neutral-300 text-base transition-colors duration-200 disabled:opacity-40"
@@ -487,6 +546,17 @@ export function VehicleMediaManager({
                     </button>
                   </div>
                 </div>
+
+                {croppingPhotoId === photo.id && (
+                  <div className="mt-3">
+                    <VehiclePhotoCropper
+                      imageUrl={photo.public_url}
+                      saving={croppingSaving}
+                      onCancel={() => setCroppingPhotoId(null)}
+                      onSave={(blob) => void saveCrop(photo.id, blob)}
+                    />
+                  </div>
+                )}
               </li>
             ))}
           </ul>
