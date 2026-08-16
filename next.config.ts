@@ -31,6 +31,28 @@ function supabaseStoragePattern() {
 }
 
 const nextConfig: NextConfig = {
+  // 整備実績（/maintenance-records）はブログへ統合し、ページごと削除した（2026-08-17）。
+  // 旧URLをそのまま404にすると、これまでの被リンクと検索流入を捨てることになるため、
+  // ブログ一覧へ恒久リダイレクトする。
+  //
+  // 詳細ページ（:slug）の行き先もあえて一覧にしている。移行後の記事slugは
+  // 記事側と衝突した場合に 'maintenance-' が前置されうるため、旧slugから
+  // 新URLを機械的に導けない。存在しない記事へ飛ばして404を見せるより、
+  // カテゴリ「整備記録」で絞り込める一覧に着地させる方が読者は目的に近づける。
+  //
+  // permanent: true は Next.js では 301 ではなく 308 を返す（リクエストメソッドを保つため）。
+  // 検索エンジンにとっては301と同じ「恒久的な移動」として扱われる
+  // （node_modules/next/dist/docs/01-app/03-api-reference/05-config/01-next-config-js/redirects.md）。
+  redirects() {
+    return [
+      { source: "/maintenance-records", destination: "/blog", permanent: true },
+      {
+        source: "/maintenance-records/:slug",
+        destination: "/blog",
+        permanent: true,
+      },
+    ];
+  },
   images: {
     remotePatterns: [supabaseStoragePattern()],
     // 車両写真は一眼で撮影された数MBのJPEGがそのまま登録されうる。AVIF/WebPへの自動変換で

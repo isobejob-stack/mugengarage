@@ -5,6 +5,7 @@ import type {
   CustomerNote,
   Inquiry,
   Reminder,
+  ReminderListItem,
 } from "@/lib/crm/types";
 import { getFavoritesByCustomerId } from "@/lib/engagement/queries";
 
@@ -125,6 +126,35 @@ export async function getCustomerTimeline(
   return entries.sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
+}
+
+// FR-CRM-004: 未完了リマインダーの横断一覧（期日の昇順）。
+//
+// 従来リマインダーは顧客詳細からしか見えず、期日を確認するには顧客を1件ずつ開く必要があった。
+// 「車検時期に連絡する」ような期日は、忘れた時点で機能そのものが無意味になるため、
+// 期日順に横串で見られる入口を用意する。
+//
+// customers!inner + deleted_at のフィルタで、論理削除済みの顧客のリマインダーを
+// DB側で除外する（!inner を付けないと埋め込み側の条件では行が絞られない）。
+export async function listOpenReminders(limit?: number) {
+  const supabase = createAdminClient();
+
+  let query = supabase
+    .from("reminders")
+    .select(
+      "id, customer_id, title, due_date, is_completed, customers!inner(id, name)",
+    )
+    .eq("is_completed", false)
+    .is("customers.deleted_at", null)
+    .order("due_date", { ascending: true });
+
+  if (limit !== undefined) {
+    query = query.limit(limit);
+  }
+
+  const { data } = await query;
+
+  return (data ?? []) as unknown as ReminderListItem[];
 }
 
 // FR-CRM-005: 顧客がお気に入り登録した車両一覧（全ステータス対象、管理画面用）

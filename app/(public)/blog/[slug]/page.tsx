@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getPublicArticleBySlug } from "@/lib/content/queries";
+import { contentCategoryLabel } from "@/lib/content/categories";
 import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { RelatedInventorySection } from "@/components/related/related-discovery";
@@ -82,8 +83,12 @@ export default async function Page({
       <Breadcrumb
         items={[{ label: "ブログ", href: "/blog" }, { label: article.title }]}
       />
+      {/* カテゴリは表示名に直して出す（値「整備記録」→「整備記録（維持・メンテナンス）」）。
+          一覧のchipと同じ文言に揃え、どの絞り込みから来た記事かが分かるようにする。 */}
       {article.category && (
-        <p className="text-foreground-muted text-sm">{article.category}</p>
+        <p className="text-foreground-muted text-sm">
+          {contentCategoryLabel(article.category)}
+        </p>
       )}
       <h1 className="text-charcoal-900 mt-1 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         {article.title}

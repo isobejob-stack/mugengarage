@@ -1,21 +1,26 @@
+import type { ReactNode } from "react";
+import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { listPublicTimelineEvents } from "@/lib/timeline/queries";
+import {
+  decadeLabelOf,
+  formatTimelineDate,
+  timelineYearOf,
+} from "@/lib/timeline/format";
 import { listRelatedContents } from "@/lib/related/queries";
 import {
   timelineCategoryLabels,
   timelineCategoryColors,
 } from "@/lib/timeline/schema";
 import { RelatedContentList } from "@/components/related/related-content-list";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import Link from "next/link";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 
-function decadeOf(dateStr: string) {
-  const year = new Date(dateStr).getFullYear();
-  return `${Math.floor(year / 10) * 10}年代`;
-}
+// 管理画面での年表の追加・編集を次のデプロイまで待たせないため、リクエストごとに描画する
+// （理由の詳細は app/(public)/blog/page.tsx のコメント参照）。
+export const dynamic = "force-dynamic";
 
 export const metadata = buildPageMetadata({
   title: "Jaguar年表",
@@ -24,7 +29,19 @@ export const metadata = buildPageMetadata({
   path: "/timeline",
 });
 
-// SCR-PUB-010: Jaguar年表（縦型タイムライン、カテゴリ色分け、年代絞り込み）
+// SCR-PUB-010: Jaguar年表
+//
+// 2画面構成にした（発注者の指摘「情報量が多い・箇条書きすぎる」への対応）。
+//
+// 従来は59件すべてを本文つきの縦タイムラインで一度に出していた。
+// 1件あたり200字前後の本文と関連リンクが並ぶため、全体で1万字を超え、
+// 「いつ何があったか」を俯瞰する年表としてはむしろ読めない状態だった
+// （加えて表示のたびに59件分の関連コンテンツ取得が走っていた）。
+//
+// 既定は「年 ／ 出来事」だけの一覧にして全59件を俯瞰させ、
+// 年代を選んだときだけ本文・関連リンクを出す。
+// 出来事の行そのものが該当年代のアンカーへのリンクなので、
+// どの出来事にも1タップで到達でき、情報は1件も減っていない。
 export default async function Page({
   searchParams,
 }: {
@@ -34,76 +51,40 @@ export default async function Page({
   const events = await listPublicTimelineEvents();
 
   const decades = Array.from(
-    new Set(events.map((e) => decadeOf(e.event_date))),
+    new Set(events.map((e) => decadeLabelOf(e.event_date))),
   );
-  const filtered = decade
-    ? events.filter((e) => decadeOf(e.event_date) === decade)
-    : events;
 
+  if (!decade) {
+    return (
+      <Overview events={events} decades={decades} />
+    );
+  }
+
+  const filtered = events.filter((e) => decadeLabelOf(e.event_date) === decade);
+
+  // 関連コンテンツの取得は、本文を出す年代だけに限る（従来は毎回59件分を取得していた）
   const relatedByEvent = await Promise.all(
     filtered.map((e) => listRelatedContents("timeline_event", e.id)),
   );
 
+  const currentIndex = decades.indexOf(decade);
+  const previousDecade = currentIndex > 0 ? decades[currentIndex - 1] : null;
+  const nextDecade =
+    currentIndex >= 0 && currentIndex < decades.length - 1
+      ? decades[currentIndex + 1]
+      : null;
+
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <Breadcrumb items={[{ label: "Jaguar年表" }]} />
+      <Breadcrumb
+        items={[
+          { label: "Jaguar年表", href: "/timeline" },
+          { label: decade },
+        ]}
+      />
       <h1 className="text-charcoal-900 mt-3 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-        Jaguar年表
+        {decade}のジャガー
       </h1>
-      <p className="text-foreground-muted mt-2">
-        1922年の創業から現在まで、Jaguarの歩みを時系列でたどります。
-      </p>
-      {/* 蓄積量そのものが価値なので件数を出す。絞り込み中は母数も併記する */}
-      <p className="text-charcoal-900 mt-3 text-base">
-        {decade ? (
-          <>
-            {decade}
-            <strong className="mx-1 text-xl font-bold tabular-nums">
-              {filtered.length}
-            </strong>
-            件
-            <span className="text-foreground-muted ml-2 text-sm">
-              （全{events.length}件中）
-            </span>
-          </>
-        ) : (
-          <>
-            全
-            <strong className="text-xl font-bold tabular-nums">
-              {events.length}
-            </strong>
-            件
-          </>
-        )}
-      </p>
-
-      {decades.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Link
-            href="/timeline"
-            className={`ease-standard flex min-h-11 items-center rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200 ${
-              !decade
-                ? "border-primary-600 bg-primary-600 text-white"
-                : "text-charcoal-800 hover:border-primary-400 hover:bg-primary-50 border-neutral-300 bg-white"
-            }`}
-          >
-            すべて
-          </Link>
-          {decades.map((d) => (
-            <Link
-              key={d}
-              href={`/timeline?decade=${encodeURIComponent(d)}`}
-              className={`ease-standard flex min-h-11 items-center rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200 ${
-                decade === d
-                  ? "border-primary-600 bg-primary-600 text-white"
-                  : "text-charcoal-800 hover:border-primary-400 hover:bg-primary-50 border-neutral-300 bg-white"
-              }`}
-            >
-              {d}
-            </Link>
-          ))}
-        </div>
-      )}
 
       {filtered.length === 0 ? (
         <div className="bg-cream-100 mt-8 rounded-2xl border border-neutral-200 p-6 text-center">
@@ -117,51 +98,164 @@ export default async function Page({
           </div>
         </div>
       ) : (
-        <ol className="mt-8 flex flex-col gap-8 border-l border-neutral-200 pl-6">
-          {filtered.map((e, i) => (
-            // 車両詳細などから /timeline#event-<id> で該当の出来事へ直接飛べるようにする。
-            // 年表は縦に長く、飛び先の位置が分からないと結局探し直しになるため。
-            // scroll-mt はヘッダーに隠れないための余白。
-            <li
-              key={e.id}
-              id={`event-${e.id}`}
-              className="relative scroll-mt-24"
-            >
-              <span
-                className={`absolute top-1 -left-[29px] h-3 w-3 rounded-full ${timelineCategoryColors[e.category]}`}
-              />
-              <p className="text-foreground-muted text-sm">
-                {e.event_date}
-                {" ・ "}
-                {timelineCategoryLabels[e.category]}
-              </p>
-              <h2 className="text-charcoal-900 mt-1 font-serif text-xl font-bold tracking-tight sm:text-2xl">
-                {e.title}
-              </h2>
-              {e.body && (
-                <div className="prose mt-2 max-w-none">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {e.body}
-                  </ReactMarkdown>
-                </div>
-              )}
-              <RelatedContentList
-                items={relatedByEvent[i]}
-                title="関連リンク"
-                compact
-              />
-            </li>
-          ))}
-        </ol>
+        <>
+          <p className="text-foreground-muted mt-2 text-base">
+            {filtered.length}件（全{events.length}件中）
+          </p>
+          <ol className="mt-8 flex flex-col gap-8 border-l border-neutral-200 pl-6">
+            {filtered.map((e, i) => (
+              // 車両詳細や年表一覧から /timeline?decade=...#event-<id> で
+              // 該当の出来事へ直接飛べるようにする。
+              // scroll-mt はヘッダーに隠れないための余白。
+              <li
+                key={e.id}
+                id={`event-${e.id}`}
+                className="relative scroll-mt-24"
+              >
+                <span
+                  className={`absolute top-1 -left-[29px] h-3 w-3 rounded-full ${timelineCategoryColors[e.category]}`}
+                  aria-hidden="true"
+                />
+                {/* 色は補助。分類は必ず文字でも示す（03_ui_rules.md 4章） */}
+                <p className="text-foreground-muted text-sm">
+                  {formatTimelineDate(e.event_date, e.date_precision)}
+                  {" ・ "}
+                  {timelineCategoryLabels[e.category]}
+                </p>
+                <h2 className="text-charcoal-900 mt-1 font-serif text-xl font-bold tracking-tight sm:text-2xl">
+                  {e.title}
+                </h2>
+                {e.body && (
+                  <div className="prose mt-2 max-w-none">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {e.body}
+                    </ReactMarkdown>
+                  </div>
+                )}
+                <RelatedContentList
+                  items={relatedByEvent[i]}
+                  title="関連リンク"
+                  compact
+                />
+              </li>
+            ))}
+          </ol>
+        </>
       )}
-      <div className="mt-12 flex flex-wrap justify-center gap-3 border-t border-neutral-200 pt-8">
+
+      {/* 読み終えた位置に、前後の年代と全体への戻り口を置く。
+          年代の一覧を画面上部に並べると、読む前に選ばせることになるため下に置く。 */}
+      <nav className="mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 pt-8">
+        {previousDecade ? (
+          <DecadeLink decade={previousDecade}>← {previousDecade}</DecadeLink>
+        ) : (
+          <span />
+        )}
+        <Link
+          href="/timeline"
+          className="text-charcoal-900 ease-standard hover:text-primary-700 inline-flex min-h-11 items-center text-base font-medium underline decoration-1 underline-offset-4 transition-colors duration-200"
+        >
+          年表全体へ戻る
+        </Link>
+        {nextDecade ? (
+          <DecadeLink decade={nextDecade}>{nextDecade} →</DecadeLink>
+        ) : (
+          <span />
+        )}
+      </nav>
+
+      <div className="mt-8 flex justify-center">
         <Button href="/vehicles" variant="primary" size="md">
           在庫車両を見る
         </Button>
-        <Button href="/encyclopedia" variant="outline" size="md">
-          車種ごとの解説を読む
+      </div>
+    </main>
+  );
+}
+
+// 既定表示。全59件を「年 ／ 出来事」だけで俯瞰させる。
+function Overview({
+  events,
+  decades,
+}: {
+  events: Awaited<ReturnType<typeof listPublicTimelineEvents>>;
+  decades: string[];
+}) {
+  return (
+    <main className="mx-auto max-w-3xl px-4 py-8">
+      <Breadcrumb items={[{ label: "Jaguar年表" }]} />
+      <h1 className="text-charcoal-900 mt-3 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
+        Jaguar年表
+      </h1>
+      <p className="text-foreground-muted mt-3 text-base leading-loose">
+        創業から現在までの{events.length}
+        件です。出来事を選ぶと、その年代の解説を読めます。
+      </p>
+
+      {decades.map((label) => {
+        const items = events.filter(
+          (e) => decadeLabelOf(e.event_date) === label,
+        );
+        const decadeHref = `/timeline?decade=${encodeURIComponent(label)}`;
+        return (
+          <section key={label} className="mt-10">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 border-b border-neutral-200 pb-2">
+              <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
+                {label}
+              </h2>
+              <Link
+                href={decadeHref}
+                className="text-primary-700 ease-standard inline-flex min-h-11 items-center gap-1.5 text-base font-medium underline decoration-1 underline-offset-4 transition-colors duration-200 hover:decoration-2"
+              >
+                この年代を読む
+                <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+            <ol className="divide-y divide-neutral-200">
+              {items.map((e) => (
+                <li key={e.id}>
+                  {/* 行そのものを、その出来事の本文へのリンクにする。
+                      年と出来事を2列に固定して、目が縦に滑るようにする。 */}
+                  <Link
+                    href={`${decadeHref}#event-${e.id}`}
+                    className="ease-standard hover:bg-cream-100 -mx-2 grid min-h-11 grid-cols-[3.5rem_1fr] items-center gap-3 rounded-lg px-2 py-2.5 transition-colors duration-200"
+                  >
+                    <span className="text-foreground-muted font-mono text-sm tabular-nums">
+                      {timelineYearOf(e.event_date)}
+                    </span>
+                    <span className="text-charcoal-900 text-base">
+                      {e.title}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </section>
+        );
+      })}
+
+      <div className="mt-12 flex justify-center border-t border-neutral-200 pt-8">
+        <Button href="/vehicles" variant="primary" size="md">
+          在庫車両を見る
         </Button>
       </div>
     </main>
+  );
+}
+
+function DecadeLink({
+  decade,
+  children,
+}: {
+  decade: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={`/timeline?decade=${encodeURIComponent(decade)}`}
+      className="text-primary-700 ease-standard inline-flex min-h-11 items-center text-base font-medium underline decoration-1 underline-offset-4 transition-colors duration-200 hover:decoration-2"
+    >
+      {children}
+    </Link>
   );
 }

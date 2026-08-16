@@ -11,7 +11,11 @@ export interface Customer extends BaseEntity, SoftDeletable {
   notes: string | null;
 }
 
-export type InquiryChannel = "line" | "phone" | "email" | "form";
+// "form" は公開フォーム（app/api/inquiries）専用。管理画面からの手動登録（FR-INQ-002）は
+// "form" を受け付けないため、チャネルだけで「フォーム由来か、店側が手で記録したものか」を判別できる。
+// "visit"（来店）はこの店で実際に多い流入経路だが、DBのCHECK制約には後から追加する必要がある
+// （supabase/migrations/20260817090000_add_visit_channel_to_inquiries.sql）。
+export type InquiryChannel = "line" | "phone" | "email" | "form" | "visit";
 export type InquiryCategory =
   "purchase" | "repair" | "sale" | "parts" | "other";
 export type InquiryResponseStatus = "unhandled" | "in_progress" | "completed";
@@ -36,4 +40,14 @@ export interface Reminder extends BaseEntity {
   title: string;
   due_date: string;
   is_completed: boolean;
+}
+
+// FR-CRM-004（横断一覧）: 顧客を1件ずつ開かずに期日を確認するための一覧行。
+// 誰への対応かが分からないと一覧の意味が無いため、顧客名を必ず伴う。
+export interface ReminderListItem
+  extends Pick<
+    Reminder,
+    "id" | "customer_id" | "title" | "due_date" | "is_completed"
+  > {
+  customers: { id: string; name: string };
 }

@@ -6,7 +6,10 @@ import {
   getCustomerFavoriteVehicles,
   getCustomerTimeline,
 } from "@/lib/crm/queries";
-import { inquiryCategoryLabels } from "@/lib/crm/schema";
+import {
+  inquiryCategoryLabels,
+  inquiryChannelLabels,
+} from "@/lib/crm/schema";
 import { CustomerEditForm } from "@/components/crm/customer-edit-form";
 import { CustomerNoteForm } from "@/components/crm/customer-note-form";
 import { ReminderForm } from "@/components/crm/reminder-form";
@@ -14,13 +17,6 @@ import { ReminderToggle } from "@/components/crm/reminder-toggle";
 import { VehicleStatusBadge } from "@/components/ui/status-badge";
 import { Card, CardBody } from "@/components/ui/card";
 import type { VehicleStatus } from "@/lib/inventory/types";
-
-const channelLabels: Record<string, string> = {
-  line: "LINE",
-  phone: "電話",
-  email: "メール",
-  form: "フォーム",
-};
 
 // UIUXレビュー指摘: セクションが同じ見た目のCardで5つ並ぶため、
 // アイコンで種類を一目で判別できるようにする（55歳以上の非エンジニア運用者向け配慮）。
@@ -202,7 +198,8 @@ export default async function Page({
                     {entry.type === "inquiry" && (
                       <div>
                         <p className="text-foreground-muted text-base">
-                          問い合わせ・{channelLabels[entry.data.channel]}・
+                          問い合わせ・{inquiryChannelLabels[entry.data.channel]}
+                          ・
                           {inquiryCategoryLabels[entry.data.category]}・
                           {new Date(entry.data.received_at).toLocaleString(
                             "ja-JP",

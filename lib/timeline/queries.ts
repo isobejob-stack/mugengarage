@@ -65,6 +65,31 @@ export async function restoreTimelineEvent(id: string) {
   return { data: data as TimelineEvent | null, error };
 }
 
+// /jaguar の年表導線用。件数と、最初・最後の年だけを返す。
+//
+// 「1922年から2024年まで59件」という規模そのものが年表へ進む理由になるが、
+// そのために59件の本文まで読み込む必要はないので、日付だけを取る。
+// 年号はDBの値をそのまま使う（読み物側で年号を書き起こさないための措置。
+// docs/tasks/CONTENT_FACTCHECK.md）。
+export async function getPublicTimelineSpan() {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("timeline_events")
+    .select("event_date")
+    .is("deleted_at", null)
+    .order("event_date", { ascending: true });
+
+  const rows = (data ?? []) as Array<{ event_date: string }>;
+  if (rows.length === 0) return null;
+
+  const yearOf = (date: string) => Number(date.slice(0, 4));
+  return {
+    count: rows.length,
+    firstYear: yearOf(rows[0].event_date),
+    lastYear: yearOf(rows[rows.length - 1].event_date),
+  };
+}
+
 // FR-TL-002: 公開年表（時系列昇順、BR-DOM-003: 特定車両インスタンスに依存しない）
 export async function listPublicTimelineEvents() {
   const supabase = createAdminClient();

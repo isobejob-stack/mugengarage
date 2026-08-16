@@ -92,6 +92,28 @@ export async function listPublicEncyclopediaEntries() {
   >;
 }
 
+// FR-ENC-002: /jaguar（1枚の読み物）で引用するための図鑑本文。
+//
+// 読み物が引用するのはブランド編・車種・エンジンだけなので、種別で絞って取る。
+// listPublicEncyclopediaEntries は37件すべての本文（合計約37,000字）を返すため、
+// そのまま使うと、画面に一切出ないシリーズ20件の本文まで毎リクエスト運ぶことになる。
+//
+// 並びは display_order。どの車種を読み物の代表として出すかは、
+// 管理画面の並び替えだけで運用者が変えられる状態にしておく（コードの修正を挟まない）。
+export async function listPublicEncyclopediaEntriesForReading() {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("encyclopedia_entries")
+    .select("id, category, title, slug, body")
+    .is("deleted_at", null)
+    .in("category", ["brand", "model", "engine"])
+    .order("display_order");
+
+  return (data ?? []) as Array<
+    Pick<EncyclopediaEntry, "id" | "category" | "title" | "slug" | "body">
+  >;
+}
+
 export async function getPublicEncyclopediaEntryBySlug(slug: string) {
   const supabase = createAdminClient();
   const { data } = await supabase

@@ -1,26 +1,14 @@
 import { listAdminInquiries } from "@/lib/crm/queries";
 import { Card, CardBody } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { inquiryCategoryLabels } from "@/lib/crm/schema";
-
-const statusLabels: Record<string, string> = {
-  unhandled: "未対応",
-  in_progress: "対応中",
-  completed: "完了",
-};
-
-const statusTones: Record<string, "danger" | "warning" | "success"> = {
-  unhandled: "danger",
-  in_progress: "warning",
-  completed: "success",
-};
-
-const channelLabels: Record<string, string> = {
-  line: "LINE",
-  phone: "電話",
-  email: "メール",
-  form: "フォーム",
-};
+import {
+  inquiryCategoryLabels,
+  inquiryChannelLabels,
+  inquiryResponseStatusLabels,
+  inquiryResponseStatusTones,
+  isManualInquiry,
+} from "@/lib/crm/schema";
 
 // SCR-ADM-007: 問い合わせ一覧（管理）
 export default async function Page() {
@@ -28,9 +16,16 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="text-charcoal-900 font-serif text-2xl font-bold">
-        問い合わせ
-      </h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-charcoal-900 font-serif text-2xl font-bold">
+          問い合わせ
+        </h1>
+        {/* FR-INQ-002: 電話・LINE・来店で受けた相談は運用者が手で記録する。
+            一覧から1タップで入れないと、接客の合間の記録は続かない。 */}
+        <Button href="/admin/inquiries/new" variant="primary" size="md">
+          手動で登録する
+        </Button>
+      </div>
 
       {inquiries.length === 0 ? (
         <p className="text-foreground-muted mt-8 text-base">
@@ -47,8 +42,11 @@ export default async function Page() {
                       {i.customers?.name ?? "（顧客未登録）"}
                     </p>
                     <p className="text-foreground-muted text-base">
-                      {channelLabels[i.channel]}・
-                      {inquiryCategoryLabels[i.category]}
+                      {inquiryChannelLabels[i.channel]}・
+                      {inquiryCategoryLabels[i.category]}・
+                      {new Date(i.received_at).toLocaleDateString("ja-JP")}
+                      {/* 公開フォーム由来か店側の手動記録かで、内容の粒度も追い方も変わる */}
+                      {isManualInquiry(i.channel) && "（手動登録）"}
                     </p>
                     {i.message && (
                       <p className="text-foreground-muted mt-1 line-clamp-1 text-base">
@@ -57,8 +55,8 @@ export default async function Page() {
                     )}
                   </div>
                   <StatusBadge
-                    label={statusLabels[i.response_status]}
-                    tone={statusTones[i.response_status]}
+                    label={inquiryResponseStatusLabels[i.response_status]}
+                    tone={inquiryResponseStatusTones[i.response_status]}
                   />
                 </CardBody>
               </Card>

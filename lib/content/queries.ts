@@ -75,7 +75,15 @@ export async function restoreArticle(
   return { data: data as Article | null, error, restoredStatus };
 }
 
-// 公開記事一覧（新着順、pagination.md: ブログ記事一覧デフォルト10件）
+// 公開記事一覧（新着順）
+//
+// 以前は pagination.md の「ブログ記事一覧デフォルト10件」に合わせて limit(10) を掛けていたが、
+// カテゴリchipの件数と総件数を出すには、絞り込み前の全件を数える必要がある。
+// 10件で切ると「整備記録（3）」と出しながら11件目以降を数えられず、件数が嘘になる。
+// 記事は整備実績を統合しても10件前後で、1回の取得で全件読んでも負荷にならない。
+// 数十件規模まで増えたら components/ui/pagination.tsx を挟む（件数集計は別クエリに分ける）。
+//
+// published_at が null の公開記事（旧データ）を末尾に落とすため nullsFirst: false を指定する。
 export async function listPublicArticles() {
   const supabase = createAdminClient();
   const { data } = await supabase
@@ -83,8 +91,7 @@ export async function listPublicArticles() {
     .select("id, title, slug, category, published_at")
     .eq("status", "published")
     .is("deleted_at", null)
-    .order("published_at", { ascending: false })
-    .limit(10);
+    .order("published_at", { ascending: false, nullsFirst: false });
 
   return data ?? [];
 }

@@ -18,8 +18,6 @@ function buildUrl(type: RelatedContentType, slug: string) {
       return `/encyclopedia/${slug}`;
     case "library_entry":
       return `/library/${slug}`;
-    case "maintenance_record":
-      return `/maintenance-records/${slug}`;
   }
 }
 
@@ -86,17 +84,6 @@ export async function listRelatedContentCandidates(
     }
   }
 
-  if (types.includes("maintenance_record")) {
-    const { data } = await supabase
-      .from("maintenance_records")
-      .select("id, title")
-      .is("deleted_at", null)
-      .order("title");
-    for (const m of data ?? []) {
-      candidates.push({ type: "maintenance_record", id: m.id, label: m.title });
-    }
-  }
-
   return candidates;
 }
 
@@ -113,13 +100,18 @@ export async function listRelatedContents(
     .eq("from_id", fromId)
     .order("display_order");
 
+  // to_type はDBの生の文字列として扱う。
+  // 廃止した種別（整備実績: 'maintenance_record'）の行が、移行SQLを流すまで残っているため、
+  // RelatedContentType として受けると型と実データが食い違う。
+  // 知らない種別は下の種別ごとの取得のどれにも該当せず、items に入らないまま最後の
+  // filter で落ちる＝画面には出ないが例外にもならない（表示が壊れるより黙って消える方が安全）。
   const rows = (data ?? []) as Array<{
-    to_type: RelatedContentType;
+    to_type: string;
     to_id: string;
   }>;
   if (rows.length === 0) return [];
 
-  const idsByType = new Map<RelatedContentType, string[]>();
+  const idsByType = new Map<string, string[]>();
   for (const r of rows) {
     idsByType.set(r.to_type, [...(idsByType.get(r.to_type) ?? []), r.to_id]);
   }
@@ -206,23 +198,6 @@ export async function listRelatedContents(
         id: l.id,
         label: l.title,
         url: buildUrl("library_entry", l.slug),
-      });
-    }
-  }
-
-  const maintenanceRecordIds = idsByType.get("maintenance_record");
-  if (maintenanceRecordIds) {
-    const { data } = await supabase
-      .from("maintenance_records")
-      .select("id, title, slug")
-      .in("id", maintenanceRecordIds)
-      .is("deleted_at", null);
-    for (const m of data ?? []) {
-      items.set(`maintenance_record:${m.id}`, {
-        type: "maintenance_record",
-        id: m.id,
-        label: m.title,
-        url: buildUrl("maintenance_record", m.slug),
       });
     }
   }

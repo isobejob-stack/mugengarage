@@ -8,7 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // 自然に進める状態を作るのが目的（回遊）。
 //
 // 【なぜ名前一致で判定するのか】
-// encyclopedia_entries / articles / maintenance_records / timeline_events は
+// encyclopedia_entries / articles / timeline_events は
 // いずれも model_id を持っていない。taggings も vehicle と article にしか対応しておらず、
 // 現状「同じ車種の知識」を機械的に引く手段が構造的に存在しない。
 // 唯一の仕組みである related_contents は手動指定のため、店主が1件ずつ紐付けない限り
@@ -30,13 +30,14 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // 自動判定はあくまで「手動で紐付けていないものを補う」役割で、
 // 手動で選ばれたものと重複する場合は自動側を落とす（呼び出し側で除外）。
 
+// 整備実績（maintenance_record）は2026-08-17にブログへ統合したため、種別としては持たない。
+// 整備の実例は category='整備記録' の記事として article に含まれる。
 export type AutoRelatedType =
   | "vehicle"
   | "encyclopedia_entry"
   | "timeline_event"
   | "library_entry"
-  | "article"
-  | "maintenance_record";
+  | "article";
 
 export type AutoRelatedItem = {
   type: AutoRelatedType;
@@ -143,7 +144,6 @@ export async function getAutoRelatedForVehicle(vehicle: VehicleRelationSource) {
     { data: timeline },
     { data: library },
     { data: articles },
-    { data: maintenance },
   ] = await Promise.all([
     supabase
       .from("encyclopedia_entries")
@@ -161,10 +161,6 @@ export async function getAutoRelatedForVehicle(vehicle: VehicleRelationSource) {
       .from("articles")
       .select("id, title, slug")
       .eq("status", "published")
-      .is("deleted_at", null),
-    supabase
-      .from("maintenance_records")
-      .select("id, title, slug")
       .is("deleted_at", null),
   ]);
 
@@ -191,12 +187,6 @@ export async function getAutoRelatedForVehicle(vehicle: VehicleRelationSource) {
       keywords,
       (r) => ({ url: `/blog/${r.slug}`, reason: "関連する読み物" }),
       "article",
-    ),
-    ...pickByKeywords(
-      (maintenance ?? []) as Row[],
-      keywords,
-      (r) => ({ url: `/maintenance-records/${r.slug}`, reason: "整備の実例" }),
-      "maintenance_record",
     ),
     ...pickByKeywords(
       (library ?? []) as Row[],

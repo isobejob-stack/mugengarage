@@ -30,7 +30,8 @@ const adminNavGroups: readonly AdminNavGroup[] = [
       { label: "図鑑", href: "/admin/encyclopedia" },
       { label: "年表", href: "/admin/timeline" },
       { label: "ライブラリ", href: "/admin/library" },
-      { label: "整備実績", href: "/admin/maintenance-records" },
+      // 整備実績（/admin/maintenance-records）はブログへ統合して画面ごと削除した（2026-08-17）。
+      // 整備の記録は「ブログ」からカテゴリ「整備記録」で書く。
     ],
   },
   {

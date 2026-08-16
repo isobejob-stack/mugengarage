@@ -25,12 +25,12 @@ export default async function Page({
 
   const [options, candidates, tags] = await Promise.all([
     getVehicleHierarchyOptions(),
-    // FR-INV-014: 関連記事／関連図鑑／関連ブログ／関連整備実績の紐付け候補
+    // FR-INV-014: 関連記事／関連図鑑／関連ライブラリの紐付け候補
+    // 整備実績はブログへ統合したため、記事（category='整備記録'）として article に含まれる
     listRelatedContentCandidates([
       "article",
       "encyclopedia_entry",
       "library_entry",
-      "maintenance_record",
     ]),
     // FR-INV-012: タグ選択候補
     listTags(),

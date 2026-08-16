@@ -10,6 +10,7 @@ import {
   slugify,
   type ArticleFormValues,
 } from "@/lib/content/schema";
+import { contentCategoryOptions } from "@/lib/content/categories";
 import { emptySeoFieldsValues } from "@/lib/seo/schema";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { SeoFieldsSection } from "@/components/ui/seo-fields-section";
@@ -122,13 +123,27 @@ export function ArticleForm({
         )}
       </Field>
 
+      {/* カテゴリは自由入力からプルダウンへ変更した（発注者要望 2026-08-17）。
+          自由入力だと「維持・メンテナンス」「メンテナンス」のような表記ゆれが生まれ、
+          公開側のカテゴリ絞り込みが同じ内容で2つに割れてしまうため。
+          5分類に無い既存の値は contentCategoryOptions が先頭に残すので、
+          旧カテゴリの記事を保存してもカテゴリが勝手に書き換わらない。 */}
       <Field label="カテゴリ（任意）">
-        <input
-          type="text"
+        <select
           className="input"
-          {...register("category")}
+          {...register("category", {
+            // 空欄は「未設定」。DBに空文字を入れると公開側で中身の無いchipが増えるためnullに寄せる
+            setValueAs: (v) => (v === "" ? null : (v as string)),
+          })}
           value={watch("category") ?? ""}
-        />
+        >
+          <option value="">未設定</option>
+          {contentCategoryOptions(watch("category")).map((c) => (
+            <option key={c.value} value={c.value}>
+              {c.label}
+            </option>
+          ))}
+        </select>
       </Field>
 
       <Field label="本文（Markdown）" error={errors.body?.message}>

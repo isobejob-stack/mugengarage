@@ -6,17 +6,11 @@ import {
 } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
 import { getSiteAssetPublicUrl } from "@/lib/settings/storage";
-import { SITE_URL, siteNav } from "@/lib/site-config";
+import { SITE_URL } from "@/lib/site-config";
 import { getSiteSettings } from "@/lib/settings/queries";
 import { LineConsultationMenu } from "@/components/layout/line-consultation-menu";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardImage,
-  CardBody,
-  CardTitle,
-  CardMeta,
-} from "@/components/ui/card";
+import { Card, CardImage, CardBody, CardTitle } from "@/components/ui/card";
 import { VehicleFeatureBadges } from "@/components/ui/status-badge";
 import { VehicleCardPrice } from "@/components/inventory/vehicle-price";
 import { VehicleCardSpecs } from "@/components/inventory/vehicle-card-specs";
@@ -39,10 +33,6 @@ export const metadata: Metadata = {
 };
 
 const TOP_PAGE_VEHICLE_LIMIT = 9;
-
-// 「Jaguarを知る」配下の読み物。ヘッダーのナビゲーションと同じ定義を使い、
-// トップページとヘッダーで項目がずれないようにする（lib/site-config.ts）。
-const KNOWLEDGE_NAV = siteNav.find((item) => item.label === "Jaguarを知る");
 
 // SCR-PUB-001: トップページ（FR-INV-005, FR-LINE-001, FR-SEO-001）
 export default async function Page() {
@@ -233,26 +223,29 @@ export default async function Page() {
           <LineConsultationMenu lineUrl={settings.line_url} />
         </div>
 
-        {KNOWLEDGE_NAV?.children && (
-          <section className="mt-10">
-            <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
-              {KNOWLEDGE_NAV.label}
-            </h2>
-            <p className="text-foreground-muted mt-2">
-              クラシックJaguarをより深く知るための読み物です。
+        {/* 「ジャガーを知る」への導線。
+            以前はナビゲーションの下位項目（図鑑・年表・ライブラリ）から
+            カードを3枚並べていたが、まだクラシックJaguarを知らない訪問者に
+            3択を迫る形になっており、選べないまま離脱する原因になっていた。
+            入口は1つにして、1枚の読み物（/jaguar）へ送る。 */}
+        <section className="mt-10">
+          <div className="bg-cream-100 rounded-2xl border border-neutral-200 px-6 py-8 sm:px-10 sm:py-10">
+            <p className="text-primary-700 text-xs font-medium tracking-[0.15em] uppercase">
+              Classic Jaguar
             </p>
-            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-              {KNOWLEDGE_NAV.children.map((item) => (
-                <Card key={item.href} href={item.href}>
-                  <CardBody>
-                    <CardTitle>{item.label}</CardTitle>
-                    <CardMeta>{item.description}</CardMeta>
-                  </CardBody>
-                </Card>
-              ))}
+            <h2 className="text-charcoal-900 mt-3 font-serif text-xl font-bold tracking-tight text-balance sm:text-2xl">
+              ジャガーを知る
+            </h2>
+            <p className="text-charcoal-800 mt-3 max-w-2xl text-base leading-loose">
+              クラシックジャガーがどういう車なのか。成り立ちから代表的な車種、そのエンジンまで、ひと続きの読み物にまとめました。
+            </p>
+            <div className="mt-6">
+              <Button href="/jaguar" variant="outline" size="lg">
+                読みはじめる
+              </Button>
             </div>
-          </section>
-        )}
+          </div>
+        </section>
       </div>
     </main>
   );

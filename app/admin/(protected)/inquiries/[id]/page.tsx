@@ -1,16 +1,13 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getAdminInquiryById } from "@/lib/crm/queries";
-import { inquiryCategoryLabels } from "@/lib/crm/schema";
+import {
+  inquiryCategoryLabels,
+  inquiryChannelLabels,
+  isManualInquiry,
+} from "@/lib/crm/schema";
 import { InquiryStatusSelect } from "@/components/crm/inquiry-status-select";
 import { Card, CardBody } from "@/components/ui/card";
-
-const channelLabels: Record<string, string> = {
-  line: "LINE",
-  phone: "電話",
-  email: "メール",
-  form: "フォーム",
-};
 
 // SCR-ADM-008: 問い合わせ詳細
 export default async function Page({
@@ -34,9 +31,12 @@ export default async function Page({
       <Card className="mt-6">
         <CardBody className="p-6">
           <p className="text-foreground-muted text-base">
-            {channelLabels[inquiry.channel]}・
+            {inquiryChannelLabels[inquiry.channel]}・
             {inquiryCategoryLabels[inquiry.category]}・
             {new Date(inquiry.received_at).toLocaleString("ja-JP")}
+            {/* FR-INQ-002: 公開フォームからの送信か、店側が聞き取って記録したものかで
+                内容の信頼度（本人が書いた文面か、運用者の要約か）が変わる */}
+            {isManualInquiry(inquiry.channel) && "・手動登録"}
           </p>
 
           <div className="mt-4">
