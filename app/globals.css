@@ -107,4 +107,73 @@ h3 {
   .input {
     @apply text-charcoal-900 ease-standard focus-visible:border-primary-400 focus-visible:ring-primary-500/30 min-h-11 w-full rounded-lg border border-neutral-300 px-3 text-base transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none;
   }
+
+  /* Markdown本文のスタイル。
+     図鑑・年表・ライブラリ・ブログ・整備実績・車両紹介文の計7画面で
+     `className="prose"` として使われていたが、**このクラスはどこにも定義されていなかった**。
+     Tailwindのpreflightが h1〜h6 の font-size/weight を inherit に、ul/ol の
+     list-style を none に、要素の margin を 0 にリセットするため、
+     結果として見出しが本文と同じ大きさ、段落の余白ゼロ、箇条書きの記号なし、
+     本文中リンクは色も下線も無し、という「文字の塊」で表示されていた。
+
+     @tailwindcss/typography を入れる案もあったが、既定値がこのサイトの
+     デザイントークン（font-serif の見出し、cream/charcoal の配色）と合わず
+     結局ほぼ全項目を上書きすることになるため、依存を増やさず自前で定義する。
+
+     本文は17px。03_ui_rules.md 4章の下限は16pxだが、読み物は主要購買層
+     （50〜60代）が長時間読む対象なので1px上げている。 */
+  .prose {
+    @apply text-charcoal-800 text-[1.0625rem] leading-[1.9];
+  }
+  .prose > * + * {
+    @apply mt-6;
+  }
+  .prose h2 {
+    @apply text-charcoal-900 mt-10 mb-3 font-serif text-2xl font-bold tracking-tight;
+  }
+  .prose h3 {
+    @apply text-charcoal-900 mt-8 mb-2 font-serif text-xl font-bold tracking-tight;
+  }
+  .prose h4 {
+    @apply text-charcoal-900 mt-6 mb-2 text-lg font-bold;
+  }
+  .prose ul {
+    @apply list-disc space-y-2 pl-6;
+  }
+  .prose ol {
+    @apply list-decimal space-y-2 pl-6;
+  }
+  .prose li::marker {
+    @apply text-neutral-400;
+  }
+  /* 本文中のリンクは色だけに頼らず下線でも示す（03_ui_rules.md 4章） */
+  .prose a {
+    @apply text-primary-700 underline decoration-1 underline-offset-4 hover:decoration-2;
+  }
+  .prose strong {
+    @apply text-charcoal-900 font-bold;
+  }
+  .prose blockquote {
+    @apply border-accent-400 bg-cream-100 text-charcoal-800 border-l-4 px-5 py-3;
+  }
+  .prose code {
+    @apply bg-cream-200 rounded px-1.5 py-0.5 font-mono text-[0.9em];
+  }
+  .prose hr {
+    @apply my-10 border-neutral-200;
+  }
+  .prose img {
+    @apply rounded-xl;
+  }
+  /* remark-gfm のテーブル。罫線が無いと表として読めない。
+     横幅が足りない場合はページごと横スクロールさせず、表だけを送る */
+  .prose table {
+    @apply my-6 block w-full border-collapse overflow-x-auto text-base;
+  }
+  .prose th {
+    @apply bg-cream-100 text-charcoal-900 border border-neutral-200 px-3 py-2 text-left font-bold;
+  }
+  .prose td {
+    @apply border border-neutral-200 px-3 py-2 align-top;
+  }
 }

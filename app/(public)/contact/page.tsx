@@ -24,18 +24,30 @@ export default async function Page() {
       <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         お問い合わせ
       </h1>
+      {/* LINEのURLが未設定のあいだ、LineConsultationMenu は何も描画しない。
+          従来はそれを枠線付きのカードで囲み、さらに前後に「下記からLINEで」
+          「LINEでのご相談は即時性が高く」という案内を残していたため、
+          中身が空のカードと、存在しない導線への案内が2つ表示されていた。
+          初めて訪れた人には「リンクが壊れているサイト」に見える。
+          カード枠ごと、文言ごと、LINE URLの有無で切り替える。 */}
       <p className="text-foreground-muted mt-2">
-        購入・修理・売却・部品・その他、Jaguarのことなら何でもご相談ください。お急ぎの方は下記からLINEでご相談いただけます。
+        購入・修理・売却・部品・その他、Jaguarのことなら何でもご相談ください。
+        {settings.line_url
+          ? "お急ぎの方は下記からLINEでご相談いただけます。"
+          : "下記フォームよりお問い合わせください。"}
       </p>
 
       {/* FR-LINE-002: カテゴリ別のLINE相談導線 */}
-      <div className="shadow-soft mt-8 rounded-2xl border border-neutral-200 bg-white p-4 sm:p-6">
-        <LineConsultationMenu lineUrl={settings.line_url} />
-      </div>
-
-      <p className="text-foreground-muted mt-6 text-sm">
-        LINEでのご相談は即時性が高くおすすめです。じっくり文章で伝えたい方は下記フォームをご利用ください。
-      </p>
+      {settings.line_url && (
+        <>
+          <div className="shadow-soft mt-8 rounded-2xl border border-neutral-200 bg-white p-4 sm:p-6">
+            <LineConsultationMenu lineUrl={settings.line_url} />
+          </div>
+          <p className="text-foreground-muted mt-6 text-sm">
+            LINEでのご相談は即時性が高くおすすめです。じっくり文章で伝えたい方は下記フォームをご利用ください。
+          </p>
+        </>
+      )}
 
       <div className="mt-4">
         <InquiryForm />

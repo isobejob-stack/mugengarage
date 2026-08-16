@@ -9,6 +9,12 @@ import { VehicleMediaGallery } from "@/components/inventory/vehicle-media-galler
 import { StatusBadge } from "@/components/ui/status-badge";
 import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { RelatedInventorySection } from "@/components/related/related-discovery";
+import { getVehiclesRelatedToTitle } from "@/lib/related/auto";
+import { getLeadVehiclePhotoPaths } from "@/lib/inventory/queries";
+import { getSiteSettings } from "@/lib/settings/queries";
+import { buildLineConsultationUrl } from "@/lib/site-config";
 
 // 車両名を組み立ててtitleに使う。従来はルートlayoutの値を継承しており、
 // アーカイブ全件が検索結果で同じ文言になっていた（docs/tasks/ISSUE-005）。
@@ -71,6 +77,25 @@ export default async function Page({
     .filter(Boolean)
     .join(" ");
 
+  // このページは「この店が実際にこう仕上げて、実際に売った」という最も強い信頼材料で、
+  // 読み終えた直後がもっとも購買意欲の高い瞬間になる。
+  // 一方この車はもう買えないため、次の行き先を示さないと確実に離脱する。
+  const { modelName: relatedModelName, vehicles: relatedVehicles } =
+    await getVehiclesRelatedToTitle(vehicleName);
+  const relatedPhotoPaths = await getLeadVehiclePhotoPaths(
+    relatedVehicles.map((v) => v.id),
+  );
+  const relatedPhotoUrls = relatedVehicles.map((v) => {
+    const path = relatedPhotoPaths.get(v.id);
+    return path ? getVehiclePhotoPublicUrl(path) : undefined;
+  });
+  const settings = await getSiteSettings();
+  const lineConsultUrl = buildLineConsultationUrl(
+    settings.line_url,
+    "purchase",
+    vehicleName,
+  );
+
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
       <Breadcrumb
@@ -123,6 +148,40 @@ export default async function Page({
           </div>
         </section>
       )}
+      {relatedVehicles.length > 0 ? (
+        <RelatedInventorySection
+          vehicles={relatedVehicles}
+          photoUrls={relatedPhotoUrls}
+          topic={relatedModelName ?? ""}
+        />
+      ) : (
+        // 同車種の在庫が無いときこそ、希望を聞き出す価値がある。
+        // 「もう買えない車を見て終わり」にせず、入荷案内につなげる。
+        <section className="bg-cream-100 mt-16 rounded-2xl border border-neutral-200 p-6 text-center">
+          <p className="text-charcoal-900 text-lg font-bold">
+            同じような車両をお探しですか
+          </p>
+          <p className="text-foreground-muted mt-2 text-base">
+            ご希望をお聞かせいただければ、入荷時にご案内いたします。
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Button href="/vehicles" variant="primary" size="md">
+              在庫車両を見る
+            </Button>
+            {lineConsultUrl && (
+              <Button href={lineConsultUrl} variant="line" size="md">
+                LINEで相談する
+              </Button>
+            )}
+          </div>
+        </section>
+      )}
+
+      <div className="mt-10 flex justify-center border-t border-neutral-200 pt-8">
+        <Button href="/owners-archive" variant="outline" size="md">
+          オーナーズアーカイブ一覧に戻る
+        </Button>
+      </div>
     </main>
   );
 }
