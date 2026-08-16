@@ -44,3 +44,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 夜間自動作業の二重起動防止用ロック（docs/tasks/AUTONOMOUS_PLAN.md）
+docs/tasks/.autonomous-lock
