@@ -15,6 +15,7 @@ import { VehicleFeatureBadges } from "@/components/ui/status-badge";
 import { VehicleCardPrice } from "@/components/inventory/vehicle-price";
 import { VehicleCardSpecs } from "@/components/inventory/vehicle-card-specs";
 import { VehicleQuickSearch } from "@/components/inventory/vehicle-quick-search";
+import { SiteText } from "@/components/live-edit/site-text";
 import { getVehicleSearchFacetOptions } from "@/lib/inventory/search";
 import { FavoriteIconButton } from "@/components/engagement/favorite-icon-button";
 import { getSessionId } from "@/lib/engagement/session";
@@ -92,7 +93,9 @@ export default async function Page() {
               エムガレージ
             </h1>
             <p className="mt-4 max-w-2xl text-neutral-200">
-              30年以上の実績を持つクラシックJaguar専門店。販売・整備・修理・買取・ご相談まで、Jaguarのことなら何でもお任せください。
+              <SiteText k="home.hero.lead" description="トップページ 冒頭の紹介文">
+                30年以上の実績を持つクラシックJaguar専門店。販売・整備・修理・買取・ご相談まで、Jaguarのことなら何でもお任せください。
+              </SiteText>
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button href="/vehicles" variant="secondary" size="lg">
@@ -116,7 +119,9 @@ export default async function Page() {
               エムガレージ
             </h1>
             <p className="mt-4 max-w-2xl text-neutral-300">
-              30年以上の実績を持つクラシックJaguar専門店。販売・整備・修理・買取・ご相談まで、Jaguarのことなら何でもお任せください。
+              <SiteText k="home.hero.lead" description="トップページ 冒頭の紹介文">
+                30年以上の実績を持つクラシックJaguar専門店。販売・整備・修理・買取・ご相談まで、Jaguarのことなら何でもお任せください。
+              </SiteText>
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button href="/vehicles" variant="secondary" size="lg">
@@ -147,7 +152,9 @@ export default async function Page() {
 
         <section className="mt-10">
           <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
-            掲載中の車両
+            <SiteText k="home.vehicles.heading" description="トップページ 車両一覧の見出し">
+              掲載中の車両
+            </SiteText>
           </h2>
           {featuredVehicles.length === 0 ? (
             <p className="text-foreground-muted mt-4">

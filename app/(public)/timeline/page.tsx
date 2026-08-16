@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { Markdown } from "@/components/ui/markdown";
 import { listPublicTimelineEvents } from "@/lib/timeline/queries";
 import {
   decadeLabelOf,
@@ -127,9 +126,9 @@ export default async function Page({
                 </h2>
                 {e.body && (
                   <div className="prose mt-2 max-w-none">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    <Markdown>
                       {e.body}
-                    </ReactMarkdown>
+                    </Markdown>
                   </div>
                 )}
                 <RelatedContentList

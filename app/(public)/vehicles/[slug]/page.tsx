@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { Markdown } from "@/components/ui/markdown";
+import { Editable } from "@/components/live-edit/editable";
 import {
   getPublicVehicleBySlug,
   getVehiclePhotos,
@@ -185,14 +185,17 @@ export default async function Page({
   // UIUXデザイナーレビュー指摘: ギャラリー画像のalt属性に使う車両名（メーカー・モデル・年式）
   const vehicleName = buildVehicleDisplayName(vehicle);
 
-  const markdownSections: Array<[string, string | null]> = [
-    ["この車の魅力", vehicle.appeal_points],
-    ["販売コメント", vehicle.sales_comment],
-    ["店長コメント", vehicle.manager_comment],
-    ["ストーリー", vehicle.story],
-    ["エンジンの特徴", vehicle.engine_features],
-    ["よくある故障", vehicle.common_issues],
-    ["維持費", vehicle.maintenance_cost],
+  // 第3要素は車両テーブルの列名。ライブ編集（管理画面から公開画面を見ながら直す）で
+  // 「画面のこの文章」と「DBのどの列」を対応付けるために持つ（lib/live-edit/registry.ts）。
+  // storyだけは許可リストに載せていないため、編集対象にはならない（nullを渡す）。
+  const markdownSections: Array<[string, string | null, string | null]> = [
+    ["この車の魅力", vehicle.appeal_points, "appeal_points"],
+    ["販売コメント", vehicle.sales_comment, "sales_comment"],
+    ["店長コメント", vehicle.manager_comment, "manager_comment"],
+    ["ストーリー", vehicle.story, null],
+    ["エンジンの特徴", vehicle.engine_features, "engine_features"],
+    ["よくある故障", vehicle.common_issues, "common_issues"],
+    ["維持費", vehicle.maintenance_cost, "maintenance_cost"],
   ];
 
   // FR-SEO-002: 構造化データ（JSON-LD）。canonical URLはgenerateMetadataと同じ導出ロジックを使う
@@ -483,13 +486,25 @@ export default async function Page({
 
       {markdownSections
         .filter(([, body]) => Boolean(body))
-        .map(([title, body]) => (
+        .map(([title, body, field]) => (
           <section key={title} className="mt-14">
             <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
               {title}
             </h2>
             <div className="prose mt-3 max-w-none">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{body}</ReactMarkdown>
+              {field ? (
+                <Editable
+                  type="vehicle"
+                  id={vehicle.id}
+                  field={field}
+                  label={title}
+                  as="div"
+                >
+                  <Markdown>{body as string}</Markdown>
+                </Editable>
+              ) : (
+                <Markdown>{body as string}</Markdown>
+              )}
             </div>
           </section>
         ))}

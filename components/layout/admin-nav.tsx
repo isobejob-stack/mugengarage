@@ -18,8 +18,12 @@ const adminNavGroups: readonly AdminNavGroup[] = [
     label: "運用",
     items: [
       { label: "ダッシュボード", href: "/admin" },
+      // 「直したい場所をクリックして直す」入口。項目名からたどるより速い場面が多いため、
+      // 毎日使う運用グループの上のほうに置く（2026-08-17）。
+      { label: "画面を見ながら直す", href: "/admin/live" },
       { label: "車両", href: "/admin/vehicles" },
       { label: "問い合わせ", href: "/admin/inquiries" },
+      { label: "リマインダー", href: "/admin/reminders" },
       { label: "顧客", href: "/admin/customers" },
     ],
   },

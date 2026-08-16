@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { Markdown } from "@/components/ui/markdown";
 import { getPublicOwnerArchiveEntryByVehicleId } from "@/lib/archive/queries";
 import { getVehiclePhotos, getVehicleVideos } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
@@ -129,9 +128,9 @@ export default async function Page({
             レストア履歴
           </h2>
           <div className="prose mt-2 max-w-none">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            <Markdown>
               {entry.restoration_history}
-            </ReactMarkdown>
+            </Markdown>
           </div>
         </section>
       )}
@@ -142,9 +141,9 @@ export default async function Page({
             販売履歴
           </h2>
           <div className="prose mt-2 max-w-none">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            <Markdown>
               {entry.sales_history}
-            </ReactMarkdown>
+            </Markdown>
           </div>
         </section>
       )}

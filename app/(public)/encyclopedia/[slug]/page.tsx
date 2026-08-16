@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { Markdown } from "@/components/ui/markdown";
+import { Editable } from "@/components/live-edit/editable";
 import { getPublicEncyclopediaEntryBySlug } from "@/lib/knowledge/queries";
 import { encyclopediaCategoryLabels } from "@/lib/knowledge/schema";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
@@ -82,7 +82,11 @@ export default async function Page({
       </h1>
 
       <div className="prose mt-6 max-w-none">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{entry.body}</ReactMarkdown>
+        <Editable type="encyclopedia_entry" id={entry.id} field="body" as="div">
+          <Markdown linkTerms excludeSlugs={[entry.slug]}>
+            {entry.body}
+          </Markdown>
+        </Editable>
       </div>
 
       {children.length > 0 && (

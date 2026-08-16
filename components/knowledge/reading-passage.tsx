@@ -1,6 +1,5 @@
 import Link from "next/link";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { Markdown } from "@/components/ui/markdown";
 import { openingFromMarkdown } from "@/lib/knowledge/reading";
 
 // /jaguar（1枚の読み物）の1章分。
@@ -50,9 +49,9 @@ export function ReadingPassage({
       )}
       {paragraphs.length > 0 && (
         <div className="prose mt-3 max-w-none">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          <Markdown>
             {paragraphs.join("\n\n")}
-          </ReactMarkdown>
+          </Markdown>
         </div>
       )}
       <p className="mt-5">

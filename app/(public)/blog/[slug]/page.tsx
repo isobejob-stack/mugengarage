@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { Markdown } from "@/components/ui/markdown";
+import { Editable } from "@/components/live-edit/editable";
 import { getPublicArticleBySlug } from "@/lib/content/queries";
 import { contentCategoryLabel } from "@/lib/content/categories";
 import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
@@ -100,9 +100,12 @@ export default async function Page({
       )}
 
       <div className="prose mt-6 max-w-none">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {article.body}
-        </ReactMarkdown>
+        <Editable type="article" id={article.id} field="body" as="div">
+          {/* FR-LIB-002: 本文に出てくる用語からライブラリ・図鑑へ飛べるようにする。
+              図鑑・ライブラリをナビゲーションから外した代わりに、
+              「読んでいて引っかかった語を引く」経路をここで作る。 */}
+          <Markdown linkTerms>{article.body}</Markdown>
+        </Editable>
       </div>
       <RelatedInventorySection
         vehicles={relatedVehicles}
