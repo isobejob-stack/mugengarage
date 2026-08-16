@@ -2,6 +2,7 @@ import { listAdminVehicles } from "@/lib/inventory/queries";
 import { VehicleStatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
+import { VehicleListActions } from "@/components/inventory/vehicle-list-actions";
 import type { VehicleStatus } from "@/lib/inventory/types";
 
 // SCR-ADM-003: 車両一覧（管理）
@@ -52,7 +53,7 @@ export default async function Page() {
                       ¥{v.price.toLocaleString()}
                     </p>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center justify-end gap-3">
                     <VehicleStatusBadge status={v.status as VehicleStatus} />
                     {v.status === "sold" && (
                       <Button
@@ -63,13 +64,13 @@ export default async function Page() {
                         アーカイブ編集
                       </Button>
                     )}
-                    <Button
-                      href={`/admin/vehicles/${v.id}/edit`}
-                      variant="outline"
-                      size="sm"
-                    >
-                      編集
-                    </Button>
+                    <VehicleListActions
+                      vehicleId={v.id}
+                      vehicleName={`${v.manufacturers?.name ?? ""} ${
+                        v.models?.name ?? ""
+                      }`.trim()}
+                      isSold={v.status === "sold"}
+                    />
                   </div>
                 </CardBody>
               </Card>

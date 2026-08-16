@@ -37,9 +37,9 @@ export const vehicleFormSchema = z.object({
     .enum(["inspection_included", "valid_until", "none"])
     .nullable(),
   legal_maintenance: z.enum(["included", "separate", "none"]).nullable(),
-  warranty_type: z.enum(["with", "without"]).nullable(),
-  warranty_months: z.number().int().nullable(),
-  warranty_km: z.number().int().nullable(),
+  // warranty_type / warranty_months / warranty_km は2026-08-17に廃止した。
+  // 実態として保証を付けていないため、フォーム・公開表示ともに削除している。
+  // DBのカラムは残っている（既存データを消さないため）が、アプリからは書き込まない。
   recycle_fee: z.enum(["included", "separate", "none"]).nullable(),
   steering_side: z.enum(["right", "left"]).nullable(),
   fuel_type: z.string().nullable(),
@@ -104,9 +104,6 @@ export const emptyVehicleFormValues: VehicleFormValues = {
   total_price: null,
   shaken_status: null,
   legal_maintenance: null,
-  warranty_type: null,
-  warranty_months: null,
-  warranty_km: null,
   recycle_fee: null,
   steering_side: null,
   fuel_type: null,

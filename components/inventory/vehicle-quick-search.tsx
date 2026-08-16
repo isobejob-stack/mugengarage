@@ -22,14 +22,18 @@ export function VehicleQuickSearch({
   models: Array<{ id: string; name: string; count: number }>;
   totalCount: number;
 }) {
-  // よく使われる条件へのショートカット。
-  // プルダウンを1つも操作せずに探し始められる入口を用意する
+  // よく使われる入口へのショートカット。
+  // プルダウンを1つも操作せずに探し始められる導線を用意する
   // （中古車メディアの「人気の条件から探す」に相当）。
+  //
+  // 2026-08-17、車検あり・修復歴なしの絞り込みを廃止したのに伴い、
+  // 「条件で絞る」ショートカットから「並べ替えて上から見る」ショートカットへ差し替えた。
+  // 在庫が15台規模なら、条件で削るより並び順を変えて全部見るほうが速い。
   const shortcuts = [
-    { label: "車検整備付", href: "/vehicles?shaken=1" },
-    { label: "修復歴なし", href: "/vehicles?no_accident=1" },
     { label: "200万円以下", href: "/vehicles?price_max=2000000" },
     { label: "新着順に見る", href: "/vehicles?sort=new" },
+    { label: "排気量が多い順", href: "/vehicles?sort=displacement_desc" },
+    { label: "走行距離が短い順", href: "/vehicles?sort=mileage_asc" },
   ];
 
   return (

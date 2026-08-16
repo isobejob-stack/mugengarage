@@ -328,33 +328,10 @@ export function VehicleForm({
             </select>
           </Field>
 
-          <Field label="保証">
-            <select className="input" {...register("warranty_type")}>
-              <option value="">未設定</option>
-              <option value="with">保証付</option>
-              <option value="without">保証なし</option>
-            </select>
-          </Field>
-
-          <Field label="保証期間（ヶ月）">
-            <input
-              type="number"
-              className="input"
-              {...register("warranty_months", {
-                setValueAs: (v) => (v === "" ? null : Number(v)),
-              })}
-            />
-          </Field>
-
-          <Field label="保証距離（km）">
-            <input
-              type="number"
-              className="input"
-              {...register("warranty_km", {
-                setValueAs: (v) => (v === "" ? null : Number(v)),
-              })}
-            />
-          </Field>
+          {/* 保証（有無・期間・距離）の3項目は2026-08-17に削除した。
+              グーネットの掲載内容に「保証付（1ヶ月・1000km）」と書かれていたため
+              項目を用意していたが、実態として保証は付けていないと発注者から確認が取れた。
+              入力しない欄が3つ並ぶより、無い項目は消したほうが登録作業が速い。 */}
 
           {/* 輸入車のため、ハンドル位置は購入判断を大きく左右する */}
           <Field label="ハンドル">

@@ -42,7 +42,6 @@ import {
   formatModelYear,
   formatShakenValue,
   formatLegalMaintenanceValue,
-  formatWarrantyValue,
   formatRecycleFeeValue,
   formatSteeringSideValue,
 } from "@/lib/inventory/display";
@@ -301,14 +300,6 @@ export default async function Page({
         spec(
           "法定整備",
           formatLegalMaintenanceValue(vehicle.legal_maintenance),
-        ),
-        spec(
-          "保証",
-          formatWarrantyValue(
-            vehicle.warranty_type,
-            vehicle.warranty_months,
-            vehicle.warranty_km,
-          ),
         ),
         spec("リサイクル料金", formatRecycleFeeValue(vehicle.recycle_fee)),
         spec(

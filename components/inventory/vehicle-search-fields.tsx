@@ -1,5 +1,3 @@
-import type { ReactNode } from "react";
-
 // 車両検索の絞り込み条件で使う共通部品。
 //
 // 従来の課題:
@@ -153,54 +151,6 @@ export function RangeSelectField({
   );
 }
 
-// 「該当するものだけを見る」条件（車検あり・修復歴なし）。
-// 範囲や選択肢を持たずON/OFFしかないため、プルダウンではなくチェックボックスにする。
-// タップ領域を確保するため、チェックボックス単体ではなく行全体をlabelにしている。
-export function CheckboxField({
-  label,
-  name,
-  defaultChecked,
-  description,
-}: {
-  label: string;
-  name: string;
-  defaultChecked?: boolean;
-  description?: string;
-}) {
-  return (
-    <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-1 py-2">
-      <input
-        type="checkbox"
-        name={name}
-        value="1"
-        defaultChecked={defaultChecked}
-        className="accent-primary-700 size-5 shrink-0"
-      />
-      <span>
-        <span className="text-charcoal-900 text-sm font-medium">{label}</span>
-        {description && (
-          <span className="text-foreground-muted mt-0.5 block text-xs">
-            {description}
-          </span>
-        )}
-      </span>
-    </label>
-  );
-}
-
-export function FilterSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <div>
-      <p className="text-charcoal-900 text-sm font-bold">{title}</p>
-      <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {children}
-      </div>
-    </div>
-  );
-}
+// 2026-08-17、絞り込み条件を5つに絞った際に CheckboxField（車検あり・修復歴なし）と
+// FilterSection（条件のグループ見出し）は使い手が無くなったため削除した。
+// グループ見出しは、条件が2グループ以上あって初めて意味を持つ部品だった。

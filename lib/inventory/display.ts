@@ -61,21 +61,6 @@ export function formatLegalMaintenance(value: string | null): string | null {
   return null;
 }
 
-export function formatWarranty(
-  type: string | null,
-  months: number | null,
-  km: number | null,
-): string | null {
-  if (type === "without") return "保証なし";
-  if (type !== "with") return null;
-
-  const parts: string[] = [];
-  if (months !== null) parts.push(`${months}ヶ月`);
-  if (km !== null) parts.push(`${km.toLocaleString()}km`);
-
-  return parts.length > 0 ? `保証付（${parts.join("・")}）` : "保証付";
-}
-
 export function formatSteeringSide(value: string | null): string | null {
   if (value === "right") return "右ハンドル";
   if (value === "left") return "左ハンドル";
@@ -115,21 +100,6 @@ export function formatLegalMaintenanceValue(
   if (value === "separate") return "別途";
   if (value === "none") return "なし";
   return null;
-}
-
-export function formatWarrantyValue(
-  type: string | null,
-  months: number | null,
-  km: number | null,
-): string | null {
-  if (type === "without") return "なし";
-  if (type !== "with") return null;
-
-  const parts: string[] = [];
-  if (months !== null) parts.push(`${months}ヶ月`);
-  if (km !== null) parts.push(`${km.toLocaleString()}km`);
-
-  return parts.length > 0 ? `付き（${parts.join("・")}）` : "付き";
 }
 
 export function formatRecycleFeeValue(value: string | null): string | null {

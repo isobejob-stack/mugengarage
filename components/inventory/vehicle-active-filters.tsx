@@ -22,12 +22,6 @@ import {
 
 export type FacetOptions = {
   models: Array<{ id: string; name: string }>;
-  series: Array<{ id: string; name: string }>;
-  generations: Array<{ id: string; name: string }>;
-  grades: Array<{ id: string; name: string }>;
-  transmissions: string[];
-  exteriorColors: string[];
-  drivetrains: string[];
 };
 
 export type ActiveFilter = {
@@ -77,9 +71,6 @@ export function buildActiveFilters(
   };
 
   push("車種", nameOf(facets.models, params.model), ["model"]);
-  push("シリーズ", nameOf(facets.series, params.series), ["series"]);
-  push("世代", nameOf(facets.generations, params.generation), ["generation"]);
-  push("グレード", nameOf(facets.grades, params.grade), ["grade"]);
 
   push(
     "車両本体価格",
@@ -112,22 +103,6 @@ export function buildActiveFilters(
     ),
     ["displacement_min", "displacement_max"],
   );
-
-  push("ミッション", params.transmission, ["transmission"]);
-  push("駆動方式", params.drivetrain, ["drivetrain"]);
-  push("外装色", params.exterior_color, ["exterior_color"]);
-
-  // ON/OFF条件は「条件名＝値」なので、値側にだけ文言を置く
-  if (params.shaken === "1") {
-    filters.push({ label: "", value: "車検あり", removeKeys: ["shaken"] });
-  }
-  if (params.no_accident === "1") {
-    filters.push({
-      label: "",
-      value: "修復歴なし",
-      removeKeys: ["no_accident"],
-    });
-  }
 
   return filters;
 }

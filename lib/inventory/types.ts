@@ -61,9 +61,8 @@ export interface Vehicle extends BaseEntity, SoftDeletable {
   // string で持つとフォームの列挙型に代入できず、値の取り違えも検出できないため。
   shaken_status: "inspection_included" | "valid_until" | "none" | null;
   legal_maintenance: "included" | "separate" | "none" | null;
-  warranty_type: "with" | "without" | null;
-  warranty_months: number | null;
-  warranty_km: number | null;
+  // 保証（warranty_type / warranty_months / warranty_km）は2026-08-17に廃止。
+  // DBのカラムは残しているが、アプリでは読み書きしない。
   recycle_fee: "included" | "separate" | "none" | null;
   steering_side: "right" | "left" | null;
   fuel_type: string | null;

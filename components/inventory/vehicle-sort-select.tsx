@@ -12,11 +12,18 @@
 // onChange で送信するのはあくまで手数を減らすための上乗せで、
 // 送信ボタン（画面上は読み上げ専用）からも同じ結果になる。
 
+// 並び替えの選択肢は lib/inventory/search.ts の VehicleSortKey と対になっている。
+// 排気量・年式・走行距離は、絞り込み条件を削った代わりに置いた軸（2026-08-17）。
+// 「4.2リッターの個体が見たい」「走行距離が少ないものから見たい」という探し方は、
+// 条件を入力して絞るより、並べ替えて上から見るほうが速い。
 const SORT_OPTIONS = [
   { value: "", label: "おすすめ順" },
   { value: "new", label: "新着順" },
   { value: "price_asc", label: "価格が安い順" },
   { value: "price_desc", label: "価格が高い順" },
+  { value: "displacement_desc", label: "排気量が多い順" },
+  { value: "year_desc", label: "年式が新しい順" },
+  { value: "mileage_asc", label: "走行距離が短い順" },
 ];
 
 type SearchParams = Record<string, string | undefined>;
