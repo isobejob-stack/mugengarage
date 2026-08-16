@@ -48,6 +48,8 @@ Admin UIの認証・認可、公開サイト側の匿名セッション管理（
 | 2    | メール内リンク → `/api/auth/callback` | Supabase Authが付与する `?code=` をセッションに交換する（PKCEフロー）。失敗時は理由付きで手順1へ戻す |
 | 3    | `/admin/reset-password`               | `updateUser` で新しいパスワードを設定する。完了後はそのまま管理画面へ入る                            |
 
+**設定上の前提**：手順2の遷移先はSupabase Authの許可リストに載っている必要がある。Supabaseダッシュボードの Authentication > URL Configuration で、`Redirect URLs` に本番とプレビューの `/api/auth/callback` を登録する（未登録だとメール内のリンクが `Site URL` に飛ばされ、再設定画面に到達できない）。Vercelのプレビューはデプロイごとにホスト名が変わるため、ワイルドカード（例：`https://mugengarage-git-*.vercel.app/api/auth/callback`）で登録する。
+
 - パスワードは12文字以上を必須とする（顧客情報を扱うため、Supabase既定の6文字より強い下限を課す。03_non_functional_requirements.md 9章）
 - 手順2の遷移先（`next`）は自サイト内の絶対パスに限定し、オープンリダイレクトを防ぐ
 - 手順1の結果表示はメールアドレスの登録有無で変えない（アカウント存在の推測を防ぐ）
