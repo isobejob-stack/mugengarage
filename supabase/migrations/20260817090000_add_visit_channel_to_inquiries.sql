@@ -12,8 +12,10 @@
 --    支えるものが無かった。未完了だけを対象にする部分インデックスにしているのは、
 --    完了済みが積み上がっても一覧の引き方は変わらないため。
 
+-- drop に if exists を付けているのは、2回目以降の実行と、
+-- 制約名が環境によって異なる場合に、途中で止まらないようにするため。
 alter table inquiries
-  drop constraint inquiries_channel_check,
+  drop constraint if exists inquiries_channel_check,
   add constraint inquiries_channel_check check (
     channel in ('line', 'phone', 'email', 'form', 'visit')
   );

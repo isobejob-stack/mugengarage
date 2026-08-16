@@ -53,6 +53,7 @@ export function LiveEditor() {
   const [error, setError] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  const [files, setFiles] = useState<FileList | null>(null);
 
   // 編集モードのCookieを立ててからiframeを出す。
   // 先に出すと、編集の目印が付いていない状態の公開画面が一度描画されてしまう。
@@ -82,6 +83,15 @@ export function LiveEditor() {
     setTarget(next);
     setError(null);
     setSavedAt(null);
+    setFiles(null);
+
+    // 画像は「今の値」を読み込む必要がない（差し替え・追加だけを行う）
+    if (EDITABLE_TARGETS[next.type]?.fields[next.field]?.input === "image") {
+      setValue("");
+      setLoadingValue(false);
+      return;
+    }
+
     setLoadingValue(true);
 
     const params = new URLSearchParams({
@@ -128,6 +138,48 @@ export function LiveEditor() {
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
   }, [openTarget]);
+
+  // 画像のアップロード。
+  // 列の書き換えではないので、既存のアップロードAPIへFormDataをそのまま送る
+  // （縮小・Storage保存・並び順の採番はそちらが持っている。ここで作り直さない）。
+  const upload = async () => {
+    if (!target || !files || files.length === 0) return;
+    const upload = EDITABLE_TARGETS[target.type]?.upload;
+    if (!upload) return;
+
+    setSaving(true);
+    setError(null);
+
+    const formData = new FormData();
+    for (const file of Array.from(files)) {
+      formData.append(upload.fieldName, file);
+    }
+
+    try {
+      const response = await fetch(
+        upload.pathTemplate.replace("{id}", target.id),
+        { method: "POST", body: formData },
+      );
+      const json = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setError(json?.error?.message ?? "アップロードに失敗しました");
+        setSaving(false);
+        return;
+      }
+
+      setFiles(null);
+      setSavedAt(new Date().toLocaleTimeString("ja-JP"));
+      iframeRef.current?.contentWindow?.postMessage(
+        { source: "mg-live-edit-parent", kind: "reload" },
+        window.location.origin,
+      );
+    } catch {
+      setError("通信に失敗しました。もう一度お試しください。");
+    }
+
+    setSaving(false);
+  };
 
   const save = async () => {
     if (!target) return;
@@ -243,6 +295,38 @@ export function LiveEditor() {
 
             {loadingValue ? (
               <p className="text-foreground-muted text-base">読み込み中…</p>
+            ) : fieldConfig?.input === "image" ? (
+              <div className="flex flex-col gap-3">
+                {/* カメラとアルバムを分けない。分けるとiPhoneで複数選択ができなくなる
+                    （capture属性とmultipleの併用不可。車両編集画面と同じ理由）。 */}
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple={EDITABLE_TARGETS[target.type]?.upload?.multiple}
+                  onChange={(e) => setFiles(e.target.files)}
+                  className="text-base"
+                />
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  disabled={saving || !files || files.length === 0}
+                  onClick={() => void upload()}
+                >
+                  {saving ? "アップロード中..." : "この写真を追加する"}
+                </Button>
+                {EDITABLE_TARGETS[target.type]?.upload
+                  ?.manageePathTemplate && (
+                  <a
+                    href={EDITABLE_TARGETS[
+                      target.type
+                    ].upload!.manageePathTemplate!.replace("{id}", target.id)}
+                    className="text-primary-700 min-h-11 text-base underline underline-offset-4"
+                  >
+                    並び替え・削除・トリミングは編集画面で
+                  </a>
+                )}
+              </div>
             ) : fieldConfig?.input === "number" ? (
               <input
                 type="number"
@@ -283,15 +367,18 @@ export function LiveEditor() {
             )}
 
             <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="primary"
-                size="md"
-                disabled={saving || loadingValue}
-                onClick={() => void save()}
-              >
-                {saving ? "保存中..." : "保存する"}
-              </Button>
+              {/* 画像は上の「この写真を追加する」で送るので、保存ボタンを二重に出さない */}
+              {fieldConfig?.input !== "image" && (
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  disabled={saving || loadingValue}
+                  onClick={() => void save()}
+                >
+                  {saving ? "保存中..." : "保存する"}
+                </Button>
+              )}
               <Button
                 type="button"
                 variant="outline"

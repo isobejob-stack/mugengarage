@@ -104,6 +104,16 @@ export async function PATCH(request: NextRequest) {
 
   const { target, config } = resolved;
 
+  // 画像はファイルのアップロードであり、この口（列の書き換え）では扱わない。
+  // 編集パネルは既存のアップロードAPIへ直接FormDataを送る。
+  if (config.input === "image") {
+    return apiError({
+      code: "VALIDATION_ERROR",
+      message: "画像はアップロードで差し替えます",
+      field: body.field,
+    });
+  }
+
   // 入力種別ごとに値を整える。
   // 空欄はnullとして保存する（空文字を書き込むと、未入力なのか空文字なのか区別できなくなる）。
   let value: string | number | null;

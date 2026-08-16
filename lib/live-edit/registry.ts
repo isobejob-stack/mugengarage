@@ -15,7 +15,9 @@ export type EditableInputKind =
   // Markdown本文
   | "markdown"
   // 整数（価格・年式など）
-  | "number";
+  | "number"
+  // 画像。列の書き換えではなくファイルのアップロードになるため、保存の経路が他と異なる
+  | "image";
 
 export type EditableFieldConfig = {
   /** 編集パネルの見出し。店主に伝わる言葉にする */
@@ -40,6 +42,20 @@ export type EditableTargetConfig = {
    * 画面の固定文言（site_texts）専用で、編集して初めて行ができる。
    */
   keyed?: boolean;
+  /**
+   * 画像を差し替え・追加するときの送り先。
+   * 画像は列の書き換えではなくファイルのアップロードなので、既存のアップロードAPIへ
+   * そのままFormDataを送る（写真の圧縮・Storage保存・並び順の採番はそちらが持っている）。
+   * `{id}` は対象のIDに置き換える。
+   */
+  upload?: {
+    pathTemplate: string;
+    /** FormDataのフィールド名。既存APIの受け口に合わせる */
+    fieldName: string;
+    multiple: boolean;
+    /** 編集パネルから既存の管理画面へ送るときの行き先（並び替え・削除はそちらで行う） */
+    manageePathTemplate?: string;
+  };
   fields: Record<string, EditableFieldConfig>;
 };
 
@@ -66,6 +82,26 @@ export const EDITABLE_TARGETS: Record<string, EditableTargetConfig> = {
       engine_features: { label: "エンジンの特徴", input: "markdown" },
       common_issues: { label: "よくある故障", input: "markdown" },
       maintenance_cost: { label: "維持費", input: "markdown" },
+    },
+  },
+  // 車両の写真。列ではなく vehicle_photos への追加なので、保存経路が他と違う。
+  // 在庫21台に対して写真が1枚しか登録されていない状態が続いており（2026-08-17時点）、
+  // 「公開画面を見て、写真が無いことに気付いたその場で足せる」ことに一番価値がある。
+  vehicle_photos: {
+    table: "vehicle_photos",
+    label: "車両の写真",
+    upload: {
+      pathTemplate: "/api/admin/vehicles/{id}/photos",
+      fieldName: "files",
+      multiple: true,
+      manageePathTemplate: "/admin/vehicles/{id}/edit",
+    },
+    fields: {
+      photos: {
+        label: "写真",
+        input: "image",
+        help: "複数枚まとめて選べます。並び替え・削除・トリミングは編集画面で行えます",
+      },
     },
   },
   article: {

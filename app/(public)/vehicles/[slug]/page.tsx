@@ -426,7 +426,16 @@ export default async function Page({
         )}
       </div>
 
-      <div className="mt-8">
+      {/* 写真の枠ごと編集対象にする。写真が1枚も無いときの「準備中」表示も含めて囲むのは、
+          写真ゼロの車両こそ写真を足したい相手であり、囲まないと押す場所が無くなるため。 */}
+      <Editable
+        type="vehicle_photos"
+        id={vehicle.id}
+        field="photos"
+        label="この車両の写真"
+        as="div"
+        className="mt-8 block"
+      >
         {photosWithUrl.length === 0 && videos.length === 0 ? (
           // 写真も動画も未登録のとき、ギャラリーは何も描画しないため
           // 価格の直後にいきなり諸元表が来て「作りかけのページ」に見えていた。
@@ -458,7 +467,7 @@ export default async function Page({
             vehicleName={vehicleName}
           />
         )}
-      </div>
+      </Editable>
 
       {specGroups.map((group) => (
         <section key={group.title} className="mt-14">
