@@ -8,6 +8,7 @@ import { recordAuditLog } from "@/lib/audit/log";
 import { listAdminVehicles } from "@/lib/inventory/queries";
 import { replaceRelatedContents } from "@/lib/related/queries";
 import { replaceTaggings } from "@/lib/tags/queries";
+import { sanitizeVehicleWriteValues } from "@/lib/inventory/form-values";
 
 // FR-INV-002: 車両一覧取得（管理用）
 export async function GET() {
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
 
   const { data: vehicle, error } = await supabase
     .from("vehicles")
-    .insert(vehicleValues)
+    .insert(sanitizeVehicleWriteValues(vehicleValues))
     .select()
     .single();
 

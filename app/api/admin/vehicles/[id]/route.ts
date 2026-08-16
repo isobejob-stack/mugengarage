@@ -15,6 +15,7 @@ import {
 } from "@/lib/seo/service";
 import { replaceRelatedContents } from "@/lib/related/queries";
 import { replaceTaggings } from "@/lib/tags/queries";
+import { sanitizeVehicleWriteValues } from "@/lib/inventory/form-values";
 
 // FR-INV-002: 車両詳細取得（管理用、編集フォームの初期値）
 // FR-INV-011: SEO編集フォームの初期値として、slug・SEOメタ情報も併せて返す
@@ -113,7 +114,7 @@ export async function PATCH(
   // vehiclesテーブル自体はslugカラムを持たないため、更新対象から除外する（BR-URL-003）
   const { data: vehicle, error } = await supabase
     .from("vehicles")
-    .update(vehicleValues)
+    .update(sanitizeVehicleWriteValues(vehicleValues))
     .eq("id", id)
     .select()
     .single();

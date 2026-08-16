@@ -36,6 +36,33 @@ import {
   toDatetimeLocalValue,
   fromDatetimeLocalValue,
 } from "@/lib/utils/datetime-local";
+import { emptyToNull } from "@/lib/utils/empty-to-null";
+
+// 保存が検証で止まったときに、どの欄が原因かを日本語で伝えるための対応表。
+// フォームの項目名（DBの列名）をそのまま出しても、店主には何のことか分からない。
+const FIELD_LABELS: Record<string, string> = {
+  manufacturer_id: "メーカー",
+  model_id: "車種",
+  price: "車両本体価格",
+  total_price: "支払総額",
+  status: "公開ステータス",
+  slug: "スラッグ（URL）",
+  shaken_status: "車検",
+  shaken_expiry: "車検満了日",
+  legal_maintenance: "法定整備",
+  recycle_fee: "リサイクル料金",
+  steering_side: "ハンドル",
+  model_year: "年式",
+  registration_year: "登録年",
+  mileage_km: "走行距離",
+  displacement_cc: "排気量",
+  horsepower: "馬力",
+  capacity: "乗車定員",
+  door_count: "ドア数",
+  owner_count: "オーナー数",
+  scheduled_publish_at: "公開予約日時",
+  seo: "SEO・URL設定",
+};
 
 // 「あり／なし」に加えて「未設定」を持つ項目のための変換。
 // チェックボックスでは未設定と「なし」を区別できず、未入力の車両が
@@ -90,6 +117,8 @@ export function VehicleForm({
   const [pendingDelete, setPendingDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  // 検証で止まったときに表示する項目名。空配列＝止まっていない。
+  const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
   const {
     register,
@@ -139,6 +168,7 @@ export function VehicleForm({
 
   const submit = async (values: VehicleFormValues) => {
     setSubmitError(null);
+    setInvalidFields([]);
 
     // 03_ui_rules.md 7章: 価格変更時は確認ダイアログを挟む
     if (isEdit && defaultValues && values.price !== defaultValues.price) {
@@ -147,6 +177,25 @@ export function VehicleForm({
     }
 
     await save(values);
+  };
+
+  // 検証に落ちたときの受け皿。
+  //
+  // これが無いと、react-hook-form は submit を呼ばずに黙って終わる。
+  // 画面上は「更新するを押したのに何も起きない」だけになり、
+  // 60項目のどこが原因なのか利用者には知りようがなかった。
+  // 実際、「車検」を未設定に戻すと保存できなくなる不具合がこの形で潜んでいた。
+  const onInvalid = (formErrors: Record<string, unknown>) => {
+    const names = Object.keys(formErrors);
+    setInvalidFields(names.map((name) => FIELD_LABELS[name] ?? name));
+
+    // 最初の問題箇所まで運ぶ。長いフォームなので、名前を出すだけでは探せない。
+    const first = names[0];
+    if (first) {
+      document
+        .querySelector(`[name="${first}"]`)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
   };
 
   const save = async (values: VehicleFormValues) => {
@@ -191,7 +240,16 @@ export function VehicleForm({
 
   return (
     <form
-      onSubmit={handleSubmit(submit)}
+      onSubmit={handleSubmit(submit, onInvalid)}
+      // noValidate: ブラウザ標準の入力検証を使わない。
+      //
+      // このフォームの中には写真・動画の管理UIが入れ子になっており、
+      // そこに required や type="url" が1つでも付くと、
+      // 動画URLを入れないかぎり車両情報そのものが保存できない、という
+      // 原因の分かりにくい不具合になる（実際に2度発生している）。
+      // 入力検証は react-hook-form + zod（lib/inventory/schema.ts）に一本化し、
+      // 入れ子のUIが親フォームの保存を止められない状態にしておく。
+      noValidate
       className="flex flex-col gap-10 pb-24"
     >
       <section>
@@ -310,8 +368,14 @@ export function VehicleForm({
 
           {/* 中古車掲載サイトで標準的に載っている取引条件（docs/tasks/ISSUE-006）。
               これまで持てておらず、掲載情報を文章で書くしかなかった項目。 */}
+          {/* 「未設定」を選ぶと値は空文字になる。空文字のままだと
+              `z.enum([...]).nullable()` の検証に落ちてフォーム全体が保存できなくなるため、
+              nullに寄せてから検証させる（lib/utils/empty-to-null.ts）。 */}
           <Field label="車検">
-            <select className="input" {...register("shaken_status")}>
+            <select
+              className="input"
+              {...register("shaken_status", { setValueAs: emptyToNull })}
+            >
               <option value="">未設定</option>
               <option value="inspection_included">車検整備付</option>
               <option value="valid_until">満了日あり（下の欄に入力）</option>
@@ -320,7 +384,10 @@ export function VehicleForm({
           </Field>
 
           <Field label="法定整備">
-            <select className="input" {...register("legal_maintenance")}>
+            <select
+              className="input"
+              {...register("legal_maintenance", { setValueAs: emptyToNull })}
+            >
               <option value="">未設定</option>
               <option value="included">整備付</option>
               <option value="separate">別途</option>
@@ -335,7 +402,10 @@ export function VehicleForm({
 
           {/* 輸入車のため、ハンドル位置は購入判断を大きく左右する */}
           <Field label="ハンドル">
-            <select className="input" {...register("steering_side")}>
+            <select
+              className="input"
+              {...register("steering_side", { setValueAs: emptyToNull })}
+            >
               <option value="">未設定</option>
               <option value="right">右ハンドル</option>
               <option value="left">左ハンドル</option>
@@ -366,7 +436,7 @@ export function VehicleForm({
             <input
               type="text"
               className="input"
-              {...register("engine")}
+              {...register("engine", { setValueAs: emptyToNull })}
               value={watch("engine") ?? ""}
             />
           </Field>
@@ -374,7 +444,7 @@ export function VehicleForm({
             <input
               type="text"
               className="input"
-              {...register("transmission")}
+              {...register("transmission", { setValueAs: emptyToNull })}
               value={watch("transmission") ?? ""}
             />
           </Field>
@@ -382,7 +452,7 @@ export function VehicleForm({
             <input
               type="text"
               className="input"
-              {...register("exterior_color")}
+              {...register("exterior_color", { setValueAs: emptyToNull })}
               value={watch("exterior_color") ?? ""}
             />
           </Field>
@@ -390,7 +460,7 @@ export function VehicleForm({
             <input
               type="text"
               className="input"
-              {...register("interior_color")}
+              {...register("interior_color", { setValueAs: emptyToNull })}
               value={watch("interior_color") ?? ""}
             />
           </Field>
@@ -398,7 +468,7 @@ export function VehicleForm({
             <input
               type="text"
               className="input"
-              {...register("vin")}
+              {...register("vin", { setValueAs: emptyToNull })}
               value={watch("vin") ?? ""}
             />
           </Field>
@@ -421,11 +491,13 @@ export function VehicleForm({
             </select>
           </Field>
 
+          {/* 日付を入れてから消すと空文字が残る。空文字のまま date 型の列へ送ると
+              Postgresが構文エラーを返し、検証は通るのに保存だけ失敗する。 */}
           <Field label="車検満了日">
             <input
               type="date"
               className="input"
-              {...register("shaken_expiry")}
+              {...register("shaken_expiry", { setValueAs: emptyToNull })}
               value={watch("shaken_expiry") ?? ""}
             />
           </Field>
@@ -467,7 +539,7 @@ export function VehicleForm({
             <input
               type="text"
               className="input"
-              {...register("torque")}
+              {...register("torque", { setValueAs: emptyToNull })}
               value={watch("torque") ?? ""}
             />
           </Field>
@@ -476,7 +548,7 @@ export function VehicleForm({
             <input
               type="text"
               className="input"
-              {...register("engine_model_code")}
+              {...register("engine_model_code", { setValueAs: emptyToNull })}
               value={watch("engine_model_code") ?? ""}
             />
           </Field>
@@ -485,7 +557,7 @@ export function VehicleForm({
             <input
               type="text"
               className="input"
-              {...register("drivetrain")}
+              {...register("drivetrain", { setValueAs: emptyToNull })}
               value={watch("drivetrain") ?? ""}
             />
           </Field>
@@ -494,7 +566,7 @@ export function VehicleForm({
             <input
               type="text"
               className="input"
-              {...register("body_type")}
+              {...register("body_type", { setValueAs: emptyToNull })}
               value={watch("body_type") ?? ""}
             />
           </Field>
@@ -503,7 +575,7 @@ export function VehicleForm({
             <input
               type="text"
               className="input"
-              {...register("seat_material")}
+              {...register("seat_material", { setValueAs: emptyToNull })}
               value={watch("seat_material") ?? ""}
             />
           </Field>
@@ -512,7 +584,7 @@ export function VehicleForm({
             <input
               type="text"
               className="input"
-              {...register("model_code")}
+              {...register("model_code", { setValueAs: emptyToNull })}
               value={watch("model_code") ?? ""}
             />
           </Field>
@@ -522,7 +594,7 @@ export function VehicleForm({
               type="text"
               className="input"
               placeholder="ガソリン など"
-              {...register("fuel_type")}
+              {...register("fuel_type", { setValueAs: emptyToNull })}
               value={watch("fuel_type") ?? ""}
             />
           </Field>
@@ -561,7 +633,10 @@ export function VehicleForm({
           </Field>
 
           <Field label="リサイクル料金">
-            <select className="input" {...register("recycle_fee")}>
+            <select
+              className="input"
+              {...register("recycle_fee", { setValueAs: emptyToNull })}
+            >
               <option value="">未設定</option>
               <option value="included">込み</option>
               <option value="separate">別途</option>
@@ -612,7 +687,7 @@ export function VehicleForm({
               type="text"
               className="input"
               placeholder="東京都◯◯市 など"
-              {...register("location_text")}
+              {...register("location_text", { setValueAs: emptyToNull })}
               value={watch("location_text") ?? ""}
             />
           </Field>
@@ -831,6 +906,21 @@ export function VehicleForm({
       )}
 
       <div className="shadow-medium fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-white p-4 pb-[env(safe-area-inset-bottom)]">
+        {/* 保存ボタンのすぐ上に出す。フォームの途中にだけエラーを出しても、
+            画面下部の固定ボタンを押している利用者の視界には入らない。 */}
+        {invalidFields.length > 0 && (
+          <div
+            role="alert"
+            className="mx-auto mb-3 max-w-md rounded-lg border border-red-200 bg-red-50 px-4 py-3"
+          >
+            <p className="text-base font-medium text-red-700">
+              入力内容を確認してください
+            </p>
+            <p className="mt-1 text-base text-red-700">
+              {invalidFields.join("・")}
+            </p>
+          </div>
+        )}
         <Button
           type="submit"
           disabled={isSubmitting}
@@ -908,7 +998,7 @@ function TextAreaField({
       <textarea
         rows={4}
         className="input"
-        {...register(name)}
+        {...register(name, { setValueAs: emptyToNull })}
         value={(watch(name) as string | null) ?? ""}
       />
     </Field>

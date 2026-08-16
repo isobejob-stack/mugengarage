@@ -2,6 +2,29 @@ import type { Vehicle } from "@/lib/inventory/types";
 import type { VehicleFormValues } from "@/lib/inventory/schema";
 import type { RelatedContentTarget } from "@/lib/related/types";
 
+// 日付・日時の列に空文字が入るのを防ぐ。
+//
+// Postgresの date / timestamptz 型に "" を渡すと
+// `invalid input syntax for type date: ""` で書き込みが失敗する。
+// zodは z.string().nullable() として "" を通してしまうため、検証は成功するのに
+// 保存だけが失敗し、画面には原因の分からないエラーだけが出る形になっていた。
+//
+// 画面側でも空文字はnullに寄せているが（lib/utils/empty-to-null.ts）、
+// APIは画面以外からも呼べるので、DBへ書く直前でも同じ保証を置く。
+const DATE_LIKE_COLUMNS = ["shaken_expiry", "scheduled_publish_at"] as const;
+
+export function sanitizeVehicleWriteValues<T extends Record<string, unknown>>(
+  values: T,
+): T {
+  const next = { ...values };
+  for (const column of DATE_LIKE_COLUMNS) {
+    if (typeof next[column] === "string" && next[column].trim() === "") {
+      (next as Record<string, unknown>)[column] = null;
+    }
+  }
+  return next;
+}
+
 // DBの車両1件を、車両フォームの初期値に変換する。
 //
 // 編集画面と「コピーして新規登録」の2箇所で同じ変換が必要になったため共通化した。
