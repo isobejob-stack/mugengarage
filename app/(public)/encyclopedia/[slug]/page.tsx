@@ -11,6 +11,11 @@ import { RelatedInventorySection } from "@/components/related/related-discovery"
 import { getVehiclesRelatedToTitle } from "@/lib/related/auto";
 import { getLeadVehiclePhotoPaths } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
+import {
+  buildEncyclopediaStructuredData,
+  serializeStructuredData,
+} from "@/lib/seo/structured-data";
+import { SITE_URL } from "@/lib/site-config";
 
 // 各詳細ページに固有のtitle/descriptionを与える。従来はルートlayoutの値を継承しており、
 // 検索結果でどのページも同じ文言になっていた（docs/tasks/ISSUE-005）。
@@ -60,8 +65,25 @@ export default async function Page({
     return path ? getVehiclePhotoPublicUrl(path) : undefined;
   });
 
+  // FR-SEO-002: 図鑑項目の構造化データ。
+  // 2026-08-16に全面書き直しした本文（1件2,000〜4,000字）を、
+  // 新しく書き足すことなく検索露出に変えるための実装。
+  const structuredDataJson = serializeStructuredData(
+    buildEncyclopediaStructuredData({
+      title: entry.title,
+      description: excerptFromMarkdown(entry.body),
+      url: `${SITE_URL}/encyclopedia/${slug}`,
+      categoryLabel: encyclopediaCategoryLabels[entry.category] ?? null,
+      updatedAt: entry.updated_at,
+    }),
+  );
+
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: structuredDataJson }}
+      />
       {/* 図鑑だけが独自のパンくずを持っていたため、共通コンポーネントに統一する。
           これでBreadcrumbListの構造化データも他ページと同じ形で出力される。 */}
       <Breadcrumb

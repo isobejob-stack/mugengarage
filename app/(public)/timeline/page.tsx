@@ -16,6 +16,11 @@ import { RelatedContentList } from "@/components/related/related-content-list";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import {
+  buildTimelineStructuredData,
+  serializeStructuredData,
+} from "@/lib/seo/structured-data";
+import { SITE_URL } from "@/lib/site-config";
 
 // 管理画面での年表の追加・編集を次のデプロイまで待たせないため、リクエストごとに描画する
 // （理由の詳細は app/(public)/blog/page.tsx のコメント参照）。
@@ -180,8 +185,22 @@ function Overview({
   events: Awaited<ReturnType<typeof listPublicTimelineEvents>>;
   decades: string[];
 }) {
+  // FR-SEO-002: 年表の構造化データ。
+  // 出来事1件ずつに固有のURLが無いため、Eventを個別に出さずページ全体をItemListとして出す
+  // （URLの無い項目をEventで出すと、検索結果からどこにも着地できない断片が増える）。
+  const structuredDataJson = serializeStructuredData(
+    buildTimelineStructuredData({
+      url: `${SITE_URL}/timeline`,
+      items: events.map((e) => ({ name: e.title, date: e.event_date })),
+    }),
+  );
+
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: structuredDataJson }}
+      />
       <Breadcrumb items={[{ label: "Jaguar年表" }]} />
       <h1 className="text-charcoal-900 mt-3 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         Jaguar年表

@@ -71,6 +71,71 @@ export function buildDefinedTermStructuredData(params: {
   };
 }
 
+// FR-SEO-002: 図鑑項目の構造化データ。
+//
+// 図鑑は「XK120とは何か」「AJ6エンジンとは」に答えるページなので、
+// 用語ライブラリと同じ DefinedTerm 系ではなく Article として出す。
+// 1件あたり2,000〜4,000字の解説であり、語義の定義ではなく読み物だからで、
+// 実際に検索から来る人も「XK120 とは」より「XK120 中古 注意点」に近い読み方をする。
+//
+// isPartOf で図鑑という集合の一部であることを示し、
+// 個別の車種解説が単独の記事として孤立しないようにしている。
+export function buildEncyclopediaStructuredData(params: {
+  title: string;
+  description: string;
+  url: string;
+  categoryLabel: string | null;
+  updatedAt: string | null;
+}) {
+  const { title, description, url, categoryLabel, updatedAt } = params;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: title,
+    ...(description ? { description } : {}),
+    url,
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    ...(updatedAt ? { dateModified: updatedAt } : {}),
+    ...(categoryLabel ? { articleSection: categoryLabel } : {}),
+    isPartOf: {
+      "@type": "Collection",
+      name: `${SITE_NAME} Jaguar図鑑`,
+      url: `${SITE_URL}/encyclopedia`,
+    },
+    author: publisher,
+    publisher,
+  };
+}
+
+// FR-SEO-002: 年表の構造化データ。
+//
+// 年表は1ページに59件の出来事が並ぶ「一覧」であり、個々の出来事に固有のURLが無い。
+// そのため出来事1件ずつをEventとして出すのではなく、ページ全体を ItemList として出す。
+// URLを持たない項目をEventで出すと、検索結果からどこにも着地できない断片が増える。
+//
+// 件数が多いため、上位のものだけを渡す想定（呼び出し側で絞る）。
+export function buildTimelineStructuredData(params: {
+  url: string;
+  items: Array<{ name: string; date: string | null }>;
+}) {
+  const { url, items } = params;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: `${SITE_NAME} Jaguar年表`,
+    url,
+    numberOfItems: items.length,
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      ...(item.date ? { item: { "@type": "Event", name: item.name, startDate: item.date } } : {}),
+    })),
+  };
+}
+
 // FR-SEO-002: 車両詳細ページ用のSchema.org構造化データ（JSON-LD）を生成する。
 // schema.orgの Car（Vehicle ⊂ Product のサブタイプ）を用い、中古車販売店向けの
 // Google Vehicle Listing構造化データの形式に準拠する。
