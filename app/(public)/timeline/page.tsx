@@ -9,6 +9,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Link from "next/link";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 
 function decadeOf(dateStr: string) {
   const year = new Date(dateStr).getFullYear();
@@ -44,11 +46,35 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
+      <Breadcrumb items={[{ label: "Jaguar年表" }]} />
+      <h1 className="text-charcoal-900 mt-3 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         Jaguar年表
       </h1>
       <p className="text-foreground-muted mt-2">
-        Jaguarブランドの歴史を時系列でたどります。
+        1922年の創業から現在まで、Jaguarの歩みを時系列でたどります。
+      </p>
+      {/* 蓄積量そのものが価値なので件数を出す。絞り込み中は母数も併記する */}
+      <p className="text-charcoal-900 mt-3 text-base">
+        {decade ? (
+          <>
+            {decade}
+            <strong className="mx-1 text-xl font-bold tabular-nums">
+              {filtered.length}
+            </strong>
+            件
+            <span className="text-foreground-muted ml-2 text-sm">
+              （全{events.length}件中）
+            </span>
+          </>
+        ) : (
+          <>
+            全
+            <strong className="text-xl font-bold tabular-nums">
+              {events.length}
+            </strong>
+            件
+          </>
+        )}
       </p>
 
       {decades.length > 0 && (
@@ -80,7 +106,16 @@ export default async function Page({
       )}
 
       {filtered.length === 0 ? (
-        <p className="text-foreground-muted mt-8">イベントはまだありません。</p>
+        <div className="bg-cream-100 mt-8 rounded-2xl border border-neutral-200 p-6 text-center">
+          <p className="text-charcoal-900 text-lg font-bold">
+            この年代の出来事はまだ登録されていません
+          </p>
+          <div className="mt-6 flex justify-center">
+            <Button href="/timeline" variant="primary" size="md">
+              すべての年代を見る
+            </Button>
+          </div>
+        </div>
       ) : (
         <ol className="mt-8 flex flex-col gap-8 border-l border-neutral-200 pl-6">
           {filtered.map((e, i) => (
@@ -104,7 +139,7 @@ export default async function Page({
                 {e.title}
               </h2>
               {e.body && (
-                <div className="prose mt-2 max-w-none text-sm">
+                <div className="prose mt-2 max-w-none">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {e.body}
                   </ReactMarkdown>
@@ -113,11 +148,20 @@ export default async function Page({
               <RelatedContentList
                 items={relatedByEvent[i]}
                 title="関連リンク"
+                compact
               />
             </li>
           ))}
         </ol>
       )}
+      <div className="mt-12 flex flex-wrap justify-center gap-3 border-t border-neutral-200 pt-8">
+        <Button href="/vehicles" variant="primary" size="md">
+          在庫車両を見る
+        </Button>
+        <Button href="/encyclopedia" variant="outline" size="md">
+          車種ごとの解説を読む
+        </Button>
+      </div>
     </main>
   );
 }

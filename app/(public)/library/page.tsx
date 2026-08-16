@@ -3,6 +3,8 @@ import { listPublicLibraryEntries } from "@/lib/library/queries";
 import { kanaRowOf } from "@/lib/library/schema";
 import { Card, CardBody, CardTitle, CardMeta } from "@/components/ui/card";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 
 export const metadata = buildPageMetadata({
   title: "ライブラリ",
@@ -52,11 +54,36 @@ export default async function Page({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
+      <Breadcrumb items={[{ label: "ライブラリ" }]} />
+      <h1 className="text-charcoal-900 mt-3 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         ライブラリ
       </h1>
       <p className="text-foreground-muted mt-2">
         Jaguar関連の用語・知識を辞典形式でまとめています。
+      </p>
+      {/* 蓄積そのものがこの店の価値なので、件数を数字で出す。
+          絞り込み中は「全31語のうち何語か」が分かるようにする。 */}
+      <p className="text-charcoal-900 mt-3 text-base">
+        {filtered.length === entries.length ? (
+          <>
+            全
+            <strong className="text-xl font-bold tabular-nums">
+              {entries.length}
+            </strong>
+            語
+          </>
+        ) : (
+          <>
+            該当
+            <strong className="text-xl font-bold tabular-nums">
+              {filtered.length}
+            </strong>
+            語
+            <span className="text-foreground-muted ml-2 text-sm">
+              （全{entries.length}語中）
+            </span>
+          </>
+        )}
       </p>
 
       {rows.length > 0 && (
@@ -94,7 +121,21 @@ export default async function Page({
       )}
 
       {filtered.length === 0 ? (
-        <p className="text-foreground-muted mt-8">項目はまだありません。</p>
+        // 31語あるのに「まだありません」と出ると、空の店に見える。
+        // 絞り込みの結果0件なのだと分かる文言にし、解除の導線を必ず添える。
+        <div className="bg-cream-100 mt-8 rounded-2xl border border-neutral-200 p-6 text-center">
+          <p className="text-charcoal-900 text-lg font-bold">
+            この条件に該当する用語はありませんでした
+          </p>
+          <p className="text-foreground-muted mt-2 text-base">
+            条件を外すと{entries.length}語をご覧いただけます。
+          </p>
+          <div className="mt-6 flex justify-center">
+            <Button href="/library" variant="primary" size="md">
+              すべての用語を見る
+            </Button>
+          </div>
+        </div>
       ) : (
         <ul className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {filtered.map((e) => (
