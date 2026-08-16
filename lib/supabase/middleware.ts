@@ -35,9 +35,14 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const isAdminRoute = pathname.startsWith("/admin");
-  const isLoginRoute = pathname === "/admin/login";
+  // 未ログインでも到達できる必要がある管理画面のパス。
+  // /admin/reset-password は含めない: パスワード再設定メールのリンクを踏むと
+  // /api/auth/callback で回復用セッションが確立されるため、認証必須のままで到達できる
+  // （リンクを持たない第三者は到達できない、authentication.md 7章）。
+  const isPublicAdminRoute =
+    pathname === "/admin/login" || pathname === "/admin/forgot-password";
 
-  if (isAdminRoute && !isLoginRoute && !user) {
+  if (isAdminRoute && !isPublicAdminRoute && !user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/admin/login";
     return NextResponse.redirect(loginUrl);
