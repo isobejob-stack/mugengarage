@@ -18,6 +18,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     },
     { url: `${SITE_URL}/blog`, changeFrequency: "daily", priority: 0.7 },
+    // 「ジャガーを知る」は図鑑・年表への入口を兼ねる読み物のため、
+    // 個別ページより高い優先度で載せる（2026-08-17新設）。
+    // 整備実績（/maintenance-records）は同日にブログへ統合し、URLは /blog へ転送している。
+    { url: `${SITE_URL}/jaguar`, changeFrequency: "weekly", priority: 0.7 },
     {
       url: `${SITE_URL}/encyclopedia`,
       changeFrequency: "weekly",
@@ -25,11 +29,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     { url: `${SITE_URL}/timeline`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${SITE_URL}/library`, changeFrequency: "weekly", priority: 0.6 },
-    {
-      url: `${SITE_URL}/maintenance-records`,
-      changeFrequency: "weekly",
-      priority: 0.6,
-    },
     {
       url: `${SITE_URL}/owners-archive`,
       changeFrequency: "weekly",
@@ -68,7 +67,6 @@ async function collectDynamicEntries(): Promise<MetadataRoute.Sitemap> {
     articles,
     encyclopediaEntries,
     libraryEntries,
-    maintenanceRecords,
     ownerArchiveEntries,
   ] = await Promise.all([
     supabase
@@ -91,10 +89,6 @@ async function collectDynamicEntries(): Promise<MetadataRoute.Sitemap> {
       .is("deleted_at", null),
     supabase
       .from("library_entries")
-      .select("slug, updated_at")
-      .is("deleted_at", null),
-    supabase
-      .from("maintenance_records")
       .select("slug, updated_at")
       .is("deleted_at", null),
     supabase
@@ -147,15 +141,6 @@ async function collectDynamicEntries(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
-  const maintenanceSitemapEntries: MetadataRoute.Sitemap = (
-    maintenanceRecords.data ?? []
-  ).map((m) => ({
-    url: `${SITE_URL}/maintenance-records/${m.slug}`,
-    lastModified: m.updated_at ? new Date(m.updated_at) : undefined,
-    changeFrequency: "monthly" as const,
-    priority: 0.5,
-  }));
-
   const ownerArchiveSitemapEntries: MetadataRoute.Sitemap = (
     ownerArchiveEntries.data ?? []
   ).map((o) => ({
@@ -170,7 +155,6 @@ async function collectDynamicEntries(): Promise<MetadataRoute.Sitemap> {
     ...articleEntries,
     ...encyclopediaSitemapEntries,
     ...librarySitemapEntries,
-    ...maintenanceSitemapEntries,
     ...ownerArchiveSitemapEntries,
   ];
 }

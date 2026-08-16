@@ -17,8 +17,12 @@ export function buildPublicPath(
       return `/encyclopedia/${slug}`;
     case "library_entry":
       return `/library/${slug}`;
+    // maintenance_record は2026-08-17にブログへ統合した。
+    // 移行SQLを流すまで seo_metas / related_contents にこの型の行が残りうるため、
+    // 分岐は残したまま /blog へ向ける（/maintenance-records/... はリダイレクト先を
+    // 経由するだけの遠回りになり、記事のslugとも一致しないため個別URLは返さない）。
     case "maintenance_record":
-      return `/maintenance-records/${slug}`;
+      return "/blog";
     case "timeline_event":
       return null;
     default:
