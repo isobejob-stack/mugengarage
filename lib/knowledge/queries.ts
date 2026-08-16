@@ -78,15 +78,17 @@ export async function restoreEncyclopediaEntry(id: string) {
 // FR-ENC-002: 公開図鑑一覧（BR-DOM-001: Vehicleに依存しない独立コンテンツ）
 export async function listPublicEncyclopediaEntries() {
   const supabase = createAdminClient();
+  // body も取る。一覧をタイトルだけのカードにすると、36件のうちどれが
+  // 読む価値のある解説で、どれが型式の区分なのかが開くまで分からない。
   const { data } = await supabase
     .from("encyclopedia_entries")
-    .select("id, category, title, slug")
+    .select("id, category, title, slug, body")
     .is("deleted_at", null)
     .order("category")
     .order("display_order");
 
   return (data ?? []) as Array<
-    Pick<EncyclopediaEntry, "id" | "category" | "title" | "slug">
+    Pick<EncyclopediaEntry, "id" | "category" | "title" | "slug" | "body">
   >;
 }
 
