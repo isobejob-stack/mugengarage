@@ -9,11 +9,17 @@ import { createClient } from "@/lib/supabase/server";
 // proxy.ts の認証チェックを通過できるようになる。リンクを持たない第三者は
 // セッションを得られないため、再設定画面自体が認証必須のままで良い。
 
+// 既定の遷移先。ここに着地するのはパスワード再設定メール経由のみのため、
+// 呼び出し側は `?next=` を付けない（付けるとリンクのURLがSupabaseの
+// Redirect URLs 許可リストの登録値と文字列として一致しなくなるため。authentication.md 7.1）。
+const DEFAULT_NEXT_PATH = "/admin/reset-password";
+
 // オープンリダイレクト対策: 自サイト内の絶対パスだけを遷移先として許可する。
 // `//example.com` はプロトコル相対URLとして外部に飛ぶため弾く。
+// 現状 `next` を付けて呼ぶ経路は無いが、第三者が細工したURLを想定して残す。
 function toSafePath(next: string | null): string {
   if (!next || !next.startsWith("/") || next.startsWith("//")) {
-    return "/admin";
+    return DEFAULT_NEXT_PATH;
   }
   return next;
 }

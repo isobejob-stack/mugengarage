@@ -50,6 +50,8 @@ Admin UIの認証・認可、公開サイト側の匿名セッション管理（
 
 **設定上の前提**：手順2の遷移先はSupabase Authの許可リストに載っている必要がある。Supabaseダッシュボードの Authentication > URL Configuration で、`Redirect URLs` に本番とプレビューの `/api/auth/callback` を登録する（未登録だとメール内のリンクが `Site URL` に飛ばされ、再設定画面に到達できない）。Vercelのプレビューはデプロイごとにホスト名が変わるため、ワイルドカード（例：`https://mugengarage-git-*.vercel.app/api/auth/callback`）で登録する。
 
+照合はURL全体に対するパターンマッチであるため、`resetPasswordForEmail` に渡す `redirectTo` には**クエリ文字列を付けない**。遷移先は `/api/auth/callback` 側の既定値（`/admin/reset-password`）に持たせ、許可リストの登録値と完全に同じ文字列を渡す。`?next=` を付けると登録値と一致せず `Site URL` に飛ばされる可能性がある。
+
 - パスワードは12文字以上を必須とする（顧客情報を扱うため、Supabase既定の6文字より強い下限を課す。03_non_functional_requirements.md 9章）
 - 手順2の遷移先（`next`）は自サイト内の絶対パスに限定し、オープンリダイレクトを防ぐ
 - 手順1の結果表示はメールアドレスの登録有無で変えない（アカウント存在の推測を防ぐ）

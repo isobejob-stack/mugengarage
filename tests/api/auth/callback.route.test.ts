@@ -69,10 +69,11 @@ describe("GET /api/auth/callback", () => {
     expect(location.searchParams.get("notice")).toBeNull();
   });
 
-  it("nextが未指定の場合は管理画面トップへ送る", async () => {
+  // 実際のメールのリンクはクエリ無し（許可リストの登録値と完全一致させるため）で着地する
+  it("nextが未指定の場合はパスワード再設定画面へ送る", async () => {
     const response = await GET(callbackRequest("?code=abc"));
 
-    expect(locationOf(response).pathname).toBe("/admin");
+    expect(locationOf(response).pathname).toBe("/admin/reset-password");
   });
 
   // オープンリダイレクト対策: 外部サイトへ誘導されないことを担保する
@@ -80,13 +81,13 @@ describe("GET /api/auth/callback", () => {
     ["プロトコル相対URL", "//evil.example.net/phishing"],
     ["絶対URL", "https://evil.example.net/phishing"],
     ["相対パス", "admin/reset-password"],
-  ])("nextが%s（%s）の場合は管理画面トップへ握り潰す", async (_label, next) => {
+  ])("nextが%s（%s）の場合は既定の遷移先へ握り潰す", async (_label, next) => {
     const response = await GET(
       callbackRequest(`?code=abc&next=${encodeURIComponent(next)}`),
     );
     const location = locationOf(response);
 
     expect(location.origin).toBe(ORIGIN);
-    expect(location.pathname).toBe("/admin");
+    expect(location.pathname).toBe("/admin/reset-password");
   });
 });

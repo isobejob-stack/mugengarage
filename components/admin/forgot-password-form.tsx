@@ -34,8 +34,13 @@ export function ForgotPasswordForm({ notice }: { notice?: string }) {
 
     // メール内のリンクは /api/auth/callback に着地し、そこでコードを
     // セッションに交換してから再設定画面へ遷移する（Supabase Auth PKCEフロー）。
+    //
+    // このURLはSupabaseの Redirect URLs 許可リストと照合される。照合はURL全体に対する
+    // パターンマッチのため、クエリ文字列を付けると登録値（…/api/auth/callback）と
+    // 一致しなくなる恐れがある。遷移先はコールバック側の既定値に任せ、ここでは
+    // 許可リストに登録するURLと完全に同じ文字列を渡す（authentication.md 7.1）。
     const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
-      redirectTo: `${window.location.origin}/api/auth/callback?next=${encodeURIComponent("/admin/reset-password")}`,
+      redirectTo: `${window.location.origin}/api/auth/callback`,
     });
 
     if (error) {
