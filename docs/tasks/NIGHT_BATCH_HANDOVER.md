@@ -19,6 +19,7 @@
 | 1    | `supabase/migrations/20260817010000_merge_maintenance_records_into_articles.sql` | 整備実績1件をブログ記事に移し、既存記事のカテゴリを5分類に揃える |
 | 2    | `supabase/migrations/20260817020000_create_site_texts_table.sql`   | 画面の固定文言を編集できるようにするテーブルを作る               |
 | 3    | `supabase/migrations/20260817090000_add_visit_channel_to_inquiries.sql` | 問い合わせの経路に「来店」を追加する                       |
+| 4    | `supabase/migrations/20260817120000_add_modern_era_encyclopedia_entries.sql` | **図鑑に1990年以降の車種を追加**（XK・Sタイプ・Xタイプ・AJ16・AJ-V8・XJのX300〜X351）。2026-08-17追加分 |
 
 **①を実行するまでの状態**（壊れてはいませんが、中途半端に見えます）
 
