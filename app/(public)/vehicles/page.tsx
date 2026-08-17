@@ -29,6 +29,7 @@ import {
   buildActiveFilters,
 } from "@/components/inventory/vehicle-active-filters";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { SiteText } from "@/components/live-edit/site-text";
 import { VehicleSortSelect } from "@/components/inventory/vehicle-sort-select";
 import { Pagination } from "@/components/ui/pagination";
 import { FavoriteIconButton } from "@/components/engagement/favorite-icon-button";
@@ -108,7 +109,9 @@ export default async function Page({
     <main className="mx-auto max-w-5xl px-4 py-8">
       <Breadcrumb items={[{ label: "在庫車両" }]} />
       <h1 className="text-charcoal-900 mt-3 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-        在庫車両一覧
+        <SiteText k="vehicles.title" description="在庫一覧 見出し">
+          在庫車両一覧
+        </SiteText>
       </h1>
 
       {/*
@@ -127,7 +130,9 @@ export default async function Page({
       >
         <summary className="text-charcoal-900 hover:bg-cream-100 flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-base font-bold">
           <span>
-            条件を絞り込む
+            <SiteText k="vehicles.filter.heading" description="在庫一覧 絞り込みの見出し">
+              条件を絞り込む
+            </SiteText>
             {activeFilterCount > 0 && (
               <span className="text-primary-700 ml-2 text-sm font-medium">
                 （{activeFilterCount}件適用中）
@@ -215,10 +220,14 @@ export default async function Page({
 
           <div className="flex gap-3">
             <Button type="submit" variant="primary" size="md">
-              この条件で検索
+              <SiteText k="vehicles.filter.submit" description="在庫一覧 検索ボタンの文言">
+                この条件で検索
+              </SiteText>
             </Button>
             <Button href="/vehicles" variant="outline" size="md">
-              条件をクリア
+              <SiteText k="vehicles.filter.clear" description="在庫一覧 条件クリアボタンの文言">
+                条件をクリア
+              </SiteText>
             </Button>
           </div>
         </form>
@@ -249,19 +258,25 @@ export default async function Page({
         // すぐ0件になり、ここで戻る導線が無いと離脱する。
         <div className="bg-cream-100 mt-8 rounded-2xl border border-neutral-200 p-6 text-center">
           <p className="text-charcoal-900 text-lg font-bold">
-            条件に一致する車両が見つかりませんでした
+            <SiteText k="vehicles.empty.title" description="在庫一覧 0件のときの見出し">
+              条件に一致する車両が見つかりませんでした
+            </SiteText>
           </p>
           <p className="text-foreground-muted mt-2 text-base">
-            条件を少なくすると見つかることがあります。
-            お探しの車両が見つからない場合は、ご希望をお聞かせいただければ
-            入荷時にご案内いたします。
+            <SiteText k="vehicles.empty.body" description="在庫一覧 0件のときの説明文">
+              条件を少なくすると見つかることがあります。お探しの車両が見つからない場合は、ご希望をお聞かせいただければ入荷時にご案内いたします。
+            </SiteText>
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Button href="/vehicles" variant="primary" size="md">
-              条件をクリアしてすべて見る
+              <SiteText k="vehicles.empty.clear" description="在庫一覧 0件のとき すべて見るボタンの文言">
+                条件をクリアしてすべて見る
+              </SiteText>
             </Button>
             <Button href="/contact" variant="outline" size="md">
-              希望の車両を相談する
+              <SiteText k="vehicles.empty.consult" description="在庫一覧 0件のとき 相談するボタンの文言">
+                希望の車両を相談する
+              </SiteText>
             </Button>
           </div>
         </div>
@@ -332,7 +347,9 @@ export default async function Page({
           一覧を見終えて「決めきれなかった」人に効く導線のため、結果の後ろに置く。 */}
       <div className="mt-10 flex justify-center border-t border-neutral-200 pt-8">
         <Button href="/vehicles/ranking" variant="outline" size="md">
-          人気の車両ランキングを見る
+          <SiteText k="vehicles.ranking.cta" description="在庫一覧 ランキングボタンの文言">
+            人気の車両ランキングを見る
+          </SiteText>
         </Button>
       </div>
     </main>

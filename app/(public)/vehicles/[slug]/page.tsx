@@ -23,6 +23,7 @@ import {
 import { getAutoRelatedForVehicle } from "@/lib/related/auto";
 import { VehicleMediaGallery } from "@/components/inventory/vehicle-media-gallery";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { SiteText } from "@/components/live-edit/site-text";
 import { CarIcon } from "@/components/ui/car-icon";
 import { getSeoMeta } from "@/lib/seo/queries";
 import { buildPublicPath } from "@/lib/seo/paths";
@@ -434,7 +435,9 @@ export default async function Page({
             レビュー指摘対応（必須修正3）: プリフィル文言に車両名を含め、ボタン文言と送信内容を一致させる */}
         {lineConsultUrl && (
           <Button href={lineConsultUrl} variant="line" size="md">
-            この車をLINEで相談する
+            <SiteText k="vehicle.cta.lineTop" description="車両詳細 上部のLINE相談ボタンの文言">
+              この車をLINEで相談する
+            </SiteText>
           </Button>
         )}
       </div>
@@ -461,15 +464,20 @@ export default async function Page({
           <div className="bg-cream-100 flex aspect-[4/3] w-full flex-col items-center justify-center gap-3 rounded-2xl border border-neutral-200 px-6 text-center">
             <CarIcon className="text-foreground-muted h-12 w-12" />
             <p className="text-charcoal-900 text-base font-medium">
-              この車両の写真は準備中です
+              <SiteText k="vehicle.photo.empty.title" description="車両詳細 写真が無いときの見出し">
+                この車両の写真は準備中です
+              </SiteText>
             </p>
             <p className="text-foreground-muted text-sm">
-              現車の写真をご希望の方は、お気軽にお問い合わせください。
-              個別にお送りいたします。
+              <SiteText k="vehicle.photo.empty.body" description="車両詳細 写真が無いときの説明文">
+                現車の写真をご希望の方は、お気軽にお問い合わせください。個別にお送りいたします。
+              </SiteText>
             </p>
             {lineConsultUrl && (
               <Button href={lineConsultUrl} variant="line" size="md">
-                写真をLINEで請求する
+                <SiteText k="vehicle.photo.empty.cta" description="車両詳細 写真をLINEで請求するボタンの文言">
+                  写真をLINEで請求する
+                </SiteText>
               </Button>
             )}
           </div>
@@ -552,7 +560,9 @@ export default async function Page({
         {/* 読み終えた位置から一覧に戻れるようにする。
             検索結果から直接開いた利用者にはブラウザバック以外の戻り手段が無かった。 */}
         <Button href="/vehicles" variant="outline" size="md">
-          在庫車両一覧に戻る
+          <SiteText k="vehicle.backToList" description="車両詳細 一覧へ戻るリンクの文言">
+            在庫車両一覧に戻る
+          </SiteText>
         </Button>
       </div>
 
@@ -576,7 +586,9 @@ export default async function Page({
                 size="md"
                 className="w-full max-w-xs"
               >
-                電話で問い合わせる
+                <SiteText k="vehicle.cta.phone" description="車両詳細 下部固定バー 電話ボタンの文言">
+                  電話で問い合わせる
+                </SiteText>
               </Button>
             )}
             {lineConsultUrl && (
@@ -586,7 +598,9 @@ export default async function Page({
                 size="md"
                 className="w-full max-w-xs"
               >
-                この車をLINEで相談する
+                <SiteText k="vehicle.cta.lineBottom" description="車両詳細 下部固定バー LINEボタンの文言">
+                  この車をLINEで相談する
+                </SiteText>
               </Button>
             )}
           </div>

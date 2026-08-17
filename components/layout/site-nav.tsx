@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { siteNav } from "@/lib/site-config";
+import { EditableText } from "@/components/live-edit/site-text-provider";
 
 // グローバルナビゲーション。
 //
@@ -90,7 +91,14 @@ export function SiteNav() {
               aria-current={current ? "page" : undefined}
               className={linkClass(current)}
             >
-              {item.label}
+              {/* ナビゲーションの文言も編集対象にする。クライアントコンポーネントなので
+                  サーバー版の <SiteText> は使えず、Provider経由の <EditableText> を使う。 */}
+              <EditableText
+                k={`nav${item.href.replaceAll("/", ".")}`}
+                description={`ナビゲーション「${item.label}」の文言`}
+              >
+                {item.label}
+              </EditableText>
             </Link>
           );
         }

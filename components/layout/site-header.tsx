@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SiteNav } from "@/components/layout/site-nav";
 import { getSiteSettings } from "@/lib/settings/queries";
 import { Button } from "@/components/ui/button";
+import { SiteText } from "@/components/live-edit/site-text";
 
 // 03_ui_rules.md 7章: グローバルヘッダーはロゴ・主要ナビ・LINE相談ボタンを常設する
 // デザイン刷新: 常時 shadow-soft を出して面としての境界を明確にする（実装コストの低い常時表示を採用）
@@ -22,13 +23,20 @@ export async function SiteHeader() {
 
         <div className="flex items-center gap-3">
           <Button href="/favorites" variant="outline" size="md">
-            ♡ お気に入り
+            <SiteText
+              k="header.favorites"
+              description="ヘッダー お気に入りボタンの文言"
+            >
+              ♡ お気に入り
+            </SiteText>
           </Button>
           {/* LINEのURLが未設定のあいだはボタンを出さない。
               仮URLや空リンクへ飛ばすより、導線を見せないほうが利用者を裏切らない。 */}
           {settings.line_url && (
             <Button href={settings.line_url} variant="line" size="md">
-              LINEで相談する
+              <SiteText k="header.line" description="ヘッダー LINE相談ボタンの文言">
+                LINEで相談する
+              </SiteText>
             </Button>
           )}
         </div>

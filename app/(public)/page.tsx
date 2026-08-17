@@ -122,10 +122,14 @@ export default async function Page() {
           />
           <div className="relative mx-auto w-full max-w-5xl px-4 pb-12 sm:pb-16">
             <p className="text-accent-400 text-xs font-medium tracking-[0.15em] uppercase">
-              Classic Jaguar Specialist
+              <SiteText k="home.hero.eyebrow" description="トップページ 冒頭の英字">
+                Classic Jaguar Specialist
+              </SiteText>
             </p>
             <h1 className="mt-3 font-serif text-4xl font-bold tracking-tight text-balance text-white sm:text-5xl">
-              エムガレージ
+              <SiteText k="home.hero.title" description="トップページ 店名の見出し">
+                エムガレージ
+              </SiteText>
             </h1>
             <p className="mt-4 max-w-2xl text-neutral-200">
               <SiteText k="home.hero.lead" description="トップページ 冒頭の紹介文">
@@ -148,10 +152,14 @@ export default async function Page() {
         <div className="mx-auto max-w-5xl px-4 pt-8">
           <section className="bg-charcoal-900 shadow-medium rounded-2xl px-6 py-12 text-white sm:px-10 sm:py-16">
             <p className="text-accent-400 text-xs font-medium tracking-[0.15em] uppercase">
-              Classic Jaguar Specialist
+              <SiteText k="home.hero.eyebrow" description="トップページ 冒頭の英字">
+                Classic Jaguar Specialist
+              </SiteText>
             </p>
             <h1 className="mt-3 font-serif text-3xl font-bold sm:text-4xl">
-              エムガレージ
+              <SiteText k="home.hero.title" description="トップページ 店名の見出し">
+                エムガレージ
+              </SiteText>
             </h1>
             <p className="mt-4 max-w-2xl text-neutral-300">
               <SiteText k="home.hero.lead" description="トップページ 冒頭の紹介文">
