@@ -36,6 +36,15 @@ const MODERN_ERA_FROM = 1990;
 const MODERN_ERA_TO = 2015;
 const MODERN_ERA_EVENT_COUNT = 8;
 
+// 「いま手に入る年代」の章に出してよい図鑑項目の下限（display_order）。
+//
+// 図鑑の display_order は登場年の順に振ってある。XJ（1968年〜、order=100）以降を
+// この章の対象とする。この線を引かないと、在庫の「Sタイプ（2004年式）」と
+// 図鑑の「Sタイプ／420（1963年）」が名前で一致してしまい、
+// 1960年代の車の解説が「いま手に入る年代」の章に出る。
+// それはまさに、この改修で解消しようとしている年代の食い違いそのものになる。
+const MODERN_ERA_MIN_DISPLAY_ORDER = 100;
+
 // ジャガーを知る（FR-ENC-002 / FR-TL-002 の公開コンテンツを読み物として再構成）。SCR-PUB-020。
 //
 // 2026-08-17、発注者の指摘で構成を組み替えた。
@@ -87,10 +96,12 @@ export default async function Page() {
       vehicles.map((v) => v.models?.name).filter((n): n is string => Boolean(n)),
     ),
   );
-  const modernModels = models.filter((entry) =>
-    stockModelNames.some(
-      (name) => entry.title.includes(name) || name.includes(entry.title),
-    ),
+  const modernModels = models.filter(
+    (entry) =>
+      entry.display_order >= MODERN_ERA_MIN_DISPLAY_ORDER &&
+      stockModelNames.some(
+        (name) => entry.title.includes(name) || name.includes(entry.title),
+      ),
   );
 
   // 在庫の年式の幅。「読んだ年代の車が実際にある」ことを数字で示すために使う。

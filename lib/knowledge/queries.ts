@@ -82,13 +82,16 @@ export async function listPublicEncyclopediaEntries() {
   // 読む価値のある解説で、どれが型式の区分なのかが開くまで分からない。
   const { data } = await supabase
     .from("encyclopedia_entries")
-    .select("id, category, title, slug, body")
+    .select("id, category, title, slug, body, display_order")
     .is("deleted_at", null)
     .order("category")
     .order("display_order");
 
   return (data ?? []) as Array<
-    Pick<EncyclopediaEntry, "id" | "category" | "title" | "slug" | "body">
+    Pick<
+      EncyclopediaEntry,
+      "id" | "category" | "title" | "slug" | "body" | "display_order"
+    >
   >;
 }
 
@@ -104,13 +107,18 @@ export async function listPublicEncyclopediaEntriesForReading() {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("encyclopedia_entries")
-    .select("id, category, title, slug, body")
+    .select("id, category, title, slug, body, display_order")
     .is("deleted_at", null)
     .in("category", ["brand", "model", "engine"])
     .order("display_order");
 
+  // display_order も返す。呼び出し側（/jaguar）が「どの年代の車種か」を
+  // この値で判断するため（登場年の順に振ってある）。
   return (data ?? []) as Array<
-    Pick<EncyclopediaEntry, "id" | "category" | "title" | "slug" | "body">
+    Pick<
+      EncyclopediaEntry,
+      "id" | "category" | "title" | "slug" | "body" | "display_order"
+    >
   >;
 }
 
