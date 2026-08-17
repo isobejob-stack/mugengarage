@@ -115,6 +115,19 @@ export async function generateMetadata({
   const canonicalPath = buildPublicPath("vehicle", slug) ?? `/vehicles/${slug}`;
   const canonicalUrl = seoMeta?.canonical_url || `${SITE_URL}${canonicalPath}`;
 
+  // OGP画像は「SEO設定で明示された画像 → その車の先頭写真」の順で決める。
+  //
+  // 従来はSEO設定が空だと画像なしになっていた。この店の最重要導線は
+  // LINEでの共有（FR-LINE-001）で、車両ページのURLをトークに貼る場面が実際に多い。
+  // そこに画像が出ないと、車の写真という最も強い訴求材料を捨てたまま共有されることになる。
+  // 車両ごとにSEO設定を手入力するのは現実的でないため、登録済みの写真を既定にする。
+  let ogImage = seoMeta?.og_image_url ?? null;
+  if (!ogImage) {
+    const leadPhotos = await getLeadVehiclePhotoPaths([vehicle.id]);
+    const path = leadPhotos.get(vehicle.id);
+    if (path) ogImage = getVehiclePhotoPublicUrl(path);
+  }
+
   return {
     title: seoMeta?.title ? absoluteTitle(seoMeta.title) : title,
     description,
@@ -124,7 +137,7 @@ export async function generateMetadata({
       title: seoMeta?.title || `${title}｜${SITE_NAME}`,
       description,
       url: canonicalUrl,
-      images: seoMeta?.og_image_url ? [seoMeta.og_image_url] : undefined,
+      images: ogImage ? [ogImage] : undefined,
     },
   };
 }

@@ -85,6 +85,15 @@ export async function SiteFooter() {
           >
             お問い合わせ
           </Link>
+          {/* 個人情報の扱いを書いた場所への導線は、フォームの近くだけでなく
+              全ページから届く位置に置く。高額商材で名前と電話番号を預ける判断は、
+              問い合わせ画面に着く前から始まっているため。 */}
+          <Link
+            href="/privacy"
+            className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
+          >
+            プライバシーポリシー
+          </Link>
           {settings.line_url && (
             <Button href={settings.line_url} variant="line" size="md">
               LINEで相談する

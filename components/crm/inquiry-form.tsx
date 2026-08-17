@@ -10,6 +10,7 @@ import {
   type InquiryFormValues,
 } from "@/lib/crm/schema";
 import { postJson } from "@/lib/api/client";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 // SCR-PUB-017: 問い合わせフォーム
@@ -106,6 +107,20 @@ export function InquiryForm() {
       </div>
 
       {submitError && <p className="text-sm text-red-600">{submitError}</p>}
+
+      {/* 名前と連絡先を渡す直前に、その情報がどう扱われるかへの導線を置く。
+          高額商材ではここで手が止まる人が実際にいるため、
+          フッターまで探させずに送信ボタンの手前で示す。 */}
+      <p className="text-foreground-muted text-base">
+        ご入力いただいた情報は、ご返答とご相談への対応にのみ使用します。詳しくは
+        <Link
+          href="/privacy"
+          className="text-primary-700 mx-1 underline underline-offset-4"
+        >
+          プライバシーポリシー
+        </Link>
+        をご覧ください。
+      </p>
 
       <Button type="submit" variant="primary" size="md" disabled={isSubmitting}>
         {isSubmitting ? "送信中..." : "送信する"}

@@ -6,7 +6,11 @@ import {
 } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
 import { getSiteAssetPublicUrl } from "@/lib/settings/storage";
-import { SITE_URL } from "@/lib/site-config";
+import { SITE_URL, SITE_NAME } from "@/lib/site-config";
+import {
+  buildSiteStructuredData,
+  serializeStructuredData,
+} from "@/lib/seo/structured-data";
 import { getSiteSettings } from "@/lib/settings/queries";
 import { LineConsultationMenu } from "@/components/layout/line-consultation-menu";
 import { Button } from "@/components/ui/button";
@@ -29,9 +33,22 @@ export const dynamic = "force-dynamic";
 // トップページはルートlayoutのtitle.default（"エムガレージ｜クラシックJaguar専門店"）を
 // そのまま使いたいため、titleは上書きせずcanonicalのみ明示する。
 // トップは "/" と "" の両方で到達しうるため、正規URLを示しておく。
-export const metadata: Metadata = {
-  alternates: { canonical: SITE_URL },
-};
+//
+// OGP画像は管理画面で設定したヒーロー写真を使う（2026-08-17追加）。
+// この店の最重要導線はLINEでの共有（FR-LINE-001）だが、画像が無いと
+// トークに貼っても文字だけのリンクになり、車の店であることすら伝わらない。
+// 写真が未設定のあいだは指定しない（存在しない画像URLを出すより無い方がよい）。
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  const heroUrl = settings.hero_image_path
+    ? getSiteAssetPublicUrl(settings.hero_image_path)
+    : null;
+
+  return {
+    alternates: { canonical: SITE_URL },
+    ...(heroUrl ? { openGraph: { images: [heroUrl] } } : {}),
+  };
+}
 
 const TOP_PAGE_VEHICLE_LIMIT = 9;
 
@@ -63,8 +80,26 @@ export default async function Page() {
     ? getSiteAssetPublicUrl(settings.hero_image_path)
     : null;
 
+  // FR-SEO-002: サイト自体の構造化データ。
+  // ブランド名で検索したときの着地点はトップページなので、
+  // 「どういう事業者か」と「サイト内検索がある」ことをここで示す。
+  const structuredDataJson = serializeStructuredData(
+    buildSiteStructuredData({
+      siteUrl: SITE_URL,
+      siteName: SITE_NAME,
+      description:
+        "30年以上の実績を持つクラシックJaguar専門店。在庫車両・整備・修理・買取のご相談を承ります。",
+      address: settings.address,
+      phone: settings.phone,
+    }),
+  );
+
   return (
     <main className="pb-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: structuredDataJson }}
+      />
       {/* ヒーロー。管理画面で店舗写真が設定されていれば全幅の写真、未設定なら従来の文字ベース。
           クラシックJaguar専門店にとって車と店の佇まいが最も強い訴求材料であるため、
           写真がある場合は画面幅いっぱいに見せる。 */}

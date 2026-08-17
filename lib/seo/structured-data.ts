@@ -71,6 +71,55 @@ export function buildDefinedTermStructuredData(params: {
   };
 }
 
+// FR-SEO-002: サイト自体の構造化データ（トップページ）。
+//
+// 2つの意味がある。
+// 1. WebSite + SearchAction …「エムガレージ」で検索したときに、
+//    検索結果の中に直接サイト内検索の窓が出る可能性がある（sitelinks searchbox）。
+//    在庫検索を持つサイトなので、そこへ直接入れる価値は大きい
+// 2. AutoDealer … 中古車販売店としての実体を示す。
+//    店舗情報ページにも同じ型を出しているが、トップページはブランド名で検索されたときの
+//    着地点になるため、こちらにも置いて同一の事業者だと示す
+export function buildSiteStructuredData(params: {
+  siteUrl: string;
+  siteName: string;
+  description: string;
+  address: string | null;
+  phone: string | null;
+}) {
+  const { siteUrl, siteName, description, address, phone } = params;
+
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: siteName,
+      url: siteUrl,
+      description,
+      inLanguage: "ja",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: `${siteUrl}/vehicles?model={search_term_string}`,
+        },
+        "query-input": "required name=search_term_string",
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AutoDealer",
+      name: siteName,
+      url: siteUrl,
+      description,
+      // 未入力の項目は出さない。空文字や仮の値を構造化データに出すと、
+      // 検索エンジンに誤った事業者情報を渡すことになる。
+      ...(address ? { address: { "@type": "PostalAddress", streetAddress: address } } : {}),
+      ...(phone ? { telephone: phone } : {}),
+    },
+  ];
+}
+
 // FR-SEO-002: 図鑑項目の構造化データ。
 //
 // 図鑑は「XK120とは何か」「AJ6エンジンとは」に答えるページなので、

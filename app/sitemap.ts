@@ -36,6 +36,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     { url: `${SITE_URL}/about`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${SITE_URL}/contact`, changeFrequency: "yearly", priority: 0.4 },
+    // プライバシーポリシーは検索順位を狙うページではないが、
+    // 「この店は個人情報の扱いを明示しているか」を確認しに来る人が実際にいる。
+    // インデックスされない状態にする理由が無いので載せる。
+    { url: `${SITE_URL}/privacy`, changeFrequency: "yearly", priority: 0.2 },
   ];
 
   // サイトマップはビルド時にプリレンダリングされる唯一のDB依存ページであり、ここで例外を投げると
