@@ -53,25 +53,50 @@ type EditTarget = {
   fallback?: string;
 };
 
+// リンクの上で編集マーカーを押したときに出す選択肢。
+// 「押した場所・リンク先・編集対象」を持ち、どちらを選ぶか決まるまで保持する。
+type LinkChoice = {
+  x: number;
+  y: number;
+  href: string;
+  payload: EditTarget;
+};
+
 export function EditModeOverlay() {
   const [exiting, setExiting] = useState(false);
+  const [choice, setChoice] = useState<LinkChoice | null>(null);
   const inFrame = useSyncExternalStore(
     subscribeNever,
     isInFrameOnClient,
     isInFrameOnServer,
   );
 
+  // 親フレーム（管理画面）へ「ここを編集したい」と伝える。
+  const openEditor = (payload: EditTarget) => {
+    setChoice(null);
+    if (window.parent !== window) {
+      window.parent.postMessage(
+        { source: "mg-live-edit", kind: "select", payload },
+        window.location.origin,
+      );
+    }
+  };
+
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
-      const target = (event.target as HTMLElement | null)?.closest(
-        "[data-mg-edit]",
-      ) as HTMLElement | null;
+      const clicked = event.target as HTMLElement | null;
+      const target = clicked?.closest("[data-mg-edit]") as HTMLElement | null;
       if (!target) return;
 
-      // 編集できる箇所の中にリンクやボタンがあることがある（車両カードなど）。
-      // 編集モード中はそちらを優先せず、必ず編集として扱う。
+      // 編集できる箇所の中にリンクやボタンがあることがある（ナビゲーションの項目、
+      // カードの見出し、CTAボタンなど）。編集モード中に必ず編集を開いてしまうと
+      // サイト内を移動できなくなり、直したいページまでたどり着けない。
+      // 逆に必ず移動してしまうと、その文言を直す手段が無くなる。
+      // どちらかに決め打ちせず、押した本人に選ばせる。
       event.preventDefault();
       event.stopPropagation();
+
+      const link = clicked?.closest("a") as HTMLAnchorElement | null;
 
       document
         .querySelectorAll("[data-mg-active]")
@@ -86,12 +111,17 @@ export function EditModeOverlay() {
         fallback: target.dataset.mgFallback,
       };
 
-      if (window.parent !== window) {
-        window.parent.postMessage(
-          { source: "mg-live-edit", kind: "select", payload },
-          window.location.origin,
-        );
+      if (link?.href) {
+        setChoice({
+          x: event.clientX,
+          y: event.clientY,
+          href: link.href,
+          payload,
+        });
+        return;
       }
+
+      openEditor(payload);
     };
 
     // capture段階で受ける。next/link のクリック処理より先に止める必要があるため。
@@ -119,6 +149,48 @@ export function EditModeOverlay() {
   return (
     <>
       <style>{OVERLAY_STYLE}</style>
+
+      {/* リンクの文言を押したときの二択。
+          押した場所のすぐ横に出す（画面の隅に出すと、何に対する選択肢か分からなくなる）。 */}
+      {choice && (
+        <>
+          {/* 画面のどこを押しても閉じられるようにする受け皿 */}
+          <div
+            className="fixed inset-0 z-[60]"
+            onClick={() => setChoice(null)}
+            aria-hidden="true"
+          />
+          <div
+            role="dialog"
+            aria-label="リンクの操作を選ぶ"
+            className="fixed z-[61] flex flex-col overflow-hidden rounded-xl border border-blue-300 bg-white shadow-xl"
+            style={{
+              // 画面外にはみ出さないよう、右端・下端で折り返す
+              left: Math.min(choice.x, window.innerWidth - 200),
+              top: Math.min(choice.y, window.innerHeight - 120),
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                const href = choice.href;
+                setChoice(null);
+                window.location.href = href;
+              }}
+              className="text-charcoal-900 min-h-11 px-4 text-left text-sm hover:bg-neutral-100"
+            >
+              リンク先を開く
+            </button>
+            <button
+              type="button"
+              onClick={() => openEditor(choice.payload)}
+              className="text-charcoal-900 min-h-11 border-t border-neutral-200 px-4 text-left text-sm font-medium hover:bg-blue-50"
+            >
+              この文言を編集する
+            </button>
+          </div>
+        </>
+      )}
       {/* iframeの中では管理画面側に「編集モード」の表示があるので出さない。
           公開サイトを直接開いてしまったときにだけ、抜ける手段を見せる。 */}
       {!inFrame && (

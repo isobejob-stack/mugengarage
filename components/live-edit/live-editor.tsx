@@ -54,6 +54,8 @@ export function LiveEditor() {
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [files, setFiles] = useState<FileList | null>(null);
+  const [insertingImage, setInsertingImage] = useState(false);
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   // 編集モードのCookieを立ててからiframeを出す。
   // 先に出すと、編集の目印が付いていない状態の公開画面が一度描画されてしまう。
@@ -179,6 +181,56 @@ export function LiveEditor() {
     }
 
     setSaving(false);
+  };
+
+  // 本文の途中に画像を差し込む。
+  //
+  // 「サイト全体で写真を増やしたい」という要望に対して、写真の置き場所を
+  // 車両の写真欄だけに限らないための機能。アップロードした画像のURLを
+  // カーソル位置にMarkdownの画像記法で挿入する。
+  //
+  // 挿入位置をカーソルにしているのは、文章のどこに写真を置くかが
+  // 書き手にとって意味を持つため（末尾固定だと結局あとから動かす手間が増える）。
+  const insertImage = async (file: File) => {
+    if (!target) return;
+    setInsertingImage(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("/api/admin/live-edit/image", {
+        method: "POST",
+        body: formData,
+      });
+      const json = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setError(json?.error?.message ?? "画像のアップロードに失敗しました");
+        setInsertingImage(false);
+        return;
+      }
+
+      const url = json?.data?.url as string;
+      const textarea = bodyRef.current;
+      // 代替テキストはファイル名から作る。空の ![]() のままだと
+      // 読み上げ環境で「画像」としか伝わらず、SEO上も情報が落ちる。
+      const alt = file.name.replace(/\.[a-zA-Z0-9]+$/, "");
+      const snippet = `\n\n![${alt}](${url})\n\n`;
+
+      if (textarea) {
+        const start = textarea.selectionStart ?? value.length;
+        const end = textarea.selectionEnd ?? value.length;
+        setValue(value.slice(0, start) + snippet + value.slice(end));
+      } else {
+        setValue(value + snippet);
+      }
+    } catch {
+      setError("通信に失敗しました。もう一度お試しください。");
+    }
+
+    setInsertingImage(false);
   };
 
   const save = async () => {
@@ -343,15 +395,47 @@ export function LiveEditor() {
               />
             ) : (
               <textarea
+                ref={bodyRef}
                 className="input min-h-64 font-mono text-sm"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
               />
             )}
 
+            {/* 文章の途中に写真を入れられるようにする。
+                本文（Markdown）と複数行テキストのときだけ出す。 */}
+            {(fieldConfig?.input === "markdown" ||
+              fieldConfig?.input === "textarea") && (
+              <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+                <p className="text-charcoal-900 text-base font-medium">
+                  文章の途中に写真を入れる
+                </p>
+                <p className="text-foreground-muted mt-1 text-sm">
+                  カーソルのある位置に入ります。入れたあと「保存する」を押してください。
+                </p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  disabled={insertingImage}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) void insertImage(file);
+                    // 同じファイルを続けて選べるように値を戻す
+                    e.target.value = "";
+                  }}
+                  className="mt-2 text-base"
+                />
+                {insertingImage && (
+                  <p className="text-foreground-muted mt-2 text-sm">
+                    アップロード中…
+                  </p>
+                )}
+              </div>
+            )}
+
             {fieldConfig?.input === "markdown" && (
               <p className="text-foreground-muted text-sm">
-                見出しは行頭に「## 」、箇条書きは「- 」で書けます。
+                見出しは行頭に「## 」、箇条書きは「- 」、写真は「![説明](URL)」で入ります。
               </p>
             )}
 
