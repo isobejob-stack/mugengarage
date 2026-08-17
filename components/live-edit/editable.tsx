@@ -33,9 +33,16 @@ export async function Editable({
   className?: string;
   children: ReactNode;
 }) {
-  if (!(await isLiveEditEnabled())) return <>{children}</>;
-
   const Tag = as;
+
+  // 編集モードでないときも、レイアウトに効くclassNameは残す。
+  //
+  // 以前はここで <>{children}</> を返しており、呼び出し側が渡した余白（mt-8 等）が
+  // 通常表示のときだけ消えていた。編集機能の有無で公開画面の見た目が変わるのは、
+  // 「お客様に見えている画面をそのまま編集する」という前提そのものを壊す。
+  if (!(await isLiveEditEnabled())) {
+    return className ? <Tag className={className}>{children}</Tag> : <>{children}</>;
+  }
 
   return (
     <Tag

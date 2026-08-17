@@ -146,6 +146,18 @@ export async function PATCH(request: NextRequest) {
     value = normalized === "" ? null : normalized;
   }
 
+  // NOT NULL の列を空にしようとしたら、DBへ行く前に断る。
+  // そのまま流すとPostgresが弾いて「原因の分からない500」になり、
+  // 記事タイトルや本文が消えた場合は画面から編集対象そのものが消えて、
+  // クリックして戻すこともできなくなる。
+  if (value === null && config.notNull) {
+    return apiError({
+      code: "VALIDATION_ERROR",
+      message: `${config.label}は空にできません`,
+      field: body.field,
+    });
+  }
+
   const supabase = createAdminClient();
 
   if (target.keyed) {

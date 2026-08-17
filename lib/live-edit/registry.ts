@@ -25,6 +25,13 @@ export type EditableFieldConfig = {
   input: EditableInputKind;
   /** 入力欄の下に出す補足。単位や注意点がある項目にだけ付ける */
   help?: string;
+  /**
+   * DBの列が NOT NULL のもの。空で保存させない。
+   * 空を許すと、書き込み時にPostgresが弾いて「原因の分からない500」になるうえ、
+   * 仮に通ったとしても記事のタイトルや本文が消えて画面から編集対象が消える
+   * （＝もう一度クリックして戻すことができなくなる）。
+   */
+  notNull?: boolean;
 };
 
 export type EditableTargetConfig = {
@@ -108,33 +115,33 @@ export const EDITABLE_TARGETS: Record<string, EditableTargetConfig> = {
     table: "articles",
     label: "記事",
     fields: {
-      title: { label: "記事タイトル", input: "text" },
+      title: { label: "記事タイトル", input: "text", notNull: true },
       category: { label: "カテゴリ", input: "text" },
-      body: { label: "本文", input: "markdown" },
+      body: { label: "本文", input: "markdown", notNull: true },
     },
   },
   encyclopedia_entry: {
     table: "encyclopedia_entries",
     label: "図鑑",
     fields: {
-      title: { label: "見出し", input: "text" },
-      body: { label: "本文", input: "markdown" },
+      title: { label: "見出し", input: "text", notNull: true },
+      body: { label: "本文", input: "markdown", notNull: true },
     },
   },
   library_entry: {
     table: "library_entries",
     label: "ライブラリ",
     fields: {
-      title: { label: "用語", input: "text" },
+      title: { label: "用語", input: "text", notNull: true },
       reading_kana: { label: "読みがな", input: "text" },
-      body: { label: "解説", input: "markdown" },
+      body: { label: "解説", input: "markdown", notNull: true },
     },
   },
   timeline_event: {
     table: "timeline_events",
     label: "年表",
     fields: {
-      title: { label: "出来事", input: "text" },
+      title: { label: "出来事", input: "text", notNull: true },
       body: { label: "説明", input: "markdown" },
     },
   },
@@ -164,10 +171,15 @@ export const EDITABLE_TARGETS: Record<string, EditableTargetConfig> = {
   },
 };
 
+// 型と項目名から設定を引く。
+//
+// Object.hasOwn で自前のキーだけを見る。素の [] で引くと "constructor" や "toString" が
+// プロトタイプ由来の値として取れてしまい、許可リストに載っていない文字列が
+// 「存在する」と判定されうる。ここは外部から来た文字列で引く場所なので、
+// 継承したプロパティを一切見ないことを明示しておく。
 export function resolveEditableField(type: string, field: string) {
+  if (!Object.hasOwn(EDITABLE_TARGETS, type)) return null;
   const target = EDITABLE_TARGETS[type];
-  if (!target) return null;
-  const config = target.fields[field];
-  if (!config) return null;
-  return { target, config };
+  if (!Object.hasOwn(target.fields, field)) return null;
+  return { target, config: target.fields[field] };
 }

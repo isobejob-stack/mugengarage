@@ -57,6 +57,28 @@ export async function SiteFooter() {
           >
             オーナーズアーカイブ
           </Link>
+          {/* 図鑑・ライブラリはグローバルナビから外し、本文中の用語リンクから引く位置づけに変えた
+              （2026-08-17）。ただし一覧そのものへの入口が1つも無くなると、
+              図鑑37件・用語31件・年表59件に「見に行く」手段が消える。
+              探しに来た人だけが使う場所として、フッターに控えめに置く。 */}
+          <Link
+            href="/encyclopedia"
+            className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
+          >
+            Jaguar図鑑
+          </Link>
+          <Link
+            href="/timeline"
+            className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
+          >
+            Jaguar年表
+          </Link>
+          <Link
+            href="/library"
+            className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
+          >
+            用語ライブラリ
+          </Link>
           <Link
             href="/contact"
             className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"

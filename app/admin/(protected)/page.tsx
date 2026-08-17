@@ -19,7 +19,9 @@ const shortcuts = [
   { label: "図鑑項目を追加する", href: "/admin/encyclopedia/new" },
   { label: "年表イベントを追加する", href: "/admin/timeline/new" },
   { label: "ライブラリ項目を追加する", href: "/admin/library/new" },
-  { label: "整備実績を追加する", href: "/admin/maintenance-records/new" },
+  // 整備実績はブログへ統合した（ADR-002）。整備の記録は
+  // カテゴリ「整備記録」の記事として書くため、行き先は記事の新規作成にする。
+  { label: "整備の記録を書く", href: "/admin/articles/new" },
 ] as const;
 
 // ダッシュボードに出す「対応期日が近い顧客」の件数。

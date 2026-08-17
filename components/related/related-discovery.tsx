@@ -17,7 +17,13 @@ export function SimilarVehiclesSection({
   /** vehicles と同じ並びの先頭写真URL（無ければ undefined） */
   photoUrls: Array<string | undefined>;
 }) {
-  const shown = vehicles.filter((v) => v.slug);
+  // 写真は車両と組にしてから絞り込む。
+  // 先に vehicles だけを絞り込んで photoUrls[index] で引くと、slugが無い車両が
+  // 1台でも混ざった時点で添字がずれ、**別の車の写真が出る**。
+  // 高額商材でこれが起きると、見ている車と違う個体の写真を信じさせることになる。
+  const shown = vehicles
+    .map((vehicle, index) => ({ vehicle, photoUrl: photoUrls[index] }))
+    .filter((item) => item.vehicle.slug);
   if (shown.length === 0) return null;
 
   return (
@@ -29,10 +35,10 @@ export function SimilarVehiclesSection({
         在庫の中から、近い条件の車両をご紹介します。
       </p>
       <ul className="mt-4 grid grid-cols-2 gap-4 md:gap-6">
-        {shown.map((v, index) => (
+        {shown.map(({ vehicle: v, photoUrl }) => (
           <li key={v.id}>
             <Card href={`/vehicles/${v.slug}`}>
-              <CardImage src={photoUrls[index]} alt={v.name} />
+              <CardImage src={photoUrl} alt={v.name} />
               <CardBody className="p-4">
                 <p className="text-primary-700 text-sm font-medium">
                   {v.reason}
@@ -111,7 +117,13 @@ export function RelatedInventorySection({
   /** 見出しに出す話題名（車種名など） */
   topic: string;
 }) {
-  const shown = vehicles.filter((v) => v.slug);
+  // 写真は車両と組にしてから絞り込む。
+  // 先に vehicles だけを絞り込んで photoUrls[index] で引くと、slugが無い車両が
+  // 1台でも混ざった時点で添字がずれ、**別の車の写真が出る**。
+  // 高額商材でこれが起きると、見ている車と違う個体の写真を信じさせることになる。
+  const shown = vehicles
+    .map((vehicle, index) => ({ vehicle, photoUrl: photoUrls[index] }))
+    .filter((item) => item.vehicle.slug);
   if (shown.length === 0) return null;
 
   return (
@@ -123,10 +135,10 @@ export function RelatedInventorySection({
         いま実際にご覧いただける車両です。
       </p>
       <ul className="mt-4 grid grid-cols-2 gap-4 md:gap-6">
-        {shown.map((v, index) => (
+        {shown.map(({ vehicle: v, photoUrl }) => (
           <li key={v.id}>
             <Card href={`/vehicles/${v.slug}`}>
-              <CardImage src={photoUrls[index]} alt={v.name} />
+              <CardImage src={photoUrl} alt={v.name} />
               <CardBody className="p-4">
                 <CardTitle className="text-base">{v.name}</CardTitle>
                 <VehicleCardPrice price={v.price} totalPrice={v.total_price} />
