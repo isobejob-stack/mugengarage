@@ -28,8 +28,9 @@ Public Website（公開サイト）とAdmin UI（管理画面）の全画面を�
 | SCR-PUB-010 | Jaguar年表                 | `/timeline`                  | FR-TL-002, FR-TL-003                |
 | SCR-PUB-011 | ライブラリ一覧             | `/library`                   | FR-LIB-003                          |
 | SCR-PUB-012 | ライブラリ詳細             | `/library/:slug`             | FR-LIB-002                          |
-| SCR-PUB-013 | 整備実績一覧               | `/maintenance-records`       | FR-MNT-003                          |
-| SCR-PUB-014 | 整備実績詳細               | `/maintenance-records/:slug` | FR-MNT-001〜003                     |
+| ~~SCR-PUB-013~~ | ~~整備実績一覧~~       | ~~`/maintenance-records`~~   | **廃止（ADR-002）**。`/blog` へ308リダイレクト |
+| ~~SCR-PUB-014~~ | ~~整備実績詳細~~       | ~~`/maintenance-records/:slug`~~ | **廃止（ADR-002）**。`/blog` へ308リダイレクト |
+| SCR-PUB-020 | ジャガーを知る             | `/jaguar`                    | FR-ENC-002, FR-TL-002（読み物として再構成） |
 | SCR-PUB-015 | オーナーズアーカイブ一覧   | `/owners-archive`            | FR-OWN-003                          |
 | SCR-PUB-016 | オーナーズアーカイブ詳細   | `/owners-archive/:vehicleId` | FR-OWN-001〜003                     |
 | SCR-PUB-017 | 問い合わせフォーム         | `/contact`                   | FR-INQ-001                          |
@@ -56,8 +57,8 @@ Public Website（公開サイト）とAdmin UI（管理画面）の全画面を�
 | SCR-ADM-014 | 年表編集                      | `/admin/timeline/new`, `/admin/timeline/:id/edit`                       | FR-TL-001, FR-TL-003                           |
 | SCR-ADM-015 | ライブラリ管理一覧            | `/admin/library`                                                        | FR-LIB-001                                     |
 | SCR-ADM-016 | ライブラリ編集                | `/admin/library/new`, `/admin/library/:id/edit`                         | FR-LIB-001, FR-LIB-002                         |
-| SCR-ADM-017 | 整備実績管理一覧              | `/admin/maintenance-records`                                            | FR-MNT-001                                     |
-| SCR-ADM-018 | 整備実績編集                  | `/admin/maintenance-records/new`, `/admin/maintenance-records/:id/edit` | FR-MNT-001〜002                                |
+| ~~SCR-ADM-017~~ | ~~整備実績管理一覧~~      | ~~`/admin/maintenance-records`~~                                        | **廃止（ADR-002）**。SCR-ADM-009/010が引き継ぐ |
+| ~~SCR-ADM-018~~ | ~~整備実績編集~~          | ~~`/admin/maintenance-records/new`~~                                    | **廃止（ADR-002）**。SCR-ADM-009/010が引き継ぐ |
 | SCR-ADM-019 | オーナーズアーカイブ管理      | `/admin/owners-archive/:vehicleId/edit`                                 | FR-OWN-002                                     |
 | SCR-ADM-020 | SEO設定（共通コンポーネント） | 各編集画面内に埋め込み                                                  | FR-SEO-001〜004                                |
 | SCR-ADM-021 | メディア管理                  | `/admin/media`                                                          | FR-ADM-003                                     |
@@ -65,6 +66,9 @@ Public Website（公開サイト）とAdmin UI（管理画面）の全画面を�
 | SCR-ADM-023 | 監査ログ                      | `/admin/audit-logs`                                                     | FR-ADM-005                                     |
 | SCR-ADM-024 | タグ管理                      | `/admin/tags`                                                           | BR-DATA-003                                    |
 | SCR-ADM-025 | リダイレクト一覧              | `/admin/redirects`                                                      | FR-SEO-003                                     |
+| SCR-ADM-026 | 公開画面を見ながら直す        | `/admin/live`                                                           | FR-ADM-010（2026-08-17追加）                   |
+| SCR-ADM-027 | リマインダー横断一覧          | `/admin/reminders`                                                      | FR-CRM-004                                     |
+| SCR-ADM-028 | 問い合わせ手動登録            | `/admin/inquiries/new`                                                  | FR-INQ-002                                     |
 
 ## 6. 画面遷移（主要フロー）
 
