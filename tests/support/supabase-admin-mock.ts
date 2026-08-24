@@ -23,6 +23,8 @@ export interface MockCall {
 export interface QueryResult<T = unknown> {
   data: T | null;
   error: { message: string; code?: string } | null;
+  /** `.select(..., { count: "exact" })` を使うクエリの総件数 */
+  count?: number | null;
 }
 
 type ResultResolver = (calls: MockCall[]) => QueryResult;
@@ -50,6 +52,9 @@ const CHAIN_METHODS = [
   "in",
   "order",
   "limit",
+  "range",
+  "gte",
+  "lte",
   "returns",
 ] as const;
 

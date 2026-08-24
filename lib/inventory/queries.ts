@@ -187,6 +187,50 @@ export async function restoreVehicle(
   return { data: data as Vehicle | null, error, restoredStatus };
 }
 
+// 公開サイトの一覧カードが必要とする車両の形。
+// トップページ・在庫一覧・お気に入りで同じカードを使うため、選ぶ列も揃えている。
+type PublicVehicleListItem = {
+  id: string;
+  price: number;
+  total_price: number | null;
+  model_year: number | null;
+  mileage_km: number | null;
+  shaken_status: string | null;
+  shaken_expiry: string | null;
+  accident_history: boolean | null;
+  status: string;
+  is_recommended: boolean;
+  is_new_arrival: boolean;
+  manufacturers: { name: string } | null;
+  models: { name: string } | null;
+  grades: { name: string } | null;
+};
+
+// 車両詳細のURLに使うslugは seo_metas 側にあるため、一覧の行に後から結合する。
+// 対象の車両ぶんだけを1クエリでまとめて引く（車両ごとに引くとN+1になる）。
+async function withSlugs<T extends { id: string }>(
+  supabase: ReturnType<typeof createAdminClient>,
+  vehicles: T[],
+): Promise<Array<T & { slug: string | null }>> {
+  const { data: seoMetas } = await supabase
+    .from("seo_metas")
+    .select("target_id, slug")
+    .eq("target_type", "vehicle")
+    .in(
+      "target_id",
+      vehicles.map((v) => v.id),
+    );
+
+  const slugByVehicleId = new Map(
+    (seoMetas ?? []).map((s) => [s.target_id, s.slug as string]),
+  );
+
+  return vehicles.map((v) => ({
+    ...v,
+    slug: slugByVehicleId.get(v.id) ?? null,
+  }));
+}
+
 // FR-SRCH-002: 公開中車両の一覧（status=published かつ論理削除されていないもの）
 export async function listPublicVehicles() {
   const supabase = createAdminClient();
@@ -199,42 +243,60 @@ export async function listPublicVehicles() {
     .is("deleted_at", null)
     .order("display_order", { ascending: true });
 
-  const vehicles = (data ?? []) as unknown as Array<{
-    id: string;
-    price: number;
-    total_price: number | null;
-    model_year: number | null;
-    mileage_km: number | null;
-    shaken_status: string | null;
-    shaken_expiry: string | null;
-    accident_history: boolean | null;
-    status: string;
-    is_recommended: boolean;
-    is_new_arrival: boolean;
-    manufacturers: { name: string } | null;
-    models: { name: string } | null;
-    grades: { name: string } | null;
-  }>;
+  const vehicles = (data ?? []) as unknown as PublicVehicleListItem[];
 
   if (vehicles.length === 0) return [];
 
-  const { data: seoMetas } = await supabase
-    .from("seo_metas")
-    .select("target_id, slug")
-    .eq("target_type", "vehicle")
-    .in(
-      "target_id",
-      vehicles.map((v) => v.id),
-    );
+  return withSlugs(supabase, vehicles);
+}
 
-  const slugByVehicleId = new Map(
-    (seoMetas ?? []).map((s) => [s.target_id, s.slug]),
-  );
+// トップページ用: 先頭数台と総台数だけを取る。
+//
+// 以前はここでも listPublicVehicles() を使い、公開中の車両を全件読んでから
+// 先頭9台にスライスしていた。表示に使わない車両の諸元・車名・slug（seo_metas）まで
+// 毎リクエスト運んでいたことになる。台数表示（「すべて見る（N台）」・検索ブロック）に
+// 必要なのは件数だけなので、件数はDBに数えさせ、行は必要なぶんだけ受け取る。
+export async function listPublicVehiclePreview(limit: number) {
+  const supabase = createAdminClient();
+  const { data, count } = await supabase
+    .from("vehicles")
+    .select(
+      "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, status, is_recommended, is_new_arrival, manufacturers(name), models(name), grades(name)",
+      { count: "exact" },
+    )
+    .eq("status", "published")
+    .is("deleted_at", null)
+    .order("display_order", { ascending: true })
+    .range(0, Math.max(limit - 1, 0));
 
-  return vehicles.map((v) => ({
-    ...v,
-    slug: slugByVehicleId.get(v.id) ?? null,
-  }));
+  const vehicles = (data ?? []) as unknown as PublicVehicleListItem[];
+  const totalCount = count ?? vehicles.length;
+
+  if (vehicles.length === 0) return { vehicles: [], totalCount };
+
+  return {
+    vehicles: await withSlugs(supabase, vehicles),
+    totalCount,
+  };
+}
+
+// /jaguar 用: 在庫がどの車種・どの年式に集まっているかだけを取る。
+//
+// あのページが在庫から使うのは「車種名」と「年式」の2つだけで、
+// 価格や車検の状態、slugは一切使っていない。全件を全列で読む理由がない
+// （slugを引くための seo_metas への2本目のクエリも不要になる）。
+export async function getPublicVehicleStockSummary() {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("vehicles")
+    .select("model_year, models(name)")
+    .eq("status", "published")
+    .is("deleted_at", null);
+
+  return (data ?? []) as unknown as Array<{
+    model_year: number | null;
+    models: { name: string } | null;
+  }>;
 }
 
 export async function getPublicVehicleBySlug(slug: string) {

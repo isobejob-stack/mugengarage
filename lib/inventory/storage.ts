@@ -1,5 +1,5 @@
 import "server-only";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { getStoragePublicUrl } from "@/lib/supabase/public-url";
 
 // FR-INV-009 / system_architecture.md 4.4: 車両写真の保管先バケット。
 // public: true のバケットとして作成している（supabase/migrations/20260806090000_...）ため、
@@ -24,9 +24,5 @@ export function buildVehiclePhotoStoragePath(
 
 // storage_path から表示用の公開URLを組み立てる（署名不要、非公開バケットへの変更は行わない前提）
 export function getVehiclePhotoPublicUrl(storagePath: string) {
-  const supabase = createAdminClient();
-  const { data } = supabase.storage
-    .from(VEHICLE_PHOTOS_BUCKET)
-    .getPublicUrl(storagePath);
-  return data.publicUrl;
+  return getStoragePublicUrl(VEHICLE_PHOTOS_BUCKET, storagePath);
 }

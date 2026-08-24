@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import {
-  listPublicVehicles,
+  listPublicVehiclePreview,
   getLeadVehiclePhotoPaths,
 } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
@@ -50,31 +50,46 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// トップに出す在庫の上限。3カラムのグリッドがちょうど3行で埋まる9台とする
+// （10台前後で打ち切る想定だが、9なら最終行に1台だけ余るような欠けが出ない）。
 const TOP_PAGE_VEHICLE_LIMIT = 9;
 
 // SCR-PUB-001: トップページ（FR-INV-005, FR-LINE-001, FR-SEO-001）
 export default async function Page() {
   const sessionId = await getSessionId();
-  const [vehicles, settings, facets, favoriteIds] = await Promise.all([
-    listPublicVehicles(),
+
+  // 掲載中の車両は「先頭9台＋総台数」だけを取る（全件読んでからのスライスはしない）。
+  // 写真はその9台のIDが決まってからでないと引けないため、車両の取得だけ先に始め、
+  // 店舗情報・検索の選択肢・お気に入りは写真と並行して取りに行かせる。
+  // 直列に await を並べると、それぞれの往復時間がそのまま足し算になる。
+  const vehiclesPromise = listPublicVehiclePreview(TOP_PAGE_VEHICLE_LIMIT);
+
+  const featuredPhotoUrlsPromise = vehiclesPromise.then(async ({ vehicles }) => {
+    const leadPhotoPaths = await getLeadVehiclePhotoPaths(
+      vehicles.map((v) => v.id),
+    );
+    return vehicles.map((v) => {
+      const path = leadPhotoPaths.get(v.id);
+      return path ? getVehiclePhotoPublicUrl(path) : null;
+    });
+  });
+
+  const [
+    { vehicles: featuredVehicles, totalCount: vehicleCount },
+    featuredPhotoUrls,
+    settings,
+    facets,
+    favoriteIds,
+  ] = await Promise.all([
+    vehiclesPromise,
+    featuredPhotoUrlsPromise,
     getSiteSettings(),
     getVehicleSearchFacetOptions(),
     sessionId ? listFavoriteVehicleIds(sessionId) : Promise.resolve([]),
   ]);
-  // トップに出す在庫の上限。3カラムのグリッドがちょうど3行で埋まる9台とする
-  // （10台前後で打ち切る想定だが、9なら最終行に1台だけ余るような欠けが出ない）。
-  // これを超える場合は「すべて見る」ボタンで在庫一覧へ送る。
-  const featuredVehicles = vehicles.slice(0, TOP_PAGE_VEHICLE_LIMIT);
-  const hasMoreVehicles = vehicles.length > TOP_PAGE_VEHICLE_LIMIT;
 
-  // 在庫車両カードのサムネイル用に、トップ3件分のみ先頭写真を1クエリでまとめて取得する
-  const leadPhotoPaths = await getLeadVehiclePhotoPaths(
-    featuredVehicles.map((v) => v.id),
-  );
-  const featuredPhotoUrls = featuredVehicles.map((v) => {
-    const path = leadPhotoPaths.get(v.id);
-    return path ? getVehiclePhotoPublicUrl(path) : null;
-  });
+  // トップに出す在庫の上限を超えた場合は「すべて見る」ボタンで在庫一覧へ送る。
+  const hasMoreVehicles = vehicleCount > TOP_PAGE_VEHICLE_LIMIT;
 
   const heroImageUrl = settings.hero_image_path
     ? getSiteAssetPublicUrl(settings.hero_image_path)
@@ -184,11 +199,11 @@ export default async function Page() {
         {/* ヒーローの直後に検索ブロックを置く。
             この店に来た人の第一の用件は「車を探す」であり、
             その入口をスクロールさせずに渡す。 */}
-        {vehicles.length > 0 && (
+        {vehicleCount > 0 && (
           <div className="mt-8">
             <VehicleQuickSearch
               models={facets.models}
-              totalCount={vehicles.length}
+              totalCount={vehicleCount}
             />
           </div>
         )}
@@ -262,7 +277,7 @@ export default async function Page() {
           {hasMoreVehicles && (
             <div className="mt-6 flex justify-center">
               <Button href="/vehicles" variant="outline" size="lg">
-                在庫車両をすべて見る（{vehicles.length}台）
+                在庫車両をすべて見る（{vehicleCount}台）
               </Button>
             </div>
           )}
