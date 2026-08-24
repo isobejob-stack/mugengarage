@@ -1,5 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { invalidateRedirectCache } from "@/lib/seo/redirect-lookup";
 
 // BR-URL-002 / event_flow.md 3.7: 旧URL→新URLの301リダイレクトを自動登録する。
 // Slug変更のたびに必ずこの関数を通すことで、Redirect作成を運用者の手動操作に依存させない
@@ -38,4 +39,9 @@ export async function createRedirect(oldPath: string, newPath: string) {
       error,
     });
   }
+
+  // 引き当て用のキャッシュを捨てて、次のアクセスで読み直させる。
+  // 効くのはこのプロセスの中だけだが（サーバーレスでは実行環境が分かれうる）、
+  // 効いた場合はTTLを待たずに新しいリダイレクトが有効になる。
+  invalidateRedirectCache();
 }
