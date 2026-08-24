@@ -1,5 +1,8 @@
 import "server-only";
+import { cache } from "react";
+import { unstable_cache, revalidateTag } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { ExternalLink, SiteSettingsValues } from "@/lib/settings/schema";
 
 export type SiteSettings = {
@@ -39,7 +42,7 @@ const EMPTY_SETTINGS: SiteSettings = {
 // サイト全体が落ちる。テーブル未作成（マイグレーション未適用）や一時的なDB障害でも
 // 表示を継続できるよう、失敗時は空の設定として扱う。
 // これは app/sitemap.ts で採った「補助的な情報のために全体を止めない」方針と同じ。
-export async function getSiteSettings(): Promise<SiteSettings> {
+async function fetchSiteSettings(): Promise<SiteSettings> {
   try {
     const supabase = createAdminClient();
     const { data, error } = await supabase
@@ -61,6 +64,36 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   } catch {
     return EMPTY_SETTINGS;
   }
+}
+
+// リクエストをまたいで持ち回るキャッシュ。
+// 店舗情報は住所・電話番号・営業時間・LINE URLで、変わるのは年に数回。
+// それを全ページ・全リクエストで読みに行くのは無駄が大きい。
+//
+// 管理画面から更新したときは revalidateSiteSettings() でこのタグを失効させるので、
+// 保存した内容はその場で公開サイトに出る。revalidate は失効漏れがあっても
+// いつかは追いつくようにするための保険で、通常はタグ側で先に切れる。
+const getCachedSiteSettings = unstable_cache(
+  fetchSiteSettings,
+  ["site-settings"],
+  { tags: [CACHE_TAGS.siteSettings], revalidate: 3600 },
+);
+
+// 1回の描画の中でも、ヘッダー・フッター・本文・generateMetadata から個別に呼ばれる。
+// React の cache() でリクエスト内の重複呼び出しを1回に畳む
+// （キャッシュヒット時でもデシリアライズのコストは掛かるため）。
+export const getSiteSettings = cache(async (): Promise<SiteSettings> =>
+  getCachedSiteSettings(),
+);
+
+// 店舗情報を書き換えた側（管理画面のAPI）から呼ぶ。
+//
+// expire: 0 は「古い値を一切出さずに次のリクエストで取り直す」指定。
+// 既定の "max" は stale-while-revalidate（古い値を出しつつ裏で更新）になるため、
+// 保存直後に公開サイトを開いた店主に一度は古い内容が見えてしまう。
+// 店舗情報の更新頻度は低く、取り直しの負荷より「直したのに変わらない」を避ける方が大事。
+export function revalidateSiteSettings() {
+  revalidateTag(CACHE_TAGS.siteSettings, { expire: 0 });
 }
 
 export async function updateSiteSettings(values: SiteSettingsValues) {

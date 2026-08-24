@@ -4,6 +4,8 @@ import { requireAdminUser } from "@/lib/api/require-admin";
 import { apiError, apiInternalError } from "@/lib/api/error-response";
 import { recordAuditLog } from "@/lib/audit/log";
 import { resolveEditableField } from "@/lib/live-edit/registry";
+import { revalidateSiteTexts } from "@/lib/live-edit/texts";
+import { revalidateSiteSettings } from "@/lib/settings/queries";
 
 // ライブ編集の保存口（1項目だけを書き換える）。
 //
@@ -197,6 +199,15 @@ export async function PATCH(request: NextRequest) {
         message: "編集対象が見つかりません",
       });
     }
+  }
+
+  // 画面文言と店舗情報はリクエストをまたいでキャッシュしている（lib/cache/tags.ts）。
+  // ライブ編集は「画面の文字をクリックして直す」操作なので、
+  // 保存したのに画面が変わらないと壊れているようにしか見えない。ここで必ず失効させる。
+  if (target.table === "site_texts") {
+    revalidateSiteTexts();
+  } else if (target.table === "site_settings") {
+    revalidateSiteSettings();
   }
 
   await recordAuditLog({

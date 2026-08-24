@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdminUser } from "@/lib/api/require-admin";
 import { apiError, apiInternalError } from "@/lib/api/error-response";
 import { recordAuditLog } from "@/lib/audit/log";
+import { revalidateSiteSettings } from "@/lib/settings/queries";
 import {
   SITE_ASSETS_BUCKET,
   MAX_SITE_ASSET_FILE_SIZE_BYTES,
@@ -89,6 +90,10 @@ export async function POST(request: NextRequest) {
       .remove([current.hero_image_path]);
   }
 
+  // ヒーロー写真はトップページのLCPそのものであり、OGP画像にも使われる。
+  // キャッシュを失効させないと差し替えが公開サイトに出ない。
+  revalidateSiteSettings();
+
   await recordAuditLog({
     adminUserId: user.id,
     targetType: "site_setting",
@@ -134,6 +139,8 @@ export async function DELETE() {
       .from(SITE_ASSETS_BUCKET)
       .remove([current.hero_image_path]);
   }
+
+  revalidateSiteSettings();
 
   await recordAuditLog({
     adminUserId: user.id,
