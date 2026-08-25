@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type {
   Manufacturer,
@@ -299,7 +300,13 @@ export async function getPublicVehicleStockSummary() {
   }>;
 }
 
-export async function getPublicVehicleBySlug(slug: string) {
+// 車両詳細ページの本体。
+//
+// React の cache() で1リクエスト内の重複呼び出しを1回に畳む。
+// このページは generateMetadata（タイトル・OGP用）と本文描画の両方が同じslugを引くため、
+// 素のままだと「slugから車両IDを引く」「その車両を読む」の2クエリが1ページで2度ずつ、
+// 計4回走っていた。しかも2つは直列なので、往復時間もそのまま2倍になっていた。
+export const getPublicVehicleBySlug = cache(async (slug: string) => {
   const supabase = createAdminClient();
   const { data: seoMeta } = await supabase
     .from("seo_metas")
@@ -324,7 +331,7 @@ export async function getPublicVehicleBySlug(slug: string) {
         models: { name: string } | null;
       })
     | null;
-}
+});
 
 // FR-INV-009: 車両写真一覧（論理削除除く、表示順）。table_definitions.md 4.8
 export async function getVehiclePhotos(vehicleId: string) {

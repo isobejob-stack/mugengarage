@@ -1,20 +1,27 @@
 import "server-only";
+import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { SeoMeta, SeoTargetType, Redirect } from "@/lib/seo/types";
 
 // FR-SEO-001 / FR-INV-011 / FR-BLOG-005 / FR-ENC-004:
 // 対象コンテンツのSEOメタ情報を取得する（管理画面の編集フォーム初期値、公開ページのメタ生成の両方から使う）
-export async function getSeoMeta(targetType: SeoTargetType, targetId: string) {
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("seo_metas")
-    .select("*")
-    .eq("target_type", targetType)
-    .eq("target_id", targetId)
-    .maybeSingle<SeoMeta>();
+//
+// React の cache() で1リクエスト内の重複呼び出しを1回に畳む。
+// 公開ページは generateMetadata と本文描画の両方から同じ対象のSEOメタを引くため、
+// 素のままだと1ページの表示で必ず2回同じ行を取りに行っていた。
+export const getSeoMeta = cache(
+  async (targetType: SeoTargetType, targetId: string) => {
+    const supabase = createAdminClient();
+    const { data } = await supabase
+      .from("seo_metas")
+      .select("*")
+      .eq("target_type", targetType)
+      .eq("target_id", targetId)
+      .maybeSingle<SeoMeta>();
 
-  return data;
-}
+    return data;
+  },
+);
 
 // BR-URL-003: seo_metas.slug はコンテンツ種別（target_type）内でユニーク
 // （テーブルのunique制約 (target_type, slug)。各種別のURLは/vehicles/, /blog/等の

@@ -157,37 +157,61 @@ export default async function Page({
     notFound();
   }
 
-  const settings = await getSiteSettings();
-  const lineConsultUrl = buildLineConsultationUrl(
-    settings.line_url,
-    "purchase",
-    buildVehicleDisplayName(vehicle),
-  );
-
   const sessionId = await getSessionId();
-  const [favoriteIds, related, photos, videos] = await Promise.all([
-    sessionId ? listFavoriteVehicleIds(sessionId) : Promise.resolve([]),
-    listRelatedContents("vehicle", vehicle.id),
-    getVehiclePhotos(vehicle.id),
-    getVehicleVideos(vehicle.id),
-  ]);
-  const isFavorited = favoriteIds.includes(vehicle.id);
 
-  // 自動関連（回遊の土台）。手動指定と重複するものは自動側を落とす。
-  const { similarVehicles, knowledge } = await getAutoRelatedForVehicle({
+  // 車両が判明したあとに要る読み込みは、互いに依存していない。
+  // 従来はこれらを1つずつ await しており、店舗情報 → お気に入り等 → 自動関連 →
+  // 類似車の写真 → SEOメタ、と往復時間がそのまま足し算になっていた。
+  // 車両詳細は「一覧で気になった車をタップして開く」画面で、この待ち時間が
+  // そのまま「押したのに変わらない」に化ける。まとめて同時に走らせる。
+  //
+  // 類似車の写真だけは、どの車が類似かが決まらないと引けない。
+  // 自動関連の完了に繋いで、他の読み込みと並行させる。
+  const autoRelatedPromise = getAutoRelatedForVehicle({
     id: vehicle.id,
     model_id: vehicle.model_id,
     model_year: vehicle.model_year,
     models: vehicle.models,
   });
+
+  const similarPhotoPathsPromise = autoRelatedPromise.then(
+    ({ similarVehicles }) =>
+      getLeadVehiclePhotoPaths(similarVehicles.map((v) => v.id)),
+  );
+
+  const [
+    settings,
+    favoriteIds,
+    related,
+    photos,
+    videos,
+    { similarVehicles, knowledge },
+    similarPhotoPaths,
+    seoMeta,
+  ] = await Promise.all([
+    getSiteSettings(),
+    sessionId ? listFavoriteVehicleIds(sessionId) : Promise.resolve([]),
+    listRelatedContents("vehicle", vehicle.id),
+    getVehiclePhotos(vehicle.id),
+    getVehicleVideos(vehicle.id),
+    autoRelatedPromise,
+    similarPhotoPathsPromise,
+    getSeoMeta("vehicle", vehicle.id),
+  ]);
+
+  const lineConsultUrl = buildLineConsultationUrl(
+    settings.line_url,
+    "purchase",
+    buildVehicleDisplayName(vehicle),
+  );
+  const isFavorited = favoriteIds.includes(vehicle.id);
+
+  // 自動関連（回遊の土台）。手動指定と重複するものは自動側を落とす。
   const manualKeys = new Set(related.map((r) => `${r.type}:${r.id}`));
   const autoKnowledge = knowledge.filter(
     (item) => !manualKeys.has(`${item.type}:${item.id}`),
   );
 
-  const similarPhotoPaths = await getLeadVehiclePhotoPaths(
-    similarVehicles.map((v) => v.id),
-  );
   const similarPhotoUrls = similarVehicles.map((v) => {
     const path = similarPhotoPaths.get(v.id);
     return path ? getVehiclePhotoPublicUrl(path) : undefined;
@@ -213,7 +237,7 @@ export default async function Page({
   ];
 
   // FR-SEO-002: 構造化データ（JSON-LD）。canonical URLはgenerateMetadataと同じ導出ロジックを使う
-  const seoMeta = await getSeoMeta("vehicle", vehicle.id);
+  // （seoMeta は上のPromise.allで他の読み込みと一緒に取得済み）
   const canonicalPath = buildPublicPath("vehicle", slug) ?? `/vehicles/${slug}`;
   const canonicalUrl = seoMeta?.canonical_url || `${SITE_URL}${canonicalPath}`;
   const structuredData = buildVehicleStructuredData({

@@ -33,8 +33,19 @@ const CARD_BASE_CLASSES =
 // ホバーリフト演出はクリック可能（href指定）な場合のみ付与する。
 // 静的なコンテナ（テーブルのラッパー、フォームのセクション等）に付けると、
 // 操作できないのに操作できそうに見える誤ったアフォーダンスになるため（UIUXレビュー指摘）。
+//
+// active: の押し込み表現は必須（2026-08-25追加）。
+// 従来このカードは hover: しか持っていなかった。ホバーはマウスにしか存在しないため、
+// スマートフォンで車両カードをタップしても見た目が一切変わらず、
+// 「押せたのか分からない」→「反応しないからもう一度押す」を招いていた。
+// 遷移先（車両詳細）はリクエストごとに描画されるため間があり、その空白が
+// そのまま「無反応」に見えていた。Buttonは以前から active: を持っており（components/ui/button.tsx）、
+// 同じ操作なのにカードだけ手応えが無い状態でもあった。
+//
+// duration-75 は押し込みだけを速くするための上書き。基底の duration-300 のままだと
+// 指を触れてから沈み込むまでが遅く、「押した瞬間の手応え」にならない。
 const CARD_INTERACTIVE_CLASSES =
-  "hover:-translate-y-1 hover:shadow-medium hover:border-primary-200";
+  "hover:-translate-y-1 hover:shadow-medium hover:border-primary-200 active:translate-y-0 active:scale-[0.98] active:border-primary-300 active:shadow-soft active:duration-75 motion-reduce:active:scale-100";
 
 function cx(...classes: Array<string | undefined | false>): string {
   return classes.filter(Boolean).join(" ");
