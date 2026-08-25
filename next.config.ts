@@ -58,6 +58,17 @@ const nextConfig: NextConfig = {
     // 車両写真は一眼で撮影された数MBのJPEGがそのまま登録されうる。AVIF/WebPへの自動変換で
     // 転送量を大きく削減する（AVIFは同等画質でJPEG比おおむね半分以下）。
     formats: ["image/avif", "image/webp"],
+    // 最適化済み画像の保持期間を31日にする（Next.js 16の既定は4時間）。
+    //
+    // 保存先のオブジェクトキーはアップロードごとに生成するUUIDで、
+    // 写真を差し替えれば必ず別のURLになる（lib/inventory/storage.ts,
+    // lib/settings/storage.ts）。同じURLの中身が変わることはないため、
+    // 長く持たせても古い写真が出続ける事故が起きない。
+    //
+    // この値は最適化結果のキャッシュ寿命であると同時に、配信時の Cache-Control の
+    // max-age としてCDNとブラウザにもそのまま渡る。在庫一覧は1ページに数十枚の
+    // 写真が並ぶ画面なので、再訪・回遊のたびに取り直させないことの効きが大きい。
+    minimumCacheTTL: 60 * 60 * 24 * 31,
   },
 };
 

@@ -1,5 +1,5 @@
 import "server-only";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { getStoragePublicUrl } from "@/lib/supabase/public-url";
 
 // 店舗写真など、特定の車両に紐づかないサイト素材の保管先。
 // public バケットのため、表示側は署名なしの公開URLをそのまま使える
@@ -25,9 +25,5 @@ export function buildSiteAssetStoragePath(
 }
 
 export function getSiteAssetPublicUrl(storagePath: string) {
-  const supabase = createAdminClient();
-  const { data } = supabase.storage
-    .from(SITE_ASSETS_BUCKET)
-    .getPublicUrl(storagePath);
-  return data.publicUrl;
+  return getStoragePublicUrl(SITE_ASSETS_BUCKET, storagePath);
 }

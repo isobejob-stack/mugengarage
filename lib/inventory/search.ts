@@ -44,35 +44,40 @@ export type VehicleSortKey =
 export async function getVehicleSearchFacetOptions() {
   const supabase = createAdminClient();
 
-  const { data: publishedVehicles } = await supabase
+  // 車種名は在庫の行に結合して1クエリで取る。
+  // 以前は「在庫のmodel_idを集める」「そのidで車種名を引く」の2往復に分かれており、
+  // トップページと在庫一覧の両方で毎回2本のクエリを投げていた。
+  const { data } = await supabase
     .from("vehicles")
-    .select("model_id")
+    .select("model_id, models(id, name, deleted_at)")
     .eq("status", "published")
     .is("deleted_at", null);
 
-  const countByModelId = new Map<string, number>();
-  for (const row of publishedVehicles ?? []) {
-    const modelId = row.model_id as string | null;
-    if (!modelId) continue;
-    countByModelId.set(modelId, (countByModelId.get(modelId) ?? 0) + 1);
+  const rows = (data ?? []) as unknown as Array<{
+    model_id: string | null;
+    models: { id: string; name: string; deleted_at: string | null } | null;
+  }>;
+
+  const countById = new Map<string, { name: string; count: number }>();
+  for (const row of rows) {
+    const model = row.models;
+    // 論理削除された車種は選択肢に出さない（従来の deleted_at is null と同じ扱い）
+    if (!row.model_id || !model || model.deleted_at !== null) continue;
+
+    const entry = countById.get(model.id);
+    if (entry) {
+      entry.count += 1;
+    } else {
+      countById.set(model.id, { name: model.name, count: 1 });
+    }
   }
 
-  const ids = Array.from(countByModelId.keys());
-  if (ids.length === 0) return { models: [] };
-
-  const { data } = await supabase
-    .from("models")
-    .select("id, name")
-    .in("id", ids)
-    .is("deleted_at", null)
-    .order("name");
-
   return {
-    models: (data ?? []).map((row) => ({
-      id: row.id as string,
-      name: row.name as string,
-      count: countByModelId.get(row.id as string) ?? 0,
-    })),
+    models: Array.from(countById, ([id, { name, count }]) => ({
+      id,
+      name,
+      count,
+    })).sort((a, b) => a.name.localeCompare(b.name, "ja")),
   };
 }
 
@@ -176,27 +181,9 @@ export async function searchPublicVehicles(
     grades: { name: string } | null;
   }>;
 
-  if (vehicles.length === 0) {
-    return { vehicles: [], totalCount: count ?? 0 };
-  }
-
-  const { data: seoMetas } = await supabase
-    .from("seo_metas")
-    .select("target_id, slug")
-    .eq("target_type", "vehicle")
-    .in(
-      "target_id",
-      vehicles.map((v) => v.id),
-    );
-  const slugByVehicleId = new Map(
-    (seoMetas ?? []).map((s) => [s.target_id, s.slug]),
-  );
-
-  return {
-    vehicles: vehicles.map((v) => ({
-      ...v,
-      slug: slugByVehicleId.get(v.id) ?? null,
-    })),
-    totalCount: count ?? 0,
-  };
+  // slugはここで結合しない。呼び出し側が写真の取得と同時に走らせられるよう、
+  // 車両IDが分かった時点でいったん返す（attachVehicleSlugs を使う）。
+  // 中で待ってしまうと「車両→slug→写真」と3段の直列になり、
+  // 往復時間がそのまま3倍積み上がる。
+  return { vehicles, totalCount: count ?? 0 };
 }

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import {
-  Geist,
   Geist_Mono,
   Zen_Old_Mincho,
   Zen_Kaku_Gothic_New,
@@ -8,11 +7,12 @@ import {
 import "./globals.css";
 import { SITE_URL } from "@/lib/site-config";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
+// 数字専用。価格（font-mono）にだけ使う。
+//
+// Geist（sans）も読み込んでいたが、--font-geist-sans は app/globals.css の
+// どのトークンからも参照されておらず、本文はすべて Zen Kaku Gothic New が描いていた。
+// それでも subsets 指定つきの読み込みは <head> に preload を出すため、
+// 全ページで「使われないフォントを最優先で取りに行く」状態になっていた。読み込みごと外す。
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -75,7 +75,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="ja"
-      className={`${geistSans.variable} ${geistMono.variable} ${zenOldMincho.variable} ${zenKakuGothicNew.variable} h-full antialiased`}
+      className={`${geistMono.variable} ${zenOldMincho.variable} ${zenKakuGothicNew.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">{children}</body>
     </html>

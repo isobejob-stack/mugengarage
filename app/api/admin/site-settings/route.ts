@@ -3,7 +3,11 @@ import { requireAdminUser } from "@/lib/api/require-admin";
 import { apiError, apiInternalError } from "@/lib/api/error-response";
 import { recordAuditLog } from "@/lib/audit/log";
 import { siteSettingsFormSchema } from "@/lib/settings/schema";
-import { getSiteSettings, updateSiteSettings } from "@/lib/settings/queries";
+import {
+  getSiteSettings,
+  updateSiteSettings,
+  revalidateSiteSettings,
+} from "@/lib/settings/queries";
 
 // 店舗情報・外部リンクの取得（管理用）
 export async function GET() {
@@ -49,6 +53,10 @@ export async function PATCH(request: NextRequest) {
   if (error) {
     return apiInternalError(error);
   }
+
+  // 店舗情報は公開サイト全ページのヘッダー・フッターに出る。
+  // キャッシュを失効させないと、保存しても古い住所・電話番号が出続ける。
+  revalidateSiteSettings();
 
   await recordAuditLog({
     adminUserId: user.id,

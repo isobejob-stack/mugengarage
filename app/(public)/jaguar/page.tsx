@@ -5,7 +5,7 @@ import {
   getPublicTimelineSpan,
   listPublicTimelineEvents,
 } from "@/lib/timeline/queries";
-import { listPublicVehicles } from "@/lib/inventory/queries";
+import { getPublicVehicleStockSummary } from "@/lib/inventory/queries";
 import { timelineYearOf } from "@/lib/timeline/format";
 import { ReadingPassage } from "@/components/knowledge/reading-passage";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
@@ -67,11 +67,13 @@ const MODERN_ERA_MIN_DISPLAY_ORDER = 100;
 // 開発者を介さないと直せない場所に文章を置かないための措置
 // （docs/tasks/CONTENT_FACTCHECK.md の運用に合わせる）。
 export default async function Page() {
+  // 在庫からここで使うのは「どの車種か」と「年式の幅」だけなので、
+  // 一覧用の全列＋slugを引く listPublicVehicles ではなく、2列だけの要約を取る。
   const [entries, timelineSpan, timelineEvents, vehicles] = await Promise.all([
     listPublicEncyclopediaEntriesForReading(),
     getPublicTimelineSpan(),
     listPublicTimelineEvents(),
-    listPublicVehicles(),
+    getPublicVehicleStockSummary(),
   ]);
 
   const brand = entries.find((e) => e.category === "brand");

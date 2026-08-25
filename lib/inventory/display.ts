@@ -93,6 +93,15 @@ export function formatShakenValue(
   return label.replace(/^車検\s?/, "") || "あり";
 }
 
+// ラベルと並べる表に入れる値。「修復歴」というラベルの隣に置くので項目名を含めない
+// （formatAccidentHistory は「修復歴なし」とラベル込みで返す。用途が違う）。
+export function formatAccidentHistoryValue(
+  value: boolean | null,
+): string | null {
+  if (value === null) return null;
+  return value ? "あり" : "なし";
+}
+
 export function formatLegalMaintenanceValue(
   value: string | null,
 ): string | null {

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Markdown } from "@/components/ui/markdown";
@@ -14,18 +15,14 @@ import { Button } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/engagement/favorite-button";
 import { getSessionId } from "@/lib/engagement/session";
 import { listFavoriteVehicleIds } from "@/lib/engagement/queries";
-import { listRelatedContents } from "@/lib/related/queries";
-import { RelatedContentList } from "@/components/related/related-content-list";
 import {
-  KnowledgeLinksSection,
-  SimilarVehiclesSection,
-} from "@/components/related/related-discovery";
-import { getAutoRelatedForVehicle } from "@/lib/related/auto";
+  VehicleDiscoverySections,
+  VehicleDiscoverySectionsFallback,
+} from "@/components/related/vehicle-discovery-sections";
 import { VehicleMediaGallery } from "@/components/inventory/vehicle-media-gallery";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { SiteText } from "@/components/live-edit/site-text";
 import { CarIcon } from "@/components/ui/car-icon";
-import { getSeoMeta } from "@/lib/seo/queries";
 import { buildPublicPath } from "@/lib/seo/paths";
 import {
   buildVehicleStructuredData,
@@ -95,13 +92,14 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const vehicle = await getPublicVehicleBySlug(slug);
+  const found = await getPublicVehicleBySlug(slug);
 
-  if (!vehicle) {
+  if (!found) {
     return {};
   }
 
-  const seoMeta = await getSeoMeta("vehicle", vehicle.id);
+  // SEOメタは車両を引くのと同じ1行から得ている（往復を増やさない）
+  const { vehicle, seoMeta } = found;
   const displayName = buildVehicleDisplayName(vehicle);
   // ルートlayoutの title.template（"%s｜エムガレージ"）が適用されるため、ここで店舗名を
   // 付けると「◯◯｜エムガレージ｜エムガレージ」と二重になる。車両名のみを渡す。
@@ -151,47 +149,34 @@ export default async function Page({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const vehicle = await getPublicVehicleBySlug(slug);
+  const found = await getPublicVehicleBySlug(slug);
 
-  if (!vehicle) {
+  if (!found) {
     notFound();
   }
 
-  const settings = await getSiteSettings();
+  // SEOメタ（構造化データ・canonicalに使う）は車両と同じ1行から得ている
+  const { vehicle, seoMeta } = found;
+  const sessionId = await getSessionId();
+
+  // ここで読むのは「この画面を出すのに要るもの」だけに絞ってある。
+  // 最下部の関連ブロック（関連コンテンツ・もっと知る・似ている車両）は
+  // <Suspense> で切り離して後から流し込む。実測では、あの3つのための読み込みが
+  // 詳細ページの待ち時間の大半を占めていた（DB往復15回・直列5段のうち後半3段）。
+  // スクロールしないと見えないものが、価格と写真の表示を止めていた。
+  const [settings, favoriteIds, photos, videos] = await Promise.all([
+    getSiteSettings(),
+    sessionId ? listFavoriteVehicleIds(sessionId) : Promise.resolve([]),
+    getVehiclePhotos(vehicle.id),
+    getVehicleVideos(vehicle.id),
+  ]);
+
   const lineConsultUrl = buildLineConsultationUrl(
     settings.line_url,
     "purchase",
     buildVehicleDisplayName(vehicle),
   );
-
-  const sessionId = await getSessionId();
-  const [favoriteIds, related, photos, videos] = await Promise.all([
-    sessionId ? listFavoriteVehicleIds(sessionId) : Promise.resolve([]),
-    listRelatedContents("vehicle", vehicle.id),
-    getVehiclePhotos(vehicle.id),
-    getVehicleVideos(vehicle.id),
-  ]);
   const isFavorited = favoriteIds.includes(vehicle.id);
-
-  // 自動関連（回遊の土台）。手動指定と重複するものは自動側を落とす。
-  const { similarVehicles, knowledge } = await getAutoRelatedForVehicle({
-    id: vehicle.id,
-    model_id: vehicle.model_id,
-    model_year: vehicle.model_year,
-    models: vehicle.models,
-  });
-  const manualKeys = new Set(related.map((r) => `${r.type}:${r.id}`));
-  const autoKnowledge = knowledge.filter(
-    (item) => !manualKeys.has(`${item.type}:${item.id}`),
-  );
-
-  const similarPhotoPaths = await getLeadVehiclePhotoPaths(
-    similarVehicles.map((v) => v.id),
-  );
-  const similarPhotoUrls = similarVehicles.map((v) => {
-    const path = similarPhotoPaths.get(v.id);
-    return path ? getVehiclePhotoPublicUrl(path) : undefined;
-  });
   const photosWithUrl = photos.map((photo) => ({
     id: photo.id,
     public_url: getVehiclePhotoPublicUrl(photo.storage_path),
@@ -213,7 +198,7 @@ export default async function Page({
   ];
 
   // FR-SEO-002: 構造化データ（JSON-LD）。canonical URLはgenerateMetadataと同じ導出ロジックを使う
-  const seoMeta = await getSeoMeta("vehicle", vehicle.id);
+  // （seoMeta は車両を引いた1行から得ているので、ここで読み直さない）
   const canonicalPath = buildPublicPath("vehicle", slug) ?? `/vehicles/${slug}`;
   const canonicalUrl = seoMeta?.canonical_url || `${SITE_URL}${canonicalPath}`;
   const structuredData = buildVehicleStructuredData({
@@ -435,7 +420,10 @@ export default async function Page({
             レビュー指摘対応（必須修正3）: プリフィル文言に車両名を含め、ボタン文言と送信内容を一致させる */}
         {lineConsultUrl && (
           <Button href={lineConsultUrl} variant="line" size="md">
-            <SiteText k="vehicle.cta.lineTop" description="車両詳細 上部のLINE相談ボタンの文言">
+            <SiteText
+              k="vehicle.cta.lineTop"
+              description="車両詳細 上部のLINE相談ボタンの文言"
+            >
               この車をLINEで相談する
             </SiteText>
           </Button>
@@ -464,18 +452,27 @@ export default async function Page({
           <div className="bg-cream-100 flex aspect-[4/3] w-full flex-col items-center justify-center gap-3 rounded-2xl border border-neutral-200 px-6 text-center">
             <CarIcon className="text-foreground-muted h-12 w-12" />
             <p className="text-charcoal-900 text-base font-medium">
-              <SiteText k="vehicle.photo.empty.title" description="車両詳細 写真が無いときの見出し">
+              <SiteText
+                k="vehicle.photo.empty.title"
+                description="車両詳細 写真が無いときの見出し"
+              >
                 この車両の写真は準備中です
               </SiteText>
             </p>
             <p className="text-foreground-muted text-sm">
-              <SiteText k="vehicle.photo.empty.body" description="車両詳細 写真が無いときの説明文">
+              <SiteText
+                k="vehicle.photo.empty.body"
+                description="車両詳細 写真が無いときの説明文"
+              >
                 現車の写真をご希望の方は、お気軽にお問い合わせください。個別にお送りいたします。
               </SiteText>
             </p>
             {lineConsultUrl && (
               <Button href={lineConsultUrl} variant="line" size="md">
-                <SiteText k="vehicle.photo.empty.cta" description="車両詳細 写真をLINEで請求するボタンの文言">
+                <SiteText
+                  k="vehicle.photo.empty.cta"
+                  description="車両詳細 写真をLINEで請求するボタンの文言"
+                >
                   写真をLINEで請求する
                 </SiteText>
               </Button>
@@ -540,27 +537,26 @@ export default async function Page({
         ))}
 
       {/* 店主が手で選んだ関連は従来どおり最優先で出す */}
-      <RelatedContentList items={related} title="関連コンテンツ" />
-
-      {/* 手動で紐付いていないぶんを自動判定で補う（lib/related/auto.ts）。
-          「この車をもっと知りたい」から図鑑・年表・整備実績へ進めるようにする。 */}
-      <KnowledgeLinksSection
-        items={autoKnowledge}
-        title={`${vehicle.models?.name ?? "この車"}をもっと知る`}
-        description="この車種にまつわる解説・歴史・整備の記録です。"
-      />
-
-      <SimilarVehiclesSection
-        vehicles={similarVehicles}
-        photoUrls={similarPhotoUrls}
-      />
+      {/* 関連ブロックは本体より後に流し込む（上の読み込みを止めない）。
+          表示位置と見た目は従来どおりで、出てくる順番だけが変わる。 */}
+      <Suspense fallback={<VehicleDiscoverySectionsFallback />}>
+        <VehicleDiscoverySections
+          vehicleId={vehicle.id}
+          modelId={vehicle.model_id}
+          modelYear={vehicle.model_year}
+          models={vehicle.models}
+        />
+      </Suspense>
 
       <div className="mt-16 flex flex-wrap items-center gap-3 border-t border-neutral-200 pt-8">
         <FavoriteButton vehicleId={vehicle.id} initialFavorited={isFavorited} />
         {/* 読み終えた位置から一覧に戻れるようにする。
             検索結果から直接開いた利用者にはブラウザバック以外の戻り手段が無かった。 */}
         <Button href="/vehicles" variant="outline" size="md">
-          <SiteText k="vehicle.backToList" description="車両詳細 一覧へ戻るリンクの文言">
+          <SiteText
+            k="vehicle.backToList"
+            description="車両詳細 一覧へ戻るリンクの文言"
+          >
             在庫車両一覧に戻る
           </SiteText>
         </Button>
@@ -586,7 +582,10 @@ export default async function Page({
                 size="md"
                 className="w-full max-w-xs"
               >
-                <SiteText k="vehicle.cta.phone" description="車両詳細 下部固定バー 電話ボタンの文言">
+                <SiteText
+                  k="vehicle.cta.phone"
+                  description="車両詳細 下部固定バー 電話ボタンの文言"
+                >
                   電話で問い合わせる
                 </SiteText>
               </Button>
@@ -598,7 +597,10 @@ export default async function Page({
                 size="md"
                 className="w-full max-w-xs"
               >
-                <SiteText k="vehicle.cta.lineBottom" description="車両詳細 下部固定バー LINEボタンの文言">
+                <SiteText
+                  k="vehicle.cta.lineBottom"
+                  description="車両詳細 下部固定バー LINEボタンの文言"
+                >
                   この車をLINEで相談する
                 </SiteText>
               </Button>
