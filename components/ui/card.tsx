@@ -27,25 +27,52 @@ type CardAsLinkProps = CardOwnProps &
 
 export type CardProps = CardAsDivProps | CardAsLinkProps;
 
+// 枠線は cream-200（暖色）にする。背景は cream-50（暖色）、カード面は純白なので、
+// そこへ寒色の neutral-200 を1本入れると「カードの縁」ではなく「継ぎ目・隙間」に見える。
 const CARD_BASE_CLASSES =
-  "group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-soft transition-all duration-300 ease-premium";
+  "group relative overflow-hidden rounded-2xl border border-cream-200 bg-white shadow-soft transition-[translate,box-shadow,border-color] duration-300 ease-premium";
 
 // ホバーリフト演出はクリック可能（href指定）な場合のみ付与する。
 // 静的なコンテナ（テーブルのラッパー、フォームのセクション等）に付けると、
 // 操作できないのに操作できそうに見える誤ったアフォーダンスになるため（UIUXレビュー指摘）。
 //
-// active: の押し込み表現は必須（2026-08-25追加）。
-// 従来このカードは hover: しか持っていなかった。ホバーはマウスにしか存在しないため、
-// スマートフォンで車両カードをタップしても見た目が一切変わらず、
-// 「押せたのか分からない」→「反応しないからもう一度押す」を招いていた。
-// 遷移先（車両詳細）はリクエストごとに描画されるため間があり、その空白が
-// そのまま「無反応」に見えていた。Buttonは以前から active: を持っており（components/ui/button.tsx）、
-// 同じ操作なのにカードだけ手応えが無い状態でもあった。
+// 押下フィードバックの作り直し（2026-08-25）:
+// 発注者から「ボタンを押した感じが、空白線が色変わる程度で全然体験よくない」と指摘。
+// 調べたところ、これは実装の正確な描写だった。
 //
-// duration-75 は押し込みだけを速くするための上書き。基底の duration-300 のままだと
-// 指を触れてから沈み込むまでが遅く、「押した瞬間の手応え」にならない。
-const CARD_INTERACTIVE_CLASSES =
-  "hover:-translate-y-1 hover:shadow-medium hover:border-primary-200 active:translate-y-0 active:scale-[0.98] active:border-primary-300 active:shadow-soft active:duration-75 motion-reduce:active:scale-100";
+//   - Tailwind v4 の hover: は @media (hover: hover) の中に出る（ビルド後のCSSで確認済み）。
+//     つまりスマホでは hover:-translate-y-1 も hover:shadow-medium も**発火しない**。
+//   - 発火しないものを打ち消す active:translate-y-0 / active:shadow-soft は無効。
+//   - active:scale-[0.98] は幅170pxのカードで片側1.7px。しかも**指の下**で起きる。
+//   - 結果、スマホで実際に変化していたのは枠線1pxの色だけ。カード面積の約2%。
+//
+// 直し方は「線ではなく面を変える」。::after でカード全面に暗いヴェールを掛け、
+// 縁には真鍮（accent）の内側リングを出す。理由:
+//   - 面は指に隠れない（指が覆うのは面積の3割程度）
+//   - 縁は絶対に指に隠れない
+//   - 車両写真は明暗がまちまちで、暗い写真ではヴェールの効きが弱まる。
+//     不透明な真鍮リングは写真の明暗に一切左右されないので、効き目の下限を保証できる
+//
+// scale（縮小）は意図的に入れていない。写真エリアはカード内で横スクロールする領域で、
+// スワイプを始めた瞬間にブラウザが :active を一度乗せる。そこでカードが縮むと、
+// めくる操作そのものを邪魔しかねない（発注者から当たり判定の指摘も出ている）。
+// 面と縁だけで十分に伝わるため、動く表現は使わない。
+// この判断の副産物として prefers-reduced-motion でも表現が変わらない。
+//
+// 入り90ms・戻り200msの非対称にしている。押している最中は指がカードを覆っていて、
+// 実際に見えるのは指を離した後。戻りが速すぎると「離したときには消えていた」になる。
+const CARD_INTERACTIVE_CLASSES = [
+  "select-none",
+  "hover:-translate-y-1 hover:shadow-medium hover:border-primary-200",
+  "active:border-accent-500",
+  // キーボード操作時の現在位置。Buttonには元からあるがCardには無かった
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+  // 押下時のヴェールと真鍮リング。pointer-events-none で写真のスワイプを妨げない
+  "after:pointer-events-none after:absolute after:inset-0 after:rounded-2xl",
+  "after:bg-primary-900/20 after:inset-ring-2 after:inset-ring-accent-400",
+  "after:opacity-0 after:transition-opacity after:duration-200 after:ease-out",
+  "active:after:opacity-100 active:after:duration-[90ms]",
+].join(" ");
 
 function cx(...classes: Array<string | undefined | false>): string {
   return classes.filter(Boolean).join(" ");
@@ -164,7 +191,9 @@ export function CardMeta({
   children: ReactNode;
 }): ReactNode {
   return (
-    <p className={cx("text-foreground-muted text-xs sm:text-base", className)}>
+    // 12pxだった。支払総額か本体価格かを決める行で、03_ui_rules.md 4章の
+    // 本文16px基準に対して明確に不足していた（主要購買層は50〜60代）。
+    <p className={cx("text-foreground-muted text-sm sm:text-base", className)}>
       {children}
     </p>
   );

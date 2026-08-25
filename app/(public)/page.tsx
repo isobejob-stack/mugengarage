@@ -258,7 +258,10 @@ export default async function Page() {
                       initialFavorited={favoriteIds.includes(v.id)}
                       vehicleName={vehicleName}
                     />
-                    <Card href={`/vehicles/${v.slug}`}>
+                    <Card
+                      href={`/vehicles/${v.slug}`}
+                      className="flex h-full flex-col"
+                    >
                       <VehicleFeatureBadges
                         isRecommended={v.is_recommended}
                         isNewArrival={v.is_new_arrival}

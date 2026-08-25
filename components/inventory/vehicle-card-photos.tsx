@@ -47,7 +47,12 @@ export function VehicleCardPhotos({
 
   return (
     <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100">
-      <div className="flex h-full w-full snap-x snap-mandatory [scrollbar-width:none] overflow-x-auto scroll-smooth [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      {/* overscroll-behavior-x: contain は、端まで来たスワイプが親（ページ）や
+          iOSの「戻る」ジェスチャへ連鎖するのを止める。これが無いと、最後の写真で
+          さらに滑らせたときにブラウザバックが暴発し、めくれないように感じる。
+          scroll-smooth は外した。指の動きに追従すべき操作に補間が入ると、
+          触っている量と動く量がずれて「反応が変」という印象になる。 */}
+      <div className="flex h-full w-full snap-x snap-mandatory [scrollbar-width:none] overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {urls.map((url, index) => (
           <div
             key={url}
@@ -59,26 +64,24 @@ export function VehicleCardPhotos({
               fill
               sizes="(min-width: 640px) 33vw, 50vw"
               priority={priority && index === 0}
+              draggable={false}
               className="object-cover"
             />
           </div>
         ))}
       </div>
 
-      {/* 何枚あるかを示す。ドットが無いと、そもそもめくれることに気付かれない。
-          スクロール位置との連動はJSが要るため、ここでは枚数の提示に留める。 */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-2 flex justify-center gap-1.5">
-        {urls.map((url, index) => (
-          <span
-            key={url}
-            className={`block h-1.5 rounded-full bg-white shadow-sm ${
-              index === 0 ? "w-4" : "w-1.5 opacity-70"
-            }`}
-          />
-        ))}
-      </div>
-      <span className="pointer-events-none absolute top-2 left-2 rounded-full bg-black/60 px-2 py-0.5 text-xs font-medium text-white">
-        {urls.length}枚
+      {/* 以前はここに枚数ぶんのドットを並べ、常に1枚目を選択状態にしていた。
+          スクロール位置と連動していないため、めくってもドットが動かない。
+          「めくれていないように見える」原因になりうるので、嘘をつく表示はやめる
+          （連動させるにはJSが要る。一覧は最大20枚のカードが並ぶ画面なので入れない）。
+
+          枚数バッジは左上から右下へ移した。左上は status-badge.tsx の
+          「おすすめ／新着」バッジ（absolute top-2 left-2 z-10）と同じ座標で、
+          おすすめ車両では枚数バッジが完全に隠れていた。
+          文言も「5枚」から「写真5枚」にする。何の枚数か分からなかったため。 */}
+      <span className="bg-charcoal-900/75 pointer-events-none absolute right-2 bottom-2 rounded-full px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
+        写真{urls.length}枚
       </span>
     </div>
   );
