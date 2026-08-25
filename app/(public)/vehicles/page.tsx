@@ -3,7 +3,10 @@ import {
   searchPublicVehicles,
   type VehicleSearchFilters,
 } from "@/lib/inventory/search";
-import { getVehiclePhotoPathsByVehicle } from "@/lib/inventory/queries";
+import {
+  getVehiclePhotoPathsByVehicle,
+  attachVehicleSlugs,
+} from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
 import {
   parsePaginationParams,
@@ -81,18 +84,24 @@ export default async function Page({
   };
 
   const sessionId = await getSessionId();
-  const [{ vehicles, totalCount }, facets, favoriteIds] = await Promise.all([
-    searchPublicVehicles(filters, pagination),
-    getVehicleSearchFacetOptions(),
-    sessionId ? listFavoriteVehicleIds(sessionId) : Promise.resolve([]),
-  ]);
+
+  // 1段目: 検索結果・絞り込みの選択肢・お気に入りを同時に取る
+  // 2段目: 詳細URLのslugと、カードの写真を同時に取る
+  //        （どちらも必要なのは車両IDだけ。以前は「車両→slug→写真」の3段だった）
+  const [{ vehicles: rows, totalCount }, facets, favoriteIds] =
+    await Promise.all([
+      searchPublicVehicles(filters, pagination),
+      getVehicleSearchFacetOptions(),
+      sessionId ? listFavoriteVehicleIds(sessionId) : Promise.resolve([]),
+    ]);
   const meta = buildPaginationMeta(pagination, totalCount);
 
   // 一覧カードで数枚めくれるようにするため、車両ごとに先頭数枚を1クエリで取得する（N+1回避）
-  const photoPaths = await getVehiclePhotoPathsByVehicle(
-    vehicles.map((v) => v.id),
-  );
-  const photoUrlsByVehicle = vehicles.map((v) =>
+  const [vehicles, photoPaths] = await Promise.all([
+    attachVehicleSlugs(rows),
+    getVehiclePhotoPathsByVehicle(rows.map((v) => v.id)),
+  ]);
+  const photoUrlsByVehicle = rows.map((v) =>
     (photoPaths.get(v.id) ?? []).map((p) => getVehiclePhotoPublicUrl(p)),
   );
 
@@ -130,7 +139,10 @@ export default async function Page({
       >
         <summary className="text-charcoal-900 hover:bg-cream-100 flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-base font-bold">
           <span>
-            <SiteText k="vehicles.filter.heading" description="在庫一覧 絞り込みの見出し">
+            <SiteText
+              k="vehicles.filter.heading"
+              description="在庫一覧 絞り込みの見出し"
+            >
               条件を絞り込む
             </SiteText>
             {activeFilterCount > 0 && (
@@ -220,12 +232,18 @@ export default async function Page({
 
           <div className="flex gap-3">
             <Button type="submit" variant="primary" size="md">
-              <SiteText k="vehicles.filter.submit" description="在庫一覧 検索ボタンの文言">
+              <SiteText
+                k="vehicles.filter.submit"
+                description="在庫一覧 検索ボタンの文言"
+              >
                 この条件で検索
               </SiteText>
             </Button>
             <Button href="/vehicles" variant="outline" size="md">
-              <SiteText k="vehicles.filter.clear" description="在庫一覧 条件クリアボタンの文言">
+              <SiteText
+                k="vehicles.filter.clear"
+                description="在庫一覧 条件クリアボタンの文言"
+              >
                 条件をクリア
               </SiteText>
             </Button>
@@ -258,23 +276,35 @@ export default async function Page({
         // すぐ0件になり、ここで戻る導線が無いと離脱する。
         <div className="bg-cream-100 mt-8 rounded-2xl border border-neutral-200 p-6 text-center">
           <p className="text-charcoal-900 text-lg font-bold">
-            <SiteText k="vehicles.empty.title" description="在庫一覧 0件のときの見出し">
+            <SiteText
+              k="vehicles.empty.title"
+              description="在庫一覧 0件のときの見出し"
+            >
               条件に一致する車両が見つかりませんでした
             </SiteText>
           </p>
           <p className="text-foreground-muted mt-2 text-base">
-            <SiteText k="vehicles.empty.body" description="在庫一覧 0件のときの説明文">
+            <SiteText
+              k="vehicles.empty.body"
+              description="在庫一覧 0件のときの説明文"
+            >
               条件を少なくすると見つかることがあります。お探しの車両が見つからない場合は、ご希望をお聞かせいただければ入荷時にご案内いたします。
             </SiteText>
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Button href="/vehicles" variant="primary" size="md">
-              <SiteText k="vehicles.empty.clear" description="在庫一覧 0件のとき すべて見るボタンの文言">
+              <SiteText
+                k="vehicles.empty.clear"
+                description="在庫一覧 0件のとき すべて見るボタンの文言"
+              >
                 条件をクリアしてすべて見る
               </SiteText>
             </Button>
             <Button href="/contact" variant="outline" size="md">
-              <SiteText k="vehicles.empty.consult" description="在庫一覧 0件のとき 相談するボタンの文言">
+              <SiteText
+                k="vehicles.empty.consult"
+                description="在庫一覧 0件のとき 相談するボタンの文言"
+              >
                 希望の車両を相談する
               </SiteText>
             </Button>
@@ -347,7 +377,10 @@ export default async function Page({
           一覧を見終えて「決めきれなかった」人に効く導線のため、結果の後ろに置く。 */}
       <div className="mt-10 flex justify-center border-t border-neutral-200 pt-8">
         <Button href="/vehicles/ranking" variant="outline" size="md">
-          <SiteText k="vehicles.ranking.cta" description="在庫一覧 ランキングボタンの文言">
+          <SiteText
+            k="vehicles.ranking.cta"
+            description="在庫一覧 ランキングボタンの文言"
+          >
             人気の車両ランキングを見る
           </SiteText>
         </Button>

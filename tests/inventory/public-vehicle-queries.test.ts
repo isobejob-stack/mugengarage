@@ -17,8 +17,11 @@ vi.mock("@/lib/supabase/admin", () => ({
   createAdminClient: vi.fn(() => supabaseMock.client),
 }));
 
-const { listPublicVehiclePreview, getPublicVehicleStockSummary } =
-  await import("@/lib/inventory/queries");
+const {
+  listPublicVehiclePreview,
+  attachVehicleSlugs,
+  getPublicVehicleStockSummary,
+} = await import("@/lib/inventory/queries");
 
 describe("listPublicVehiclePreview", () => {
   beforeEach(() => {
@@ -73,28 +76,24 @@ describe("listPublicVehiclePreview", () => {
     );
   });
 
-  it("詳細ページへのslugを1クエリでまとめて結合する", async () => {
+  // slugの結合はこの関数の外に出してある。呼び出し側が「slug」と「写真」を
+  // 同時に走らせられるようにするため（中で待つと直列の段が1つ増える）。
+  it("slugは結合せず、車両IDが分かった時点で返す", async () => {
     supabaseMock = createSupabaseAdminMock({
       vehicles: {
         data: [{ id: "v1" }, { id: "v2" }],
         error: null,
         count: 2,
       },
-      seo_metas: {
-        data: [{ target_id: "v1", slug: "xj-1990" }],
-        error: null,
-      },
     });
 
     const { vehicles } = await listPublicVehiclePreview(9);
 
-    expect(vehicles.map((v) => v.slug)).toEqual(["xj-1990", null]);
-    expect(
-      supabaseMock.callsFor("seo_metas").filter((c) => c.method === "select"),
-    ).toHaveLength(1);
+    expect(vehicles.map((v) => v.id)).toEqual(["v1", "v2"]);
+    expect(supabaseMock.callsFor("seo_metas")).toHaveLength(0);
   });
 
-  it("在庫が無いときは seo_metas を引かない", async () => {
+  it("在庫が無いときも総件数を返す", async () => {
     supabaseMock = createSupabaseAdminMock({
       vehicles: { data: [], error: null, count: 0 },
     });
@@ -103,6 +102,35 @@ describe("listPublicVehiclePreview", () => {
 
     expect(vehicles).toEqual([]);
     expect(totalCount).toBe(0);
+    expect(supabaseMock.callsFor("seo_metas")).toHaveLength(0);
+  });
+});
+
+describe("attachVehicleSlugs", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("詳細ページへのslugを1クエリでまとめて結合する", async () => {
+    supabaseMock = createSupabaseAdminMock({
+      seo_metas: {
+        data: [{ target_id: "v1", slug: "xj-1990" }],
+        error: null,
+      },
+    });
+
+    const result = await attachVehicleSlugs([{ id: "v1" }, { id: "v2" }]);
+
+    expect(result.map((v) => v.slug)).toEqual(["xj-1990", null]);
+    expect(
+      supabaseMock.callsFor("seo_metas").filter((c) => c.method === "select"),
+    ).toHaveLength(1);
+  });
+
+  it("対象が無いときはDBを引かない", async () => {
+    supabaseMock = createSupabaseAdminMock({});
+
+    await expect(attachVehicleSlugs([])).resolves.toEqual([]);
     expect(supabaseMock.callsFor("seo_metas")).toHaveLength(0);
   });
 });

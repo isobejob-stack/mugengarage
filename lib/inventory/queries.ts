@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { SeoMeta } from "@/lib/seo/types";
 import type {
   Manufacturer,
   Model,
@@ -209,6 +210,17 @@ type PublicVehicleListItem = {
 
 // 車両詳細のURLに使うslugは seo_metas 側にあるため、一覧の行に後から結合する。
 // 対象の車両ぶんだけを1クエリでまとめて引く（車両ごとに引くとN+1になる）。
+//
+// export しているのは、呼び出し側で「slugの取得」と「写真の取得」を
+// 同時に走らせるため。どちらも必要なのは車両IDだけなので、順番に待つ理由がない。
+// 中で await して繋げてしまうと、往復時間が素直に足し算になる。
+export async function attachVehicleSlugs<T extends { id: string }>(
+  vehicles: T[],
+): Promise<Array<T & { slug: string | null }>> {
+  if (vehicles.length === 0) return [];
+  return withSlugs(createAdminClient(), vehicles);
+}
+
 async function withSlugs<T extends { id: string }>(
   supabase: ReturnType<typeof createAdminClient>,
   vehicles: T[],
@@ -271,14 +283,10 @@ export async function listPublicVehiclePreview(limit: number) {
     .range(0, Math.max(limit - 1, 0));
 
   const vehicles = (data ?? []) as unknown as PublicVehicleListItem[];
-  const totalCount = count ?? vehicles.length;
 
-  if (vehicles.length === 0) return { vehicles: [], totalCount };
-
-  return {
-    vehicles: await withSlugs(supabase, vehicles),
-    totalCount,
-  };
+  // slugはここで結合しない。呼び出し側が写真の取得と同時に走らせられるよう、
+  // 車両IDが分かった時点でいったん返す（attachVehicleSlugs を使う）。
+  return { vehicles, totalCount: count ?? vehicles.length };
 }
 
 // /jaguar 用: 在庫がどの車種・どの年式に集まっているかだけを取る。
@@ -308,12 +316,16 @@ export async function getPublicVehicleStockSummary() {
 // 計4回走っていた。しかも2つは直列なので、往復時間もそのまま2倍になっていた。
 export const getPublicVehicleBySlug = cache(async (slug: string) => {
   const supabase = createAdminClient();
+  // 列を絞らず全部取る。この行はslugから車両IDを引くためだけでなく、
+  // ページのタイトル・説明・OGP・canonical（SEOメタ）そのものでもある。
+  // target_id だけを取ると、同じ行をあとで getSeoMeta で引き直すことになり、
+  // 往復が1つ増える（しかも車両の取得が終わるまで始められない直列の1段になる）。
   const { data: seoMeta } = await supabase
     .from("seo_metas")
-    .select("target_id")
+    .select("*")
     .eq("target_type", "vehicle")
     .eq("slug", slug)
-    .maybeSingle();
+    .maybeSingle<SeoMeta>();
 
   if (!seoMeta) return null;
 
@@ -325,12 +337,15 @@ export const getPublicVehicleBySlug = cache(async (slug: string) => {
     .is("deleted_at", null)
     .maybeSingle();
 
-  return vehicle as
-    | (Vehicle & {
-        manufacturers: { name: string } | null;
-        models: { name: string } | null;
-      })
-    | null;
+  if (!vehicle) return null;
+
+  return {
+    vehicle: vehicle as Vehicle & {
+      manufacturers: { name: string } | null;
+      models: { name: string } | null;
+    },
+    seoMeta,
+  };
 });
 
 // FR-INV-009: 車両写真一覧（論理削除除く、表示順）。table_definitions.md 4.8

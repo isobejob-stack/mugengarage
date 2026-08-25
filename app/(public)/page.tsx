@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import {
   listPublicVehiclePreview,
+  attachVehicleSlugs,
   getLeadVehiclePhotoPaths,
 } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
@@ -59,34 +60,32 @@ export default async function Page() {
   const sessionId = await getSessionId();
 
   // 掲載中の車両は「先頭9台＋総台数」だけを取る（全件読んでからのスライスはしない）。
-  // 写真はその9台のIDが決まってからでないと引けないため、車両の取得だけ先に始め、
-  // 店舗情報・検索の選択肢・お気に入りは写真と並行して取りに行かせる。
-  // 直列に await を並べると、それぞれの往復時間がそのまま足し算になる。
-  const vehiclesPromise = listPublicVehiclePreview(TOP_PAGE_VEHICLE_LIMIT);
-
-  const featuredPhotoUrlsPromise = vehiclesPromise.then(async ({ vehicles }) => {
-    const leadPhotoPaths = await getLeadVehiclePhotoPaths(
-      vehicles.map((v) => v.id),
-    );
-    return vehicles.map((v) => {
-      const path = leadPhotoPaths.get(v.id);
-      return path ? getVehiclePhotoPublicUrl(path) : null;
-    });
-  });
-
+  //
+  // 1段目: 車両・店舗情報・検索の選択肢・お気に入りを同時に取る
+  // 2段目: 詳細URLのslugと、カードの写真を同時に取る
+  //        （どちらも必要なのは車両IDだけなので、順番に待つ理由がない。
+  //         以前は「車両→slug→写真」の3段になっており、往復時間が素直に3倍積まれていた）
   const [
-    { vehicles: featuredVehicles, totalCount: vehicleCount },
-    featuredPhotoUrls,
+    { vehicles: rows, totalCount: vehicleCount },
     settings,
     facets,
     favoriteIds,
   ] = await Promise.all([
-    vehiclesPromise,
-    featuredPhotoUrlsPromise,
+    listPublicVehiclePreview(TOP_PAGE_VEHICLE_LIMIT),
     getSiteSettings(),
     getVehicleSearchFacetOptions(),
     sessionId ? listFavoriteVehicleIds(sessionId) : Promise.resolve([]),
   ]);
+
+  const [featuredVehicles, leadPhotoPaths] = await Promise.all([
+    attachVehicleSlugs(rows),
+    getLeadVehiclePhotoPaths(rows.map((v) => v.id)),
+  ]);
+
+  const featuredPhotoUrls = rows.map((v) => {
+    const path = leadPhotoPaths.get(v.id);
+    return path ? getVehiclePhotoPublicUrl(path) : null;
+  });
 
   // トップに出す在庫の上限を超えた場合は「すべて見る」ボタンで在庫一覧へ送る。
   const hasMoreVehicles = vehicleCount > TOP_PAGE_VEHICLE_LIMIT;
@@ -137,17 +136,26 @@ export default async function Page() {
           />
           <div className="relative mx-auto w-full max-w-5xl px-4 pb-12 sm:pb-16">
             <p className="text-accent-400 text-xs font-medium tracking-[0.15em] uppercase">
-              <SiteText k="home.hero.eyebrow" description="トップページ 冒頭の英字">
+              <SiteText
+                k="home.hero.eyebrow"
+                description="トップページ 冒頭の英字"
+              >
                 Classic Jaguar Specialist
               </SiteText>
             </p>
             <h1 className="mt-3 font-serif text-4xl font-bold tracking-tight text-balance text-white sm:text-5xl">
-              <SiteText k="home.hero.title" description="トップページ 店名の見出し">
+              <SiteText
+                k="home.hero.title"
+                description="トップページ 店名の見出し"
+              >
                 エムガレージ
               </SiteText>
             </h1>
             <p className="mt-4 max-w-2xl text-neutral-200">
-              <SiteText k="home.hero.lead" description="トップページ 冒頭の紹介文">
+              <SiteText
+                k="home.hero.lead"
+                description="トップページ 冒頭の紹介文"
+              >
                 30年以上の実績を持つクラシックJaguar専門店。販売・整備・修理・買取・ご相談まで、Jaguarのことなら何でもお任せください。
               </SiteText>
             </p>
@@ -167,17 +175,26 @@ export default async function Page() {
         <div className="mx-auto max-w-5xl px-4 pt-8">
           <section className="bg-charcoal-900 shadow-medium rounded-2xl px-6 py-12 text-white sm:px-10 sm:py-16">
             <p className="text-accent-400 text-xs font-medium tracking-[0.15em] uppercase">
-              <SiteText k="home.hero.eyebrow" description="トップページ 冒頭の英字">
+              <SiteText
+                k="home.hero.eyebrow"
+                description="トップページ 冒頭の英字"
+              >
                 Classic Jaguar Specialist
               </SiteText>
             </p>
             <h1 className="mt-3 font-serif text-3xl font-bold sm:text-4xl">
-              <SiteText k="home.hero.title" description="トップページ 店名の見出し">
+              <SiteText
+                k="home.hero.title"
+                description="トップページ 店名の見出し"
+              >
                 エムガレージ
               </SiteText>
             </h1>
             <p className="mt-4 max-w-2xl text-neutral-300">
-              <SiteText k="home.hero.lead" description="トップページ 冒頭の紹介文">
+              <SiteText
+                k="home.hero.lead"
+                description="トップページ 冒頭の紹介文"
+              >
                 30年以上の実績を持つクラシックJaguar専門店。販売・整備・修理・買取・ご相談まで、Jaguarのことなら何でもお任せください。
               </SiteText>
             </p>
@@ -210,7 +227,10 @@ export default async function Page() {
 
         <section className="mt-10">
           <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
-            <SiteText k="home.vehicles.heading" description="トップページ 車両一覧の見出し">
+            <SiteText
+              k="home.vehicles.heading"
+              description="トップページ 車両一覧の見出し"
+            >
               掲載中の車両
             </SiteText>
           </h2>

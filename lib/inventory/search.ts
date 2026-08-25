@@ -181,27 +181,9 @@ export async function searchPublicVehicles(
     grades: { name: string } | null;
   }>;
 
-  if (vehicles.length === 0) {
-    return { vehicles: [], totalCount: count ?? 0 };
-  }
-
-  const { data: seoMetas } = await supabase
-    .from("seo_metas")
-    .select("target_id, slug")
-    .eq("target_type", "vehicle")
-    .in(
-      "target_id",
-      vehicles.map((v) => v.id),
-    );
-  const slugByVehicleId = new Map(
-    (seoMetas ?? []).map((s) => [s.target_id, s.slug]),
-  );
-
-  return {
-    vehicles: vehicles.map((v) => ({
-      ...v,
-      slug: slugByVehicleId.get(v.id) ?? null,
-    })),
-    totalCount: count ?? 0,
-  };
+  // slugはここで結合しない。呼び出し側が写真の取得と同時に走らせられるよう、
+  // 車両IDが分かった時点でいったん返す（attachVehicleSlugs を使う）。
+  // 中で待ってしまうと「車両→slug→写真」と3段の直列になり、
+  // 往復時間がそのまま3倍積み上がる。
+  return { vehicles, totalCount: count ?? 0 };
 }
