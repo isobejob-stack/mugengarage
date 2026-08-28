@@ -33,11 +33,17 @@ type EditTarget = {
 };
 
 // 見に行きたくなる代表的なページ。ここから入って、あとはiframeの中を普通に辿る。
+// 公開サイトのナビに出ている入口はひととおり並べる。
+// ここに無いページ（車両詳細・記事本文など）は、一覧から普通にリンクを辿って開く。
 const START_PAGES = [
   { label: "トップ", path: "/" },
   { label: "在庫車両", path: "/vehicles" },
   { label: "ジャガーを知る", path: "/jaguar" },
   { label: "ブログ", path: "/blog" },
+  { label: "図鑑", path: "/encyclopedia" },
+  { label: "年表", path: "/timeline" },
+  { label: "ライブラリ", path: "/library" },
+  { label: "納車実績", path: "/owners-archive" },
   { label: "店舗情報", path: "/about" },
   { label: "お問い合わせ", path: "/contact" },
 ];

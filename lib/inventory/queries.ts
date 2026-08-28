@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
 import type { SeoMeta } from "@/lib/seo/types";
 import type {
   Manufacturer,
@@ -91,26 +92,70 @@ export async function createModel(values: {
 }
 
 // FR-INV-002: 管理画面の車両一覧（全ステータス、論理削除除く）
-export async function listAdminVehicles() {
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("vehicles")
-    .select(
-      "id, status, price, model_year, display_order, updated_at, manufacturers(name), models(name)",
-    )
-    .is("deleted_at", null)
-    .order("display_order", { ascending: true });
+export type AdminVehicleListItem = {
+  id: string;
+  status: string;
+  price: number;
+  model_year: number | null;
+  mileage_km: number | null;
+  display_order: number;
+  updated_at: string;
+  manufacturers: { name: string } | null;
+  models: { name: string } | null;
+  grades: { name: string } | null;
+  photoCount: number;
+  /** 一覧に出す1枚目のサムネイル。写真が無ければ null */
+  leadPhotoUrl: string | null;
+};
 
-  return (data ?? []) as unknown as Array<{
-    id: string;
-    status: string;
-    price: number;
-    model_year: number | null;
-    display_order: number;
-    updated_at: string;
-    manufacturers: { name: string } | null;
-    models: { name: string } | null;
-  }>;
+// 管理画面の車両一覧。
+//
+// 写真とグレードまで持ってくるのは、この店の在庫が
+// 「ジャガー XJ」だけで10台あるため（supabase/setup.sql）。
+// 車名と年式だけを並べると、ほぼ同じ行が10行続いて目的の1台を選べない。
+// 写真・グレード・走行距離は、その中から1台を見分けるための手がかりとして出す。
+//
+// 写真は台数ぶんの問い合わせにせず、1回で全件読んでから車両ごとに振り分ける
+// （在庫は数十台、写真も数百枚の規模なので、まとめて読むほうが速い）。
+export async function listAdminVehicles(): Promise<AdminVehicleListItem[]> {
+  const supabase = createAdminClient();
+
+  const [vehicles, photos] = await Promise.all([
+    supabase
+      .from("vehicles")
+      .select(
+        "id, status, price, model_year, mileage_km, display_order, updated_at, manufacturers(name), models(name), grades(name)",
+      )
+      .is("deleted_at", null)
+      .order("display_order", { ascending: true }),
+    supabase
+      .from("vehicle_photos")
+      .select("vehicle_id, storage_path, display_order")
+      .order("display_order", { ascending: true }),
+  ]);
+
+  const photoPathsByVehicle = new Map<string, string[]>();
+  for (const row of (photos.data ?? []) as Array<{
+    vehicle_id: string;
+    storage_path: string;
+  }>) {
+    const list = photoPathsByVehicle.get(row.vehicle_id) ?? [];
+    list.push(row.storage_path);
+    photoPathsByVehicle.set(row.vehicle_id, list);
+  }
+
+  const rows = (vehicles.data ?? []) as unknown as Array<
+    Omit<AdminVehicleListItem, "photoCount" | "leadPhotoUrl">
+  >;
+
+  return rows.map((vehicle) => {
+    const paths = photoPathsByVehicle.get(vehicle.id) ?? [];
+    return {
+      ...vehicle,
+      photoCount: paths.length,
+      leadPhotoUrl: paths[0] ? getVehiclePhotoPublicUrl(paths[0]) : null,
+    };
+  });
 }
 
 export async function getAdminVehicleById(id: string) {

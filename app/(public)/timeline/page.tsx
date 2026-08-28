@@ -13,6 +13,8 @@ import {
   timelineCategoryColors,
 } from "@/lib/timeline/schema";
 import { RelatedContentList } from "@/components/related/related-content-list";
+import { SiteText } from "@/components/live-edit/site-text";
+import { Editable } from "@/components/live-edit/editable";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
@@ -127,14 +129,22 @@ export default async function Page({
                   {timelineCategoryLabels[e.category]}
                 </p>
                 <h2 className="text-charcoal-900 mt-1 font-serif text-xl font-bold tracking-tight sm:text-2xl">
-                  {e.title}
+                  <Editable type="timeline_event" id={e.id} field="title">
+                    {e.title}
+                  </Editable>
                 </h2>
                 {e.body && (
-                  <div className="prose mt-2 max-w-none">
+                  <Editable
+                    type="timeline_event"
+                    id={e.id}
+                    field="body"
+                    as="div"
+                    className="prose mt-2 max-w-none"
+                  >
                     <Markdown>
                       {e.body}
                     </Markdown>
-                  </div>
+                  </Editable>
                 )}
                 <RelatedContentList
                   items={relatedByEvent[i]}
@@ -203,11 +213,20 @@ function Overview({
       />
       <Breadcrumb items={[{ label: "Jaguar年表" }]} />
       <h1 className="text-charcoal-900 mt-3 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-        Jaguar年表
+        <SiteText k="timeline.title" description="年表 見出し">
+          Jaguar年表
+        </SiteText>
       </h1>
+      {/* 件数を挟むため、前後の文を別々に持つ。
+          SiteText は文字列だけを扱う部品なので、数字を含めて1つにはできない。 */}
       <p className="text-foreground-muted mt-3 text-base leading-loose">
-        創業から現在までの{events.length}
-        件です。出来事を選ぶと、その年代の解説を読めます。
+        <SiteText k="timeline.lead.before" description="年表 冒頭の説明（件数の前）">
+          創業から現在までの
+        </SiteText>
+        {events.length}
+        <SiteText k="timeline.lead.after" description="年表 冒頭の説明（件数の後ろ）">
+          件です。出来事を選ぶと、その年代の解説を読めます。
+        </SiteText>
       </p>
 
       {decades.map((label) => {

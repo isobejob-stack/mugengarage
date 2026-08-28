@@ -42,6 +42,9 @@ const adminNavGroups: readonly AdminNavGroup[] = [
     label: "設定",
     items: [
       { label: "店舗情報・リンク", href: "/admin/site-settings" },
+      // 管理画面に入れる人の追加・パスワード変更（FR-ADM-002）。
+      // 以前はSupabaseの管理画面でSQLを書くしかなく、店主自身では増やせなかった。
+      { label: "管理アカウント", href: "/admin/accounts" },
       { label: "メディア", href: "/admin/media" },
       { label: "タグ", href: "/admin/tags" },
       { label: "テンプレート", href: "/admin/templates" },

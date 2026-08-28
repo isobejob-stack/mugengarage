@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listPublicOwnerArchiveEntries } from "@/lib/archive/queries";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import { SiteText } from "@/components/live-edit/site-text";
 
 // 静的生成されると管理画面でのオーナーズアーカイブの追加・編集が次回デプロイまで反映されないため、
 // リクエストごとに描画する（理由の詳細は app/(public)/blog/page.tsx のコメント参照）。
@@ -21,10 +22,14 @@ export default async function Page() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
       <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-        オーナーズアーカイブ
+        <SiteText k="ownersArchive.title" description="オーナーズアーカイブ 見出し">
+          オーナーズアーカイブ
+        </SiteText>
       </h1>
       <p className="text-foreground-muted mt-2">
-        これまでにご成約いただいた車両を、当店の実績としてご紹介します。
+        <SiteText k="ownersArchive.lead" description="オーナーズアーカイブ 冒頭の説明文">
+          これまでにご成約いただいた車両を、当店の実績としてご紹介します。
+        </SiteText>
       </p>
 
       {entries.length === 0 ? (

@@ -5,6 +5,7 @@ import { openingFromMarkdown } from "@/lib/knowledge/reading";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { buildPageMetadata, excerptFromMarkdown } from "@/lib/seo/metadata";
+import { SiteText } from "@/components/live-edit/site-text";
 
 // 静的生成されると管理画面での図鑑の追加・編集が次回デプロイまで反映されないため、
 // リクエストごとに描画する（理由の詳細は app/(public)/blog/page.tsx のコメント参照）。
@@ -45,10 +46,14 @@ export default async function Page() {
     <main className="mx-auto max-w-3xl px-4 py-8">
       <Breadcrumb items={[{ label: "Jaguar図鑑" }]} />
       <h1 className="text-charcoal-900 mt-3 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-        Jaguar図鑑
+        <SiteText k="encyclopedia.title" description="図鑑一覧 見出し">
+          Jaguar図鑑
+        </SiteText>
       </h1>
       <p className="text-foreground-muted mt-3 text-base leading-loose">
-        車種ごとの解説です。気になった車名から引いてください。
+        <SiteText k="encyclopedia.lead" description="図鑑一覧 冒頭の説明文">
+          車種ごとの解説です。気になった車名から引いてください。
+        </SiteText>
       </p>
       {/* この画面に直接来た人だけに、読み物の入口を1行で知らせる。
           「まず選ばせる」形に戻らないよう、ボタンにはしない。 */}
