@@ -70,7 +70,11 @@ export async function listAdminAccounts(): Promise<AdminAccount[]> {
 
 export type CreateAdminAccountResult =
   | { ok: true; account: AdminAccount }
-  | { ok: false; reason: "duplicate" | "weak_password" | "unknown"; message: string };
+  | {
+      ok: false;
+      reason: "duplicate" | "weak_password" | "unknown";
+      message: string;
+    };
 
 // 管理アカウントを作る。
 //

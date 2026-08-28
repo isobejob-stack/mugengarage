@@ -95,7 +95,10 @@ export async function PATCH(
     });
   }
 
-  const result = await updateAdminAccountPassword(id, passwordInput.data.password);
+  const result = await updateAdminAccountPassword(
+    id,
+    passwordInput.data.password,
+  );
   if (!result.ok) {
     return apiError({
       code: "INTERNAL_ERROR",

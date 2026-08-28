@@ -22,12 +22,18 @@ export default async function Page() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
       <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-        <SiteText k="ownersArchive.title" description="オーナーズアーカイブ 見出し">
+        <SiteText
+          k="ownersArchive.title"
+          description="オーナーズアーカイブ 見出し"
+        >
           オーナーズアーカイブ
         </SiteText>
       </h1>
       <p className="text-foreground-muted mt-2">
-        <SiteText k="ownersArchive.lead" description="オーナーズアーカイブ 冒頭の説明文">
+        <SiteText
+          k="ownersArchive.lead"
+          description="オーナーズアーカイブ 冒頭の説明文"
+        >
           これまでにご成約いただいた車両を、当店の実績としてご紹介します。
         </SiteText>
       </p>

@@ -30,6 +30,22 @@ export async function listAdminInquiries() {
   }>;
 }
 
+// ダッシュボードの「未対応の問い合わせ」の件数。
+//
+// 以前はここで listAdminInquiries() を呼び、全件を本文ごと読んでから
+// 画面側で filter().length を数えていた。表示に使うのは数字ひとつだけなのに、
+// 問い合わせが増えるほど読む量が増え続ける形になっていた。
+// 数えるのはDBに任せ、行そのものは持ってこない（head: true）。
+export async function countUnhandledInquiries(): Promise<number> {
+  const supabase = createAdminClient();
+  const { count } = await supabase
+    .from("inquiries")
+    .select("id", { count: "exact", head: true })
+    .eq("response_status", "unhandled");
+
+  return count ?? 0;
+}
+
 export async function getAdminInquiryById(id: string) {
   const supabase = createAdminClient();
   const { data } = await supabase

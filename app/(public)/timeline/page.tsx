@@ -61,9 +61,7 @@ export default async function Page({
   );
 
   if (!decade) {
-    return (
-      <Overview events={events} decades={decades} />
-    );
+    return <Overview events={events} decades={decades} />;
   }
 
   const filtered = events.filter((e) => decadeLabelOf(e.event_date) === decade);
@@ -83,10 +81,7 @@ export default async function Page({
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
       <Breadcrumb
-        items={[
-          { label: "Jaguar年表", href: "/timeline" },
-          { label: decade },
-        ]}
+        items={[{ label: "Jaguar年表", href: "/timeline" }, { label: decade }]}
       />
       <h1 className="text-charcoal-900 mt-3 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         {decade}のジャガー
@@ -141,9 +136,7 @@ export default async function Page({
                     as="div"
                     className="prose mt-2 max-w-none"
                   >
-                    <Markdown>
-                      {e.body}
-                    </Markdown>
+                    <Markdown>{e.body}</Markdown>
                   </Editable>
                 )}
                 <RelatedContentList
@@ -220,11 +213,17 @@ function Overview({
       {/* 件数を挟むため、前後の文を別々に持つ。
           SiteText は文字列だけを扱う部品なので、数字を含めて1つにはできない。 */}
       <p className="text-foreground-muted mt-3 text-base leading-loose">
-        <SiteText k="timeline.lead.before" description="年表 冒頭の説明（件数の前）">
+        <SiteText
+          k="timeline.lead.before"
+          description="年表 冒頭の説明（件数の前）"
+        >
           創業から現在までの
         </SiteText>
         {events.length}
-        <SiteText k="timeline.lead.after" description="年表 冒頭の説明（件数の後ろ）">
+        <SiteText
+          k="timeline.lead.after"
+          description="年表 冒頭の説明（件数の後ろ）"
+        >
           件です。出来事を選ぶと、その年代の解説を読めます。
         </SiteText>
       </p>

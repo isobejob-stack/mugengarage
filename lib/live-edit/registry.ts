@@ -74,7 +74,11 @@ export const EDITABLE_TARGETS: Record<string, EditableTargetConfig> = {
       // 公開ステータス・スラッグ・関連付けは、その場のクリックで変えると
       // 影響範囲が大きいためライブ編集の対象にしない（従来の編集画面で行う）。
       price: { label: "車両本体価格", input: "number", help: "円" },
-      total_price: { label: "支払総額", input: "number", help: "円・諸費用込み" },
+      total_price: {
+        label: "支払総額",
+        input: "number",
+        help: "円・諸費用込み",
+      },
       model_year: { label: "年式", input: "number", help: "西暦" },
       registration_year: { label: "登録年", input: "number", help: "西暦" },
       mileage_km: { label: "走行距離", input: "number", help: "km" },

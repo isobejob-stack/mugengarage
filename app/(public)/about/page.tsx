@@ -148,7 +148,10 @@ export default async function Page() {
       {storeInfoRows.length > 0 && (
         <section className="mt-12">
           <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
-            <SiteText k="about.store.heading" description="店舗情報 見出し（店舗情報の表）">
+            <SiteText
+              k="about.store.heading"
+              description="店舗情報 見出し（店舗情報の表）"
+            >
               店舗情報
             </SiteText>
           </h2>
@@ -189,7 +192,10 @@ export default async function Page() {
       {settings.access_info && (
         <section className="mt-12">
           <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
-            <SiteText k="about.access.heading" description="店舗情報 見出し（アクセス）">
+            <SiteText
+              k="about.access.heading"
+              description="店舗情報 見出し（アクセス）"
+            >
               アクセス
             </SiteText>
           </h2>
@@ -209,12 +215,18 @@ export default async function Page() {
       {settings.external_links.length > 0 && (
         <section className="mt-12">
           <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
-            <SiteText k="about.links.heading" description="店舗情報 見出し（掲載媒体・SNS）">
+            <SiteText
+              k="about.links.heading"
+              description="店舗情報 見出し（掲載媒体・SNS）"
+            >
               在庫車両の掲載媒体・公式SNS
             </SiteText>
           </h2>
           <p className="text-foreground-muted mt-2">
-            <SiteText k="about.links.lead" description="店舗情報 掲載媒体・SNSの説明文">
+            <SiteText
+              k="about.links.lead"
+              description="店舗情報 掲載媒体・SNSの説明文"
+            >
               最新の入庫状況や日々の作業の様子は、各媒体でもご覧いただけます。
             </SiteText>
           </p>
@@ -250,25 +262,37 @@ export default async function Page() {
 
       <section className="mt-12">
         <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
-          <SiteText k="about.contact.heading" description="店舗情報 見出し（お問い合わせ）">
+          <SiteText
+            k="about.contact.heading"
+            description="店舗情報 見出し（お問い合わせ）"
+          >
             お問い合わせ
           </SiteText>
         </h2>
         <p className="text-foreground-muted mt-2">
-          <SiteText k="about.contact.lead" description="店舗情報 ご来店前のお願い文">
+          <SiteText
+            k="about.contact.lead"
+            description="店舗情報 ご来店前のお願い文"
+          >
             ご来店をご希望の場合は、在庫状況と対応可能なお時間をご案内しますので、事前にご連絡ください。
           </SiteText>
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           {settings.line_url && (
             <Button href={settings.line_url} variant="line" size="lg">
-              <SiteText k="about.contact.line" description="店舗情報 LINEボタンの文言">
+              <SiteText
+                k="about.contact.line"
+                description="店舗情報 LINEボタンの文言"
+              >
                 LINEで相談する
               </SiteText>
             </Button>
           )}
           <Button href="/contact" variant="outline" size="lg">
-            <SiteText k="about.contact.form" description="店舗情報 問い合わせフォームボタンの文言">
+            <SiteText
+              k="about.contact.form"
+              description="店舗情報 問い合わせフォームボタンの文言"
+            >
               フォームから問い合わせる
             </SiteText>
           </Button>
@@ -277,7 +301,10 @@ export default async function Page() {
 
       <section className="mt-12">
         <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
-          <SiteText k="about.services.heading" description="店舗情報 見出し（取り扱い内容）">
+          <SiteText
+            k="about.services.heading"
+            description="店舗情報 見出し（取り扱い内容）"
+          >
             取り扱い内容
           </SiteText>
         </h2>

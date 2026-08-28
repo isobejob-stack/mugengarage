@@ -69,6 +69,7 @@ Public Website（公開サイト）とAdmin UI（管理画面）の全画面を�
 | SCR-ADM-026 | 公開画面を見ながら直す        | `/admin/live`                                                           | FR-ADM-010（2026-08-17追加）                   |
 | SCR-ADM-027 | リマインダー横断一覧          | `/admin/reminders`                                                      | FR-CRM-004                                     |
 | SCR-ADM-028 | 問い合わせ手動登録            | `/admin/inquiries/new`                                                  | FR-INQ-002                                     |
+| SCR-ADM-029 | 管理アカウント                | `/admin/accounts`                                                       | FR-ADM-002（2026-08-28追加）                   |
 
 ## 6. 画面遷移（主要フロー）
 

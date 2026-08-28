@@ -20,7 +20,8 @@ import type { AdminAccount } from "@/lib/auth/queries";
 // 紛らわしい文字（0とO、1とlとI）を最初から候補に入れない。
 // 紙に書いて渡す・電話で読み上げるという渡し方をするため、
 // 「打ち間違いようがない」ことのほうが、記号の多さより効いてくる。
-const PASSWORD_ALPHABET = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const PASSWORD_ALPHABET =
+  "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 function generatePassword(length = 16) {
   // Math.random ではなく暗号用の乱数を使う。
@@ -324,9 +325,7 @@ export function AdminAccountsManager({
                 <dd className="text-charcoal-900 font-mono">/admin/login</dd>
               </div>
               <div className="flex flex-wrap gap-2">
-                <dt className="text-foreground-muted w-32">
-                  メールアドレス
-                </dt>
+                <dt className="text-foreground-muted w-32">メールアドレス</dt>
                 <dd className="text-charcoal-900 font-mono break-all">
                   {justCreated.email}
                 </dd>

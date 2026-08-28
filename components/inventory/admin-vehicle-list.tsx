@@ -162,7 +162,10 @@ export function AdminVehicleList({
                     {/* 公開中なのに写真が無い車両は、いまお客様が見て落胆している画面。
                         一覧の時点で目立たせる。 */}
                     {v.photoCount === 0 && v.status === "published" && (
-                      <StatusBadge label="写真を追加してください" tone="danger" />
+                      <StatusBadge
+                        label="写真を追加してください"
+                        tone="danger"
+                      />
                     )}
                     <VehicleStatusBadge status={v.status as VehicleStatus} />
                     {v.status === "sold" && (

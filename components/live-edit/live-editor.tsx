@@ -373,8 +373,7 @@ export function LiveEditor() {
                 >
                   {saving ? "アップロード中..." : "この写真を追加する"}
                 </Button>
-                {EDITABLE_TARGETS[target.type]?.upload
-                  ?.manageePathTemplate && (
+                {EDITABLE_TARGETS[target.type]?.upload?.manageePathTemplate && (
                   <a
                     href={EDITABLE_TARGETS[
                       target.type
@@ -441,7 +440,8 @@ export function LiveEditor() {
 
             {fieldConfig?.input === "markdown" && (
               <p className="text-foreground-muted text-sm">
-                見出しは行頭に「## 」、箇条書きは「- 」、写真は「![説明](URL)」で入ります。
+                見出しは行頭に「## 」、箇条書きは「-
+                」、写真は「![説明](URL)」で入ります。
               </p>
             )}
 
