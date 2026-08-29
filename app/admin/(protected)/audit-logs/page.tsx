@@ -28,6 +28,14 @@ const TARGET_TYPE_LABELS: Record<string, string> = {
   customer_note: "顧客メモ",
   reminder: "リマインダー",
   inquiry: "問い合わせ",
+  tag: "タグ",
+  // ライブ編集（/admin/live）と管理アカウントからの記録。
+  // 訳が無いと "site_text" のような英語の識別子がそのまま画面に出て、
+  // 何を直したログなのか運用者には読み取れない。
+  site_text: "画面の文言",
+  site_settings: "店舗情報",
+  vehicle_photos: "車両写真",
+  admin_user: "管理アカウント",
 };
 
 function targetTypeLabel(targetType: string) {
@@ -53,7 +61,7 @@ export default async function Page() {
         監査ログ
       </h1>
       <p className="text-foreground-muted mt-2 text-base">
-        SCR-ADM-023 ・ FR-ADM-005
+        管理画面で行われた変更の記録です。新しいものから100件まで表示します。
       </p>
 
       {logs.length === 0 ? (

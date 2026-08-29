@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { listAdminInquiries, listOpenReminders } from "@/lib/crm/queries";
+import { countUnhandledInquiries, listOpenReminders } from "@/lib/crm/queries";
 import { getAdminFavoriteCounts } from "@/lib/engagement/queries";
 import {
   REMINDER_URGENCY_PRESET,
@@ -30,17 +30,13 @@ const DUE_SOON_DISPLAY_COUNT = 5;
 
 // SCR-ADM-002: ダッシュボード（未対応問い合わせ件数・対応期日・よく使う操作へのショートカット）
 export default async function Page() {
-  const [inquiries, reminders, favoriteCounts] = await Promise.all([
-    listAdminInquiries(),
+  const [unhandledCount, reminders, favoriteCounts] = await Promise.all([
+    countUnhandledInquiries(),
     // 未完了のリマインダーのみが対象で件数はたかが知れているため、
     // 件数の集計と表示用の抜粋を1回の取得でまかなう
     listOpenReminders(),
     getAdminFavoriteCounts(5),
   ]);
-
-  const unhandledCount = inquiries.filter(
-    (i) => i.response_status === "unhandled",
-  ).length;
 
   const today = todayInJst();
   // 「期限切れ」と「今日が期日」は、今日中に何かしないと約束を破ることになる件数
@@ -139,7 +135,10 @@ export default async function Page() {
                             {formatDueDate(reminder.due_date, today)}・
                             {describeDueDate(reminder.due_date, today)}
                           </span>
-                          <StatusBadge label={preset.label} tone={preset.tone} />
+                          <StatusBadge
+                            label={preset.label}
+                            tone={preset.tone}
+                          />
                         </span>
                       </Link>
                     </li>

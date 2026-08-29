@@ -49,6 +49,14 @@ type SpecRow = {
   value: string;
   fullWidth?: boolean;
   breakAll?: boolean;
+  /**
+   * ライブ編集で直せる行だけが持つ、vehicles の列名。
+   *
+   * 表示が1つの列とそのまま対応する行にだけ付ける。
+   * 「車検」（状態と満了日の2列から作る）や「修復歴」（真偽値を"あり/なし"に言い換える）は、
+   * 画面の文字を書き戻す形にできないため対象外とし、従来どおり編集画面で直す。
+   */
+  field?: string;
 };
 
 // 主要諸元の1行分。値が未登録（null/空文字）なら null を返し、呼び出し側で行ごと落とす。
@@ -57,7 +65,7 @@ type SpecRow = {
 function spec(
   label: string,
   value: string | null,
-  options: { fullWidth?: boolean; breakAll?: boolean } = {},
+  options: { fullWidth?: boolean; breakAll?: boolean; field?: string } = {},
 ): SpecRow | null {
   if (!value) return null;
   return { label, value, ...options };
@@ -240,60 +248,71 @@ export default async function Page({
     {
       title: "基本情報",
       rows: [
-        spec("年式", formatModelYear(vehicle.model_year)),
+        spec("年式", formatModelYear(vehicle.model_year), {
+          field: "model_year",
+        }),
         spec(
           "登録年",
           vehicle.registration_year === null
             ? null
             : `${vehicle.registration_year}年`,
+          { field: "registration_year" },
         ),
-        spec("走行距離", formatMileage(vehicle.mileage_km)),
+        spec("走行距離", formatMileage(vehicle.mileage_km), {
+          field: "mileage_km",
+        }),
         spec(
           "車検",
           formatShakenValue(vehicle.shaken_status, vehicle.shaken_expiry),
         ),
         spec("修復歴", formatYesNo(vehicle.accident_history)),
         spec("記録簿", formatYesNo(vehicle.has_record_book)),
-        spec("型式", vehicle.model_code),
+        spec("型式", vehicle.model_code, { field: "model_code" }),
         spec("ハンドル", formatSteeringSideValue(vehicle.steering_side)),
-        spec("ボディタイプ", vehicle.body_type),
+        spec("ボディタイプ", vehicle.body_type, { field: "body_type" }),
         spec(
           "乗車定員",
           vehicle.capacity === null ? null : `${vehicle.capacity}名`,
+          { field: "capacity" },
         ),
         spec(
           "ドア数",
           vehicle.door_count === null ? null : `${vehicle.door_count}ドア`,
+          { field: "door_count" },
         ),
-        spec("燃料", vehicle.fuel_type),
+        spec("燃料", vehicle.fuel_type, { field: "fuel_type" }),
       ],
     },
     {
       title: "エンジン・駆動",
       rows: [
-        spec("エンジン", vehicle.engine),
-        spec("エンジン型式", vehicle.engine_model_code),
+        spec("エンジン", vehicle.engine, { field: "engine" }),
+        spec("エンジン型式", vehicle.engine_model_code, {
+          field: "engine_model_code",
+        }),
         spec(
           "排気量",
           vehicle.displacement_cc === null
             ? null
             : `${vehicle.displacement_cc.toLocaleString()}cc`,
+          { field: "displacement_cc" },
         ),
         spec(
           "馬力",
           vehicle.horsepower === null ? null : `${vehicle.horsepower}ps`,
+          { field: "horsepower" },
         ),
-        spec("トルク", vehicle.torque),
-        spec("ミッション", vehicle.transmission),
-        spec("駆動方式", vehicle.drivetrain),
+        spec("トルク", vehicle.torque, { field: "torque" }),
+        spec("ミッション", vehicle.transmission, { field: "transmission" }),
+        spec("駆動方式", vehicle.drivetrain, { field: "drivetrain" }),
       ],
     },
     {
       title: "外装・内装",
       rows: [
-        spec("外装色", vehicle.exterior_color),
-        spec("内装色", vehicle.interior_color),
-        spec("シート素材", vehicle.seat_material),
+        spec("外装色", vehicle.exterior_color, { field: "exterior_color" }),
+        spec("内装色", vehicle.interior_color, { field: "interior_color" }),
+        spec("シート素材", vehicle.seat_material, { field: "seat_material" }),
       ],
     },
     {
@@ -319,8 +338,12 @@ export default async function Page({
         // 「禁煙車」は該当する場合のみ価値のある情報。falseのときに「喫煙車」と
         // 掲げるのは実車の状態以上に不利な印象を与えるため、trueのときだけ出す。
         spec("禁煙車", vehicle.is_non_smoking === true ? "禁煙車" : null),
-        spec("車両所在地", vehicle.location_text),
-        spec("車台番号", vehicle.vin, { fullWidth: true, breakAll: true }),
+        spec("車両所在地", vehicle.location_text, { field: "location_text" }),
+        spec("車台番号", vehicle.vin, {
+          fullWidth: true,
+          breakAll: true,
+          field: "vin",
+        }),
       ],
     },
   ]
@@ -357,16 +380,34 @@ export default async function Page({
       <div className="mt-2">
         {vehicle.total_price !== null ? (
           <>
-            <p className="text-primary-700 font-mono text-3xl font-bold tabular-nums">
-              ¥{vehicle.total_price.toLocaleString()}
-              <span className="text-foreground-muted ml-2 font-sans text-base font-medium">
-                支払総額（税込）
-              </span>
-            </p>
-            <p className="text-foreground-muted mt-1 font-mono text-lg tabular-nums">
-              ¥{vehicle.price.toLocaleString()}
-              <span className="ml-2 font-sans text-base">車両本体価格</span>
-            </p>
+            {/* 価格はこのページで一番見られる数字で、直したくなるのも一番多い。
+                お客様に見えている金額をそのまま押して直せるようにする。 */}
+            <Editable
+              type="vehicle"
+              id={vehicle.id}
+              field="total_price"
+              label="支払総額"
+              as="div"
+            >
+              <p className="text-primary-700 font-mono text-3xl font-bold tabular-nums">
+                ¥{vehicle.total_price.toLocaleString()}
+                <span className="text-foreground-muted ml-2 font-sans text-base font-medium">
+                  支払総額（税込）
+                </span>
+              </p>
+            </Editable>
+            <Editable
+              type="vehicle"
+              id={vehicle.id}
+              field="price"
+              label="車両本体価格"
+              as="div"
+            >
+              <p className="text-foreground-muted mt-1 font-mono text-lg tabular-nums">
+                ¥{vehicle.price.toLocaleString()}
+                <span className="ml-2 font-sans text-base">車両本体価格</span>
+              </p>
+            </Editable>
             {/* 支払総額と本体価格の差額＝諸費用（ISSUE-006 3.2）。
                 差額を説明せずに2つの金額だけを並べると「この差は何なのか」という
                 不信につながるため、金額と主な内訳の名目まで出す。
@@ -384,12 +425,20 @@ export default async function Page({
             )}
           </>
         ) : (
-          <p className="text-primary-700 font-mono text-3xl font-bold tabular-nums">
-            ¥{vehicle.price.toLocaleString()}
-            <span className="text-foreground-muted ml-2 font-sans text-base font-medium">
-              車両本体価格（税込）
-            </span>
-          </p>
+          <Editable
+            type="vehicle"
+            id={vehicle.id}
+            field="price"
+            label="車両本体価格"
+            as="div"
+          >
+            <p className="text-primary-700 font-mono text-3xl font-bold tabular-nums">
+              ¥{vehicle.price.toLocaleString()}
+              <span className="text-foreground-muted ml-2 font-sans text-base font-medium">
+                車両本体価格（税込）
+              </span>
+            </p>
+          </Editable>
         )}
       </div>
 
@@ -500,11 +549,31 @@ export default async function Page({
                   row.fullWidth ? "col-span-2 sm:col-span-3" : undefined
                 }
               >
-                <Row
-                  label={row.label}
-                  value={row.value}
-                  breakAll={row.breakAll}
-                />
+                {/* 諸元の1項目ずつをクリックで直せるようにする。
+                    価格や走行距離の打ち間違いに気付くのは、たいてい
+                    お客様に見えている画面を眺めているときなので、
+                    その場から編集画面の60項目を探しに行かずに済ませる。 */}
+                {row.field ? (
+                  <Editable
+                    type="vehicle"
+                    id={vehicle.id}
+                    field={row.field}
+                    label={row.label}
+                    as="div"
+                  >
+                    <Row
+                      label={row.label}
+                      value={row.value}
+                      breakAll={row.breakAll}
+                    />
+                  </Editable>
+                ) : (
+                  <Row
+                    label={row.label}
+                    value={row.value}
+                    breakAll={row.breakAll}
+                  />
+                )}
               </div>
             ))}
           </div>

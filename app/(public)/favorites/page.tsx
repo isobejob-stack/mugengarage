@@ -9,6 +9,7 @@ import { VehicleCardPrice } from "@/components/inventory/vehicle-price";
 import { VehicleCardSpecs } from "@/components/inventory/vehicle-card-specs";
 import { FavoriteIconButton } from "@/components/engagement/favorite-icon-button";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import { SiteText } from "@/components/live-edit/site-text";
 
 export const metadata = buildPageMetadata({
   title: "お気に入り",
@@ -38,7 +39,9 @@ export default async function Page() {
     <main className="mx-auto max-w-5xl px-4 py-8">
       <Breadcrumb items={[{ label: "お気に入り" }]} />
       <h1 className="text-charcoal-900 mt-3 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-        お気に入り一覧
+        <SiteText k="favorites.title" description="お気に入り一覧 見出し">
+          お気に入り一覧
+        </SiteText>
       </h1>
 
       {vehicles.length === 0 ? (

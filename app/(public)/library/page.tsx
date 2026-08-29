@@ -5,6 +5,7 @@ import { Card, CardBody, CardTitle, CardMeta } from "@/components/ui/card";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { SiteText } from "@/components/live-edit/site-text";
 
 export const metadata = buildPageMetadata({
   title: "ライブラリ",
@@ -56,10 +57,14 @@ export default async function Page({
     <main className="mx-auto max-w-3xl px-4 py-8">
       <Breadcrumb items={[{ label: "ライブラリ" }]} />
       <h1 className="text-charcoal-900 mt-3 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-        ライブラリ
+        <SiteText k="library.title" description="ライブラリ一覧 見出し">
+          ライブラリ
+        </SiteText>
       </h1>
       <p className="text-foreground-muted mt-2">
-        Jaguar関連の用語・知識を辞典形式でまとめています。
+        <SiteText k="library.lead" description="ライブラリ一覧 冒頭の説明文">
+          Jaguar関連の用語・知識を辞典形式でまとめています。
+        </SiteText>
       </p>
       {/* 蓄積そのものがこの店の価値なので、件数を数字で出す。
           絞り込み中は「全31語のうち何語か」が分かるようにする。 */}

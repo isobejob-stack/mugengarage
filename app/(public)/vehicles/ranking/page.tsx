@@ -7,6 +7,7 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { VehicleCardPrice } from "@/components/inventory/vehicle-price";
 import { VehicleCardSpecs } from "@/components/inventory/vehicle-card-specs";
+import { SiteText } from "@/components/live-edit/site-text";
 
 // 静的生成されるとお気に入り数が増えても順位が次回デプロイまで変わらないため、
 // リクエストごとに描画する（理由の詳細は app/(public)/blog/page.tsx のコメント参照）。
@@ -36,10 +37,14 @@ export default async function Page() {
         ]}
       />
       <h1 className="text-charcoal-900 mt-3 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-        人気ランキング
+        <SiteText k="ranking.title" description="人気ランキング 見出し">
+          人気ランキング
+        </SiteText>
       </h1>
       <p className="text-foreground-muted mt-2 text-base">
-        お気に入り登録数の多い車両をランキング形式で紹介します。
+        <SiteText k="ranking.lead" description="人気ランキング 冒頭の説明文">
+          お気に入り登録数の多い車両をランキング形式で紹介します。
+        </SiteText>
       </p>
 
       {ranking.length === 0 ? (

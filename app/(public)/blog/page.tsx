@@ -3,6 +3,7 @@ import { listPublicArticles } from "@/lib/content/queries";
 import { contentCategoryLabel } from "@/lib/content/categories";
 import { Card, CardBody, CardTitle, CardMeta } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { SiteText } from "@/components/live-edit/site-text";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
 // 検索条件（searchParams）を読まないページはNext.jsが既定でビルド時に静的生成する。
@@ -57,10 +58,14 @@ export default async function Page({
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
       <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-        ブログ
+        <SiteText k="blog.title" description="ブログ一覧 見出し">
+          ブログ
+        </SiteText>
       </h1>
       <p className="text-foreground-muted mt-2 text-base">
-        新着入庫のご紹介から、購入ガイド・整備記録・技術解説まで。クラシックJaguarとの付き合い方をお伝えします。
+        <SiteText k="blog.lead" description="ブログ一覧 冒頭の説明文">
+          新着入庫のご紹介から、購入ガイド・整備記録・技術解説まで。クラシックJaguarとの付き合い方をお伝えします。
+        </SiteText>
       </p>
 
       {categoryChips.length > 0 && (

@@ -13,7 +13,8 @@ export default async function Page() {
         リダイレクト一覧
       </h1>
       <p className="text-foreground-muted mt-2 text-base">
-        SCR-ADM-025 ・ FR-SEO-003
+        ページのURLを変えたときに、古いURLから新しいURLへ自動で転送するための記録です。
+        検索結果やお気に入りに残った古いURLでも、お客様が迷わずたどり着けます。
       </p>
 
       {redirects.length === 0 ? (

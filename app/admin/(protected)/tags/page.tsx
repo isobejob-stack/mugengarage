@@ -12,7 +12,7 @@ export default async function Page() {
         タグ管理
       </h1>
       <p className="text-foreground-muted mt-2 text-base">
-        SCR-ADM-024 ・ BR-DATA-003
+        車両や記事に付ける目印です。ここで追加したタグを、各編集画面から選べます。
       </p>
       <TagsManager initialTags={tags} />
     </main>

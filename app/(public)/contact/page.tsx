@@ -1,5 +1,6 @@
 import { InquiryForm } from "@/components/crm/inquiry-form";
 import { LineConsultationMenu } from "@/components/layout/line-consultation-menu";
+import { SiteText } from "@/components/live-edit/site-text";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getSiteSettings } from "@/lib/settings/queries";
 
@@ -22,7 +23,9 @@ export default async function Page() {
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
       <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-        お問い合わせ
+        <SiteText k="contact.title" description="お問い合わせ 見出し">
+          お問い合わせ
+        </SiteText>
       </h1>
       {/* LINEのURLが未設定のあいだ、LineConsultationMenu は何も描画しない。
           従来はそれを枠線付きのカードで囲み、さらに前後に「下記からLINEで」
@@ -31,10 +34,26 @@ export default async function Page() {
           初めて訪れた人には「リンクが壊れているサイト」に見える。
           カード枠ごと、文言ごと、LINE URLの有無で切り替える。 */}
       <p className="text-foreground-muted mt-2">
-        購入・修理・売却・部品・その他、Jaguarのことなら何でもご相談ください。
-        {settings.line_url
-          ? "お急ぎの方は下記からLINEでご相談いただけます。"
-          : "下記フォームよりお問い合わせください。"}
+        <SiteText k="contact.lead" description="お問い合わせ 冒頭の案内文">
+          購入・修理・売却・部品・その他、Jaguarのことなら何でもご相談ください。
+        </SiteText>
+        {/* LINEの有無で続く一文が変わるため、文言も別々に持つ。
+            1つにまとめると、片方を直したときにもう片方が置き去りになる。 */}
+        {settings.line_url ? (
+          <SiteText
+            k="contact.lead.line"
+            description="お問い合わせ 冒頭の案内文（LINEがあるとき）"
+          >
+            お急ぎの方は下記からLINEでご相談いただけます。
+          </SiteText>
+        ) : (
+          <SiteText
+            k="contact.lead.form"
+            description="お問い合わせ 冒頭の案内文（LINEが未設定のとき）"
+          >
+            下記フォームよりお問い合わせください。
+          </SiteText>
+        )}
       </p>
 
       {/* FR-LINE-002: カテゴリ別のLINE相談導線 */}
@@ -44,7 +63,12 @@ export default async function Page() {
             <LineConsultationMenu lineUrl={settings.line_url} />
           </div>
           <p className="text-foreground-muted mt-6 text-sm">
-            LINEでのご相談は即時性が高くおすすめです。じっくり文章で伝えたい方は下記フォームをご利用ください。
+            <SiteText
+              k="contact.form.lead"
+              description="お問い合わせ フォームへの案内文"
+            >
+              LINEでのご相談は即時性が高くおすすめです。じっくり文章で伝えたい方は下記フォームをご利用ください。
+            </SiteText>
           </p>
         </>
       )}
