@@ -143,6 +143,15 @@ export function AdminAccountsManager({
         <h2 className="text-charcoal-900 font-serif text-lg font-bold">
           いまログインできる人
         </h2>
+        {/* Supabaseのダッシュボードから直接作られたユーザーは、この表に出ても
+            管理画面には入れない。混同されないよう、一覧の前に断っておく。 */}
+        {accounts.some((a) => !a.isAdmin) && (
+          <p className="text-foreground-muted mt-2 text-base leading-relaxed">
+            「管理者ではありません」と付いているアカウントは、
+            パスワードが合っていても管理画面には入れません。
+            この画面から追加した人だけが入れます。
+          </p>
+        )}
         {toggleError && (
           <p className="mt-3 text-base text-red-600" role="alert">
             {toggleError}
@@ -170,10 +179,21 @@ export function AdminAccountsManager({
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center justify-end gap-3">
-                    <StatusBadge
-                      label={account.enabled ? "使えます" : "停止中"}
-                      tone={account.enabled ? "success" : "neutral"}
-                    />
+                    {/* 管理者として未登録のアカウントは、パスワードが合っていても
+                        管理画面に入れない（lib/api/require-admin.ts）。
+                        「使えます」と並べると、入れるはずの人が入れない理由を
+                        誰も追えなくなるため、状態として分けて出す。 */}
+                    {!account.isAdmin ? (
+                      <StatusBadge
+                        label="管理者ではありません"
+                        tone="warning"
+                      />
+                    ) : (
+                      <StatusBadge
+                        label={account.enabled ? "使えます" : "停止中"}
+                        tone={account.enabled ? "success" : "neutral"}
+                      />
+                    )}
                     <Button
                       type="button"
                       variant="outline"
@@ -188,6 +208,7 @@ export function AdminAccountsManager({
                       パスワードを変える
                     </Button>
                     {account.id !== currentUserId &&
+                      account.isAdmin &&
                       (account.enabled ? (
                         <Button
                           type="button"
