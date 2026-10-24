@@ -1,20 +1,31 @@
 import { z } from "zod";
-import type {
-  InquiryChannel,
-  InquiryResponseStatus,
-} from "@/lib/crm/types";
+import type { InquiryChannel, InquiryResponseStatus } from "@/lib/crm/types";
 
 // FR-INQ-001: 問い合わせフォームの入力スキーマ（SCR-PUB-017）
+//
+// 預かる個人情報を、返信に必要な最小限に絞る方針で組んでいる。
+//
+// 以前は「氏名（必須）＋電話番号＋メールアドレス」を並べて置いており、
+// 多くの人は3つとも埋めて送っていた。返信に要るのは連絡先1つだけなので、
+// 残りは「使わないのに預かって、漏れたら迷惑をかける」情報になる。
+// 持たない情報は漏れないし、消し忘れもしない。
+//
+//   - 連絡方法は電話／メールのどちらか1つを選び、選んだ側だけを受け取る
+//   - 氏名は任意。折り返しの呼びかけに使うだけで、無くても返信はできる
+export const inquiryContactMethods = ["phone", "email"] as const;
+export type InquiryContactMethod = (typeof inquiryContactMethods)[number];
+
+// 電話番号の形式。数字・ハイフン・空白・丸括弧・先頭の + だけを許す。
+// 厳密な桁数検証はしない（国際表記や内線表記を弾くと、正規の相談を落とす）。
+const PHONE_PATTERN = /^\+?[0-9０-９\-－\s()（）]{8,20}$/;
+
 export const inquiryFormSchema = z
   .object({
-    name: z.string().min(1, "お名前を入力してください"),
-    phone: z.string().nullable(),
-    email: z
-      .string()
-      .email("メールアドレスの形式が正しくありません")
-      .nullable()
-      .or(z.literal("")),
     category: z.enum(["purchase", "repair", "sale", "parts", "other"]),
+    contact_method: z.enum(inquiryContactMethods),
+    contact: z.string().trim().min(1, "連絡先を入力してください"),
+    // 任意。空文字で送られてくるので、保存側で null に寄せる。
+    name: z.string().trim().max(50, "お名前は50文字以内で入力してください"),
     message: z.string().min(1, "お問い合わせ内容を入力してください"),
     // ハニーポット（FR-INQ-001の補強 / docs/tasks/ISSUE-005）。
     // 画面上は視覚的にもスクリーンリーダーからも隠したダミー入力欄で、人間は絶対に入力しない。
@@ -24,18 +35,35 @@ export const inquiryFormSchema = z
     // 送信されないケース（古いキャッシュ等）も許容するためoptionalにする。
     website: z.string().optional(),
   })
-  .refine((data) => Boolean(data.phone) || Boolean(data.email), {
-    message: "電話番号かメールアドレスのいずれかを入力してください",
-    path: ["phone"],
+  // 形式の検証は、選ばれた連絡方法に対してだけ行う。
+  .superRefine((data, ctx) => {
+    if (data.contact_method === "email") {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contact)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "メールアドレスの形式が正しくありません",
+          path: ["contact"],
+        });
+      }
+      return;
+    }
+
+    if (!PHONE_PATTERN.test(data.contact)) {
+      ctx.addIssue({
+        code: "custom",
+        message: "電話番号の形式が正しくありません",
+        path: ["contact"],
+      });
+    }
   });
 
 export type InquiryFormValues = z.infer<typeof inquiryFormSchema>;
 
 export const emptyInquiryFormValues = {
-  name: "",
-  phone: "",
-  email: "",
   category: "purchase" as const,
+  contact_method: "phone" as const,
+  contact: "",
+  name: "",
   message: "",
   website: "",
 };
