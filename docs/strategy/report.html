@@ -826,6 +826,26 @@ footer.end { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--ru
         <li><div><b>公式LINEにオーナーズサークルの入口を作る</b>既存の顧客に案内し、最初の朝の集まりの日程を決める。</div></li>
         <li><div><b>「直し続ける」対応車種のリストを作る</b>店として責任を持てる範囲を言葉にする。</div></li>
       </ol>
+
+      <h3>用意した実行キットと新しい画面</h3>
+      <p>上の5つを含め、すぐに動けるよう手順書とひな形を作った。リポジトリの <span class="num">docs/strategy/kit/</span> にある。最初に読むのは HANDOVER.md。</p>
+      <div class="tbl wide">
+        <table>
+          <thead><tr><th>キット</th><th>中身</th></tr></thead>
+          <tbody>
+            <tr><td>S-1 N1インタビュー</td><td>候補の選び方、依頼文、質問ガイド、記録シート、まとめ方</td></tr>
+            <tr><td>S-2 オーナーズインタビュー</td><td>構成と質問、編集の型、コメント運営、同意書のひな形</td></tr>
+            <tr><td>S-3 維持費モデル</td><td>X300・XJSの法定費用を計算済み。整備費は店の記入欄</td></tr>
+            <tr><td>S-4 オーナーズサークル</td><td>LINEオープンチャットの設計、ルール、案内文、朝の集まりの企画書</td></tr>
+            <tr><td>S-5 直し続ける車種</td><td>Jaguar Classicの部品対応を下敷きにした下書き。店の確認欄つき</td></tr>
+            <tr><td>S-6 12週間のコンテンツ</td><td>週ごとの企画表、「最後の本物のJaguar」台本3本、あるある図鑑10項目</td></tr>
+            <tr><td>S-7 トーン＆マナー</td><td>言葉づかい、やらないこと、公開前チェック、炎上時の対応</td></tr>
+            <tr><td>S-8 はじめてのJaguar</td><td>入門パッケージの構成と価格の示し方</td></tr>
+            <tr><td>S-9 業界の公共財</td><td>レジストリ、相場レポート、英国クラシック連合イベントの設計</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>サイトには、維持費ガイド（/jaguar/running-costs）と整備と部品のページ（/jaguar/keep-running）を新設し、オーナーズアーカイブの「オーナーの声」と、車両ページの「購入前にお伝えしたいこと」を表示できるようにした。DBの変更はなく、本文はすべて管理画面の「画面を見ながら直す」から書き換えられる。反映はPR #9のマージ後になる。</p>
     </section>
 
     <!-- 08 METHOD -->
