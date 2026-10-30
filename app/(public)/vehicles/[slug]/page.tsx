@@ -203,8 +203,6 @@ export default async function Page({
     ["エンジンの特徴", vehicle.engine_features, "engine_features"],
     ["よくある故障", vehicle.common_issues, "common_issues"],
     ["維持費", vehicle.maintenance_cost, "maintenance_cost"],
-    // FR-VEH-011: 気になる点・今後必要な整備を先に開示する（購入時の注意点の列）
-    ["購入前にお伝えしたいこと", vehicle.purchase_notes, "purchase_notes"],
   ];
 
   // FR-SEO-002: 構造化データ（JSON-LD）。canonical URLはgenerateMetadataと同じ導出ロジックを使う

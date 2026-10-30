@@ -735,14 +735,6 @@ export function VehicleForm({
             register={register}
             watch={watch}
           />
-          {/* FR-VEH-011: 購入前の開示。弱点や手間を先に書いておくことが、
-              かえって信頼と成約につながる（docs/strategy/03 Bring a Trailerの事例）。 */}
-          <TextAreaField
-            label="購入前にお伝えしたいこと（気になる点・今後必要な整備など）"
-            name="purchase_notes"
-            register={register}
-            watch={watch}
-          />
         </div>
       </section>
 

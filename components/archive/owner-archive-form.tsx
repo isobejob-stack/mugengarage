@@ -64,13 +64,8 @@ export function OwnerArchiveForm({
         <textarea rows={8} className="input" {...register("sales_history")} />
       </Field>
 
-      {/* FR-OWN-004: 公開画面に「オーナーの声」として表示する。
-          本人の許可を得た内容だけを入力する運用（BR-CONTENT-003）を、入力欄の真下で伝える。 */}
-      <Field label="オーナーの声（Markdown、任意）">
+      <Field label="オーナーコメント（将来公開予定、現時点では非表示）">
         <textarea rows={4} className="input" {...register("owner_comment")} />
-        <span className="text-foreground-muted mt-1 block text-sm">
-          入力すると、公開画面に「オーナーの声」として表示されます。オーナーご本人の許可を得た言葉だけを入れてください。インタビュー動画は、車両の編集画面で動画として登録すると、このページの写真と一緒に表示されます。
-        </span>
       </Field>
 
       <label className="text-charcoal-900 flex min-h-11 items-center gap-2 text-base font-medium">

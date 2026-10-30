@@ -2,1013 +2,289 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
-/* Layout: a strategy dossier. Sticky contents rail on the left (desktop), one reading column, figures break slightly wider. */
+/* Layout: a plain working document. One reading column, tables carry the facts, contents list at the top. */
 :root {
-  --bg: #F2F4F1;
-  --surface: #FAFBF9;
-  --ink: #16201B;
-  --ink-2: #3B4842;
-  --muted: #66736B;
-  --rule: #D3DBD5;
-  --green: #1E5A43;      /* British racing green, used for headings accents and links */
-  --mark: #1C7E55;       /* chart mark, validated vs surface */
-  --brass: #7D5F22;      /* brass trim: emphasis and revenue nodes */
-  --brass-soft: #F1E9D8;
-  --green-soft: #E3EEE7;
-  --chip-strong: #1E5A43; --chip-strong-fg: #FAFBF9;
-  --chip-mid: #CFE3D6; --chip-mid-fg: #16201B;
-  --chip-weak: #ECEFEC; --chip-weak-fg: #3B4842;
-  --chip-none: transparent; --chip-none-fg: #66736B;
-  --f-display: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --bg: #F4F6F4;
+  --surface: #FFFFFF;
+  --ink: #18211C;
+  --ink-2: #3E4A44;
+  --muted: #67736C;
+  --rule: #D6DDD8;
+  --accent: #1E5A43;
+  --accent-soft: #E6EFEA;
+  --warn-soft: #F6EEDC;
+  --warn: #7A5A1C;
   --f-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
-  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-  --s-1: 0.8125rem; --s0: 1rem; --s1: 1.1875rem; --s2: 1.5rem; --s3: 2rem; --s4: 2.75rem;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0F1512; --surface: #151D19; --ink: #E5ECE7; --ink-2: #BAC6BE; --muted: #8C998F; --rule: #2B3631;
-    --green: #8CCBAA; --mark: #3AA878; --brass: #D2AE66; --brass-soft: #2A2416; --green-soft: #18271F;
-    --chip-strong: #8CCBAA; --chip-strong-fg: #0F1512; --chip-mid: #24402F; --chip-mid-fg: #E5ECE7;
-    --chip-weak: #1C2420; --chip-weak-fg: #BAC6BE; --chip-none-fg: #8C998F;
+    --bg: #101512; --surface: #161D19; --ink: #E4EAE6; --ink-2: #BAC5BE; --muted: #8D998F; --rule: #2C3631;
+    --accent: #8CCBAA; --accent-soft: #1A2A21; --warn-soft: #2A2416; --warn: #D7B573;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0F1512; --surface: #151D19; --ink: #E5ECE7; --ink-2: #BAC6BE; --muted: #8C998F; --rule: #2B3631;
-  --green: #8CCBAA; --mark: #3AA878; --brass: #D2AE66; --brass-soft: #2A2416; --green-soft: #18271F;
-  --chip-strong: #8CCBAA; --chip-strong-fg: #0F1512; --chip-mid: #24402F; --chip-mid-fg: #E5ECE7;
-  --chip-weak: #1C2420; --chip-weak-fg: #BAC6BE; --chip-none-fg: #8C998F;
+  --bg: #101512; --surface: #161D19; --ink: #E4EAE6; --ink-2: #BAC5BE; --muted: #8D998F; --rule: #2C3631;
+  --accent: #8CCBAA; --accent-soft: #1A2A21; --warn-soft: #2A2416; --warn: #D7B573;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
 body {
   background: var(--bg); color: var(--ink);
-  font-family: var(--f-body); font-size: 16px; line-height: 1.85;
+  font-family: var(--f-body); font-size: 16px; line-height: 1.8;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 0 64px;
-  -webkit-font-smoothing: antialiased;
 }
-a { color: var(--green); text-underline-offset: 3px; }
-a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; border-radius: 2px; }
-.shell { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 56px; }
-@media (max-width: 900px) { .shell { grid-template-columns: minmax(0, 1fr); gap: 0; } .rail { display: none; } }
-
-/* Contents rail */
-.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 32px); align-self: start; padding-top: 40px; font-size: var(--s-1); }
-.rail p { font-family: var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; font-size: 0.72rem; }
-.rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-.rail a { display: grid; grid-template-columns: 2.2em 1fr; text-decoration: none; color: var(--ink-2); padding: 5px 8px; border-radius: 4px; line-height: 1.5; }
-.rail a span { font-family: var(--f-mono); color: var(--muted); }
-.rail a:hover { background: var(--green-soft); color: var(--ink); }
-.mobile-toc { display: none; margin: 24px 0 0; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
-.mobile-toc summary { cursor: pointer; padding: 10px 14px; font-weight: 500; }
-.mobile-toc ol { margin: 0; padding: 0 14px 12px 2.2em; }
-@media (max-width: 900px) { .mobile-toc { display: block; } }
-
-main { min-width: 0; max-width: 760px; }
-
-/* Cover */
-.cover { padding-top: 56px; padding-bottom: 40px; border-bottom: 1px solid var(--rule); }
-.eyebrow { font-family: var(--f-mono); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brass); margin: 0 0 18px; }
-.cover h1 { font-family: var(--f-display); font-weight: 700; font-size: clamp(2.1rem, 5.4vw, 3.4rem); line-height: 1.2; letter-spacing: 0.02em; margin: 0 0 18px; text-wrap: balance; }
-.cover .lede { font-size: var(--s1); color: var(--ink-2); margin: 0 0 28px; max-width: 34em; line-height: 1.75; }
-.meta { display: flex; flex-wrap: wrap; gap: 8px 28px; font-size: var(--s-1); color: var(--muted); margin: 0; padding: 0; list-style: none; }
-.meta b { color: var(--ink-2); font-weight: 500; }
-
-/* Sections */
-section { padding-top: 64px; scroll-margin-top: 24px; }
-.step { font-family: var(--f-mono); font-size: 0.75rem; letter-spacing: 0.12em; color: var(--brass); text-transform: uppercase; margin: 0 0 8px; }
-h2 { font-family: var(--f-display); font-weight: 700; font-size: clamp(1.6rem, 3.6vw, var(--s3)); line-height: 1.35; margin: 0 0 12px; text-wrap: balance; }
-h3 { font-family: var(--f-display); font-weight: 700; font-size: var(--s1); line-height: 1.5; margin: 40px 0 10px; text-wrap: balance; }
-h4 { font-size: var(--s0); font-weight: 700; margin: 0 0 6px; }
-p { margin: 0 0 16px; }
-.kicker { font-size: var(--s1); color: var(--ink-2); line-height: 1.75; margin-bottom: 24px; }
-.so { border-left: 3px solid var(--brass); padding: 4px 0 4px 16px; margin: 20px 0; font-weight: 500; }
-.so b { color: var(--brass); font-family: var(--f-mono); font-weight: 500; font-size: 0.78rem; letter-spacing: 0.08em; display: block; margin-bottom: 2px; }
-ul.plain, ol.plain { padding-left: 1.3em; margin: 0 0 16px; }
-ul.plain li, ol.plain li { margin-bottom: 6px; }
-.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
-small, .note { font-size: var(--s-1); color: var(--muted); }
-
-/* Executive summary */
-.answer { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 24px; margin: 8px 0 28px; }
-.answer .tag { font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.12em; color: var(--brass); text-transform: uppercase; margin: 0 0 8px; }
-.answer p.big { font-family: var(--f-display); font-size: clamp(1.3rem, 3vw, 1.6rem); line-height: 1.55; font-weight: 700; margin: 0; text-wrap: balance; }
-.pillars { display: grid; gap: 0; margin: 0 0 24px; padding: 0; list-style: none; counter-reset: p; }
-.pillars li { display: grid; grid-template-columns: 7.5em minmax(0, 1fr); gap: 16px; padding: 16px 0; border-top: 1px solid var(--rule); }
-.pillars li:last-child { border-bottom: 1px solid var(--rule); }
-.pillars .lbl { font-weight: 700; color: var(--green); }
-.pillars p { margin: 0; }
-@media (max-width: 520px) { .pillars li { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
-
-.trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 16px 0 8px; }
-.trio > div { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; min-width: 0; }
-.trio h4 { font-family: var(--f-display); color: var(--green); }
-.trio p { margin: 0; font-size: 0.92rem; line-height: 1.7; }
-@media (max-width: 640px) { .trio { grid-template-columns: minmax(0, 1fr); } }
-
-/* Stats row */
-.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); margin: 24px 0; }
-.stats > div { padding: 16px 16px 16px 0; min-width: 0; }
-.stats > div + div { padding-left: 16px; border-left: 1px solid var(--rule); }
-.stats .v { font-family: var(--f-mono); font-size: 1.7rem; font-weight: 500; line-height: 1.2; font-variant-numeric: tabular-nums; color: var(--ink); }
-.stats .v small { font-size: 0.85rem; color: var(--ink-2); margin-left: 2px; }
-.stats .k { font-size: var(--s-1); color: var(--ink-2); line-height: 1.55; margin-top: 6px; }
-.stats .src { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
-@media (max-width: 640px) { .stats { grid-template-columns: minmax(0, 1fr); } .stats > div + div { padding-left: 0; border-left: 0; border-top: 1px solid var(--rule); } }
-
-/* Tables */
-.tbl { overflow-x: auto; margin: 16px 0 24px; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+main { max-width: 760px; margin: 0 auto; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+header.top { padding: 40px 0 24px; border-bottom: 1px solid var(--rule); }
+.meta { font-family: var(--f-mono); font-size: 0.75rem; color: var(--muted); letter-spacing: 0.06em; margin: 0 0 10px; }
+h1 { font-size: clamp(1.6rem, 4.6vw, 2.2rem); line-height: 1.35; margin: 0 0 10px; text-wrap: balance; }
+.lede { color: var(--ink-2); margin: 0; }
+nav.toc { margin: 20px 0 0; }
+nav.toc ol { margin: 0; padding-left: 1.4em; columns: 2; column-gap: 32px; font-size: 0.92rem; }
+@media (max-width: 520px) { nav.toc ol { columns: 1; } }
+section { padding-top: 44px; scroll-margin-top: 16px; }
+h2 { font-size: 1.35rem; line-height: 1.4; margin: 0 0 12px; padding-bottom: 6px; border-bottom: 2px solid var(--accent); text-wrap: balance; }
+h3 { font-size: 1.05rem; margin: 24px 0 8px; }
+p { margin: 0 0 12px; }
+ol.plain, ul.plain { margin: 0 0 12px; padding-left: 1.4em; }
+ol.plain li, ul.plain li { margin-bottom: 4px; }
+.box { background: var(--accent-soft); border-radius: 6px; padding: 16px 18px; margin: 0 0 16px; }
+.box p:last-child, .box ol:last-child { margin-bottom: 0; }
+.note { background: var(--warn-soft); border-radius: 6px; padding: 12px 16px; font-size: 0.92rem; margin: 12px 0; }
+.note b { color: var(--warn); }
+.tbl { overflow-x: auto; margin: 8px 0 16px; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
 table { border-collapse: collapse; width: 100%; font-size: 0.9rem; line-height: 1.65; }
-th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--rule); }
 tr:last-child td { border-bottom: 0; }
-th { font-weight: 700; color: var(--ink-2); font-size: 0.8rem; background: var(--bg); white-space: nowrap; }
-td.n { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.wide table { min-width: 640px; }
-
-.chip { display: inline-block; min-width: 1.9em; text-align: center; padding: 1px 7px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; line-height: 1.6; }
-.c3 { background: var(--chip-strong); color: var(--chip-strong-fg); }
-.c2 { background: var(--chip-mid); color: var(--chip-mid-fg); }
-.c1 { background: var(--chip-weak); color: var(--chip-weak-fg); }
-.c0 { background: var(--chip-none); color: var(--chip-none-fg); border: 1px dashed var(--rule); }
-.pri { font-family: var(--f-mono); font-size: 0.75rem; font-weight: 500; color: var(--brass); white-space: nowrap; }
-
-/* Figures */
-figure { margin: 28px 0; padding: 20px; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; }
-figure .ft { font-weight: 700; margin: 0 0 2px; font-size: 0.95rem; }
-figure .fs { font-size: var(--s-1); color: var(--muted); margin: 0 0 12px; }
-figcaption { font-size: var(--s-1); color: var(--muted); margin-top: 10px; line-height: 1.6; }
-.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
-.chart .bar { fill: var(--mark); }
-.chart .bar.hl { fill: var(--brass); }
-.chart .bar:hover, .chart .hit:focus + .bar { opacity: 0.85; }
-.chart .grid { stroke: var(--rule); stroke-width: 1; }
-.chart .base { stroke: var(--ink-2); stroke-width: 1; }
-.chart text { fill: var(--ink-2); font-family: var(--f-mono); font-size: 12px; }
-.chart text.val { fill: var(--ink); font-weight: 500; font-size: 13px; }
-.chart .hit { fill: transparent; cursor: default; }
-.chart details { margin-top: 10px; font-size: var(--s-1); }
-.chart details summary { cursor: pointer; color: var(--ink-2); }
-.chart details table { margin-top: 8px; }
-.charts2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.charts2 figure { margin: 0; }
-@media (max-width: 640px) { .charts2 { grid-template-columns: minmax(0, 1fr); } }
-#tip { position: fixed; pointer-events: none; z-index: 20; background: var(--ink); color: var(--bg); font-size: 0.8rem; padding: 6px 10px; border-radius: 4px; line-height: 1.5; max-width: 260px; }
-
-/* Diagram helpers */
-.diagram svg { display: block; width: 100%; height: auto; }
-.diagram text { font-family: var(--f-body); fill: var(--ink); }
-.vchain { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-.vchain > div { min-width: 0; border-top: 3px solid var(--green); padding: 10px 10px 0; background: var(--bg); border-radius: 0 0 4px 4px; padding-bottom: 10px; }
-.vchain > div.culture { border-top-color: var(--brass); background: var(--brass-soft); }
-.vchain h4 { font-size: 0.85rem; margin-bottom: 4px; }
-.vchain ul { margin: 0; padding-left: 1.1em; font-size: 0.82rem; line-height: 1.6; color: var(--ink-2); }
-.vchain .flow { font-family: var(--f-mono); font-size: 0.7rem; color: var(--muted); margin-top: 6px; }
-@media (max-width: 640px) { .vchain { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-
-.timeline { list-style: none; margin: 16px 0 24px; padding: 0; border-left: 2px solid var(--rule); }
-.timeline li { position: relative; padding: 0 0 18px 20px; }
-.timeline li::before { content: ""; position: absolute; left: -7px; top: 9px; width: 12px; height: 12px; border-radius: 50%; background: var(--surface); border: 2px solid var(--green); }
-.timeline li.key::before { background: var(--brass); border-color: var(--brass); }
-.timeline .when { font-family: var(--f-mono); font-size: 0.78rem; color: var(--muted); display: block; }
-
-.cases { display: grid; gap: 14px; margin: 16px 0; }
-.case { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 18px 20px; }
-.case header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-bottom: 10px; }
-.case h4 { font-family: var(--f-display); font-size: 1.1rem; margin: 0; }
-.case .heat { font-family: var(--f-mono); font-size: 0.72rem; color: var(--brass); letter-spacing: 0.04em; }
-.case dl { display: grid; grid-template-columns: 4.8em minmax(0, 1fr); gap: 6px 12px; margin: 0; font-size: 0.92rem; line-height: 1.7; }
-.case dt { font-size: 0.78rem; font-weight: 700; color: var(--muted); padding-top: 2px; }
-.case dd { margin: 0; min-width: 0; }
-.case dd.tr { color: var(--green); font-weight: 500; }
-@media (max-width: 520px) { .case dl { grid-template-columns: minmax(0, 1fr); gap: 0 0; } .case dd { margin-bottom: 8px; } }
-
-.voices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0 24px; }
-.voice { margin: 0; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 16px 18px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
-.voice blockquote { margin: 0; font-family: var(--f-display); font-size: 1.02rem; line-height: 1.7; }
-.voice .who { font-size: 0.78rem; color: var(--muted); }
-.voice .read { font-size: 0.85rem; color: var(--green); border-top: 1px dashed var(--rule); padding-top: 8px; margin-top: auto; }
-@media (max-width: 640px) { .voices { grid-template-columns: minmax(0, 1fr); } }
-
-.insight { display: grid; grid-template-columns: 3em minmax(0, 1fr); gap: 4px 12px; padding: 14px 0; border-top: 1px solid var(--rule); }
-.insight .id { font-family: var(--f-mono); color: var(--brass); font-weight: 500; }
-.insight h4 { font-family: var(--f-display); font-size: 1.05rem; line-height: 1.6; }
-.insight p { margin: 0; color: var(--ink-2); font-size: 0.95rem; }
-
-.journey { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin: 8px 0 0; }
-.journey > div { min-width: 0; background: var(--bg); border-radius: 4px; padding: 10px 8px; font-size: 0.8rem; line-height: 1.55; display: flex; flex-direction: column; gap: 6px; }
-.journey b { font-family: var(--f-display); font-size: 0.95rem; color: var(--green); }
-.journey .cold { color: var(--brass); font-weight: 500; border-top: 1px dashed var(--brass); padding-top: 6px; margin-top: auto; }
-@media (max-width: 760px) { .journey { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-
-.tree { font-size: 0.9rem; line-height: 1.6; }
-.tree > p { font-weight: 700; margin-bottom: 10px; }
-.tree .branches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.tree .br { background: var(--bg); border-radius: 6px; padding: 12px 14px; min-width: 0; }
-.tree .br.struct { background: var(--brass-soft); }
-.tree .br h4 { font-size: 0.9rem; }
-.tree .br ul { margin: 0; padding-left: 1.1em; color: var(--ink-2); }
-.tree .who { font-family: var(--f-mono); font-size: 0.7rem; color: var(--muted); display: block; margin-top: 6px; }
-@media (max-width: 640px) { .tree .branches { grid-template-columns: minmax(0, 1fr); } }
-
-.statement { background: var(--green); color: var(--surface); border-radius: 8px; padding: 26px 24px; margin: 16px 0 24px; }
-:root .statement { --st-fg: var(--surface); }
-.statement .tag { font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.8; margin: 0 0 6px; }
-.statement p.big { font-family: var(--f-display); font-size: clamp(1.35rem, 3.2vw, 1.75rem); font-weight: 700; line-height: 1.5; margin: 0 0 14px; text-wrap: balance; }
-.statement ol { margin: 0; padding-left: 1.3em; line-height: 1.75; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .statement { background: var(--green-soft); color: var(--ink); border: 1px solid var(--rule); } }
-:root[data-theme="dark"] .statement { background: var(--green-soft); color: var(--ink); border: 1px solid var(--rule); }
-.dont { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; }
-.dont li { font-size: 0.82rem; border: 1px solid var(--rule); border-radius: 999px; padding: 2px 10px; color: var(--ink-2); background: var(--surface); }
-
-.layers { display: grid; gap: 16px; margin: 16px 0; }
-.layer { border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); overflow: hidden; }
-.layer > header { padding: 14px 18px; border-bottom: 1px solid var(--rule); display: grid; gap: 2px; }
-.layer > header .lv { font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.1em; color: var(--brass); text-transform: uppercase; }
-.layer > header h4 { font-family: var(--f-display); font-size: 1.15rem; margin: 0; }
-.layer > header p { margin: 0; font-size: 0.88rem; color: var(--ink-2); }
-.layer .tbl { margin: 0; border: 0; border-radius: 0; }
-
-.roadmap { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 16px 0 24px; }
-.phase { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 14px; min-width: 0; display: flex; flex-direction: column; gap: 10px; font-size: 0.86rem; line-height: 1.6; }
-.phase .when { font-family: var(--f-mono); font-size: 0.75rem; color: var(--brass); }
-.phase h4 { font-family: var(--f-display); font-size: 1.05rem; margin: 0; }
-.phase .k { font-size: 0.72rem; font-weight: 700; color: var(--muted); letter-spacing: 0.06em; display: block; }
-.phase ul { margin: 0; padding-left: 1.1em; }
-.phase .fire { border-top: 1px dashed var(--brass); padding-top: 8px; }
-@media (max-width: 760px) { .roadmap { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 460px) { .roadmap { grid-template-columns: minmax(0, 1fr); } }
-
-.week { counter-reset: w; list-style: none; padding: 0; margin: 16px 0; display: grid; gap: 10px; }
-.week li { counter-increment: w; display: grid; grid-template-columns: 2.2em minmax(0, 1fr); gap: 10px; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px; }
-.week li::before { content: counter(w); font-family: var(--f-mono); color: var(--brass); font-weight: 500; }
-.week b { display: block; }
-
-.sources { font-size: 0.82rem; line-height: 1.7; color: var(--ink-2); }
-.sources h4 { font-size: 0.85rem; margin: 18px 0 6px; color: var(--ink); }
-.sources ul { margin: 0; padding-left: 1.2em; }
-.sources li { margin-bottom: 3px; overflow-wrap: anywhere; }
-footer.end { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--rule); font-size: var(--s-1); color: var(--muted); }
-
-@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+th { background: var(--bg); color: var(--ink-2); font-size: 0.8rem; white-space: nowrap; }
+td.n { font-family: var(--f-mono); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.wide table { min-width: 560px; }
+pre.flow { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; overflow-x: auto; font-family: var(--f-mono); font-size: 0.8rem; line-height: 1.7; color: var(--ink); margin: 8px 0 16px; }
+.sources { font-size: 0.82rem; color: var(--ink-2); }
+.sources li { overflow-wrap: anywhere; margin-bottom: 2px; }
+footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--rule); font-size: 0.85rem; color: var(--muted); }
 </style>
 
-<div class="shell">
-  <nav class="rail" aria-label="目次">
-    <p>Contents</p>
-    <ol>
-      <li><a href="#summary"><span>00</span>要旨</a></li>
-      <li><a href="#market"><span>01</span>市場構造</a></li>
-      <li><a href="#jaguar"><span>02</span>Jaguarの現在地</a></li>
-      <li><a href="#cases"><span>03</span>他業界の型</a></li>
-      <li><a href="#users"><span>04</span>N1の声</a></li>
-      <li><a href="#synthesis"><span>05</span>分析と統合</a></li>
-      <li><a href="#strategy"><span>06</span>戦略</a></li>
-      <li><a href="#execution"><span>07</span>実行計画</a></li>
-      <li><a href="#method"><span>08</span>方法と出典</a></li>
-    </ol>
-  </nav>
-
-  <main>
-    <header class="cover">
-      <p class="eyebrow">M-GARAGE Strategy Report · 2026.10</p>
-      <h1>クラシックJaguar継承戦略</h1>
-      <p class="lede">市場構造の分析、他業界の事例、オーナーの声から、クラシックJaguarの界隈を育て、事業を伸ばすためのコミュニティファーストの戦略をまとめる。</p>
-      <ul class="meta">
-        <li><b>対象</b> エムガレージ（クラシックJaguar専門店）</li>
-        <li><b>調査日</b> 2026年10月30日</li>
-        <li><b>範囲</b> 業界戦略と事業戦略</li>
-      </ul>
-      <details class="mobile-toc">
-        <summary>目次</summary>
-        <ol>
-          <li><a href="#summary">要旨</a></li>
-          <li><a href="#market">市場構造</a></li>
-          <li><a href="#jaguar">Jaguarの現在地</a></li>
-          <li><a href="#cases">他業界の型</a></li>
-          <li><a href="#users">N1の声</a></li>
-          <li><a href="#synthesis">分析と統合</a></li>
-          <li><a href="#strategy">戦略</a></li>
-          <li><a href="#execution">実行計画</a></li>
-          <li><a href="#method">方法と出典</a></li>
-        </ol>
-      </details>
-    </header>
-
-    <!-- 00 SUMMARY -->
-    <section id="summary">
-      <p class="step">00 · Executive summary</p>
-      <h2>要旨</h2>
-      <div class="statement">
-        <p class="tag">2026.10.31 改訂</p>
-        <p class="big">3人で回せる形に絞り込んだ。中核は「洗車×オーナーズインタビュー」。</p>
-        <ol>
-          <li><b>徹底洗車を入口にする。</b>1回の来店で、動画の撮影、成功者インタビュー、点検、関係づくりをまとめて行う</li>
-          <li><b>動画は2段構造にする。</b>車好き向けの洗車・愛車紹介で広く届け、オーナーの話で深く残す</li>
-          <li><b>洗車は繰り返し来る理由になる。</b>コアオーナーとの接触回数が増え、乗り換えや買取の相談が、営業をかけなくても生まれる</li>
-        </ol>
-        <p style="margin:12px 0 0">維持費ガイドの公開（費用が上ぶれした時の信頼リスクがあるため）と、朝の集まり・サークル・連合イベントは、撤回または凍結した。以下の本文は改訂前の全体像で、詳細はリポジトリの docs/strategy/07 と kit/S10 にある。</p>
-      </div>
-      <div class="answer">
-        <p class="tag">結論</p>
-        <p class="big">エムガレージは、クラシックJaguarの「記録者」「伴走者」「主催者」になる。そして、オーナーが語り、次の世代が継ぐ循環を自ら回す。</p>
-      </div>
-      <ul class="pillars">
-        <li><span class="lbl">市場</span><p>取引の過半はオンラインに移り、主役は若い世代に交代しつつある。米国のオンライン取引は約25億ドル（2025年）で、Z世代の5〜6割がクラシックカーの所有を望んでいる。価格の勢いは「投資」から「体験と文化」へ移った。</p></li>
-        <li><span class="lbl">Jaguar</span><p>メーカーがEV専業へ大きく舵を切り、ヘリテージを日常的に担う席が空いた。「本物のJaguarは、もう新車では買えない」という“終わりの物語”が生まれている。一方でXJやXJSは、意味の大きさに比べて価格が低すぎる「過小評価された本物」だ。</p></li>
-        <li><span class="lbl">他業界</span><p>熱は製品からではなく「人・場・物語」から生まれる。成功例のほぼすべてで、売り手が文化の主催者になっていた（H.O.G.、Hagerty、ジャパンミニデイ、Bring a Trailer）。</p></li>
-        <li><span class="lbl">ユーザー</span><p>人は一目惚れで買い、伴走があるかどうかで残るか去るかが決まる。不安の正体は「壊れる」ことではない。「いくらかかるか分からない」「誰に相談すればいいか分からない」ことだ。</p></li>
-        <li><span class="lbl">勝ち筋</span><p><b>来歴×伴走</b>。記録のある個体の価値を正しく見える形にし、所有の不確実性を消す。これは整備を担い、オーナーと長い関係を持つ専門店にしかできない。</p></li>
-      </ul>
-      <h3>当初の3つの狙いとの対応</h3>
-      <p>出発点だった「憧れを作る」「成功者の印象をつける」「顧客を安定させる」は、この戦略で次のように実現する。</p>
-      <div class="trio">
-        <div><h4>憧れを作る</h4><p>オーナーの語りと映像で「遭遇」を増やす。入口は手の届くXJ40/X300/XJSに置き、Eタイプは憧れの記号として使う。</p></div>
-        <div><h4>成功者の印象</h4><p>見せるのはお金ではなく「手間を惜しまない美意識」。成功を語らせず、生き方を映す。見栄で乗る人は続かない、という声がある。</p></div>
-        <div><h4>顧客を安定させる</h4><p>購入後1年の伴走、定額の整備、オーナーズサークル、来歴の記録。手放す時も専門店が来歴ごと引き継ぐ。</p></div>
-      </div>
-      <p class="note">本レポートは Step 01〜06 の順に、事実 → 解釈 → 戦略と積み上げている。各章の作業メモはリポジトリの <span class="num">docs/strategy/</span> にある。</p>
-    </section>
-
-    <!-- 01 MARKET -->
-    <section id="market">
-      <p class="step">Step 01 · Market structure</p>
-      <h2>市場構造：お金と熱は、どこで動いているか</h2>
-      <p class="kicker">世界のクラシックカー市場は「値上がり期待の資産」から「乗って語る文化」へ移る途中にある。日本には、そこに固有の制度上の壁が重なっている。</p>
-
-      <div class="stats">
-        <div><div class="v num">48<small>億ドル</small></div><div class="k">米国中心のオークション＋オンライン取引額（2025年、前年比+10%）</div><div class="src">Hagerty / CNBC</div></div>
-        <div><div class="v num">25<small>億ドル</small></div><div class="k">うちオンライン（+12%）。全体の過半がオンラインで動いた</div><div class="src">Hagerty / CNBC</div></div>
-        <div><div class="v num">58.28</div><div class="k">Hagerty市場レーティング（2026年1月）。約15年ぶりの低水準で、相場は横ばい</div><div class="src">Motorious</div></div>
-      </div>
-
-      <div class="charts2">
-        <figure class="chart" data-chart="bat">
-          <p class="ft">Bring a Trailer の年間取引額</p>
-          <p class="fs">億ドル。コメント欄を中心にしたオンライン・オークション</p>
-          <div class="plot"></div>
-          <figcaption>2025年は出品49,486件、落札率81%、登録ユーザーは1年で25.5万人増えた。出典：CNBC、Jalopnik、The Shop</figcaption>
-        </figure>
-        <figure class="chart" data-chart="gen">
-          <p class="ft">クラシックカーを「所有したい」人の割合</p>
-          <p class="fs">世代別、%。米国のドライバー1万人の調査</p>
-          <div class="plot"></div>
-          <figcaption>Hagerty「Why Driving Matters」。2024年の別調査ではZ世代60%、ブーマー31%。Z世代の主な接点はYouTube（39%）とInstagram（38%）</figcaption>
-        </figure>
-      </div>
-
-      <div class="so"><b>示唆</b>相場の指数は横ばいでも、取引件数と参加者は増えている。「値上がりを期待して買う人」から「乗りたい、語りたい人」へ主役が移っている。トップ層の落札車も若返り、Hagertyの2026年注目リストは1990〜2000年代の「最後のアナログ世代」が中心になった。</div>
-
-      <h3>日本市場に固有の構造</h3>
-      <div class="tbl wide">
-        <table>
-          <thead><tr><th>論点</th><th>事実</th><th>戦略上の意味</th></tr></thead>
-          <tbody>
-            <tr><td>旧車に重い税制</td><td>自動車税は初度登録から13年超で約15%の重課。重量税は13年超と18年超の2段階で重課。HVとEVは対象外</td><td>「維持費が高い」の一部は制度が原因。数字で見える化すれば、不安は解ける</td></tr>
-            <tr><td>保険の乖離</td><td>旧車は車両保険の協定価額が市場価格を大きく下回りやすく、引き受けを断られる例もある</td><td>「価値が正しく評価されない」ことの象徴。来歴の記録が交渉材料になり得る</td></tr>
-            <tr><td>車齢の長期化</td><td>乗用車の平均車齢は9.44年（2025年3月末）で、31年連続で過去最高</td><td>古い車に長く乗ることは、社会の流れと一致している</td></tr>
-            <tr><td>国産旧車の流出</td><td>米国の25年ルールで国産スポーツが流出し、国内価格が高騰した</td><td>国産旧車は投機色が強まり、若者の手が届かない。輸入クラシックは相対的に割安な空白地帯</td></tr>
-            <tr><td>整備士不足</td><td>若者の志望が減り、整備要員の平均年齢が上がっている。整備業者の倒産も増加</td><td>最大のボトルネックは車ではなく「直せる人」。専門店の技術そのものが希少な資源</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3>バリューチェーンで見る市場マップ</h3>
-      <figure>
-        <p class="ft">お金が落ちるのは左側、需要を生むのは右側</p>
-        <p class="fs">クラシックカー市場の価値連鎖</p>
-        <div class="vchain">
-          <div><h4>供給</h4><ul><li>現存する個体</li><li>部品（純正・リプロ）</li><li>整備士の技術</li></ul><div class="flow">→</div></div>
-          <div><h4>流通</h4><ul><li>専門店</li><li>一般の中古車店</li><li>オークション</li><li>個人売買・輸出入</li></ul><div class="flow">→</div></div>
-          <div><h4>所有の支援</h4><ul><li>整備・レストア</li><li>保険</li><li>保管・税・車検</li></ul><div class="flow">→</div></div>
-          <div class="culture"><h4>文化と意味づけ</h4><ul><li>メディア・映像</li><li>イベント</li><li>クラブ</li><li>来歴の記録</li></ul></div>
-        </div>
-        <figcaption>海外ではHagertyが、保険、メディア、クラブ、相場データ、マーケットを統合して右側を押さえ、左側の需要を作っている。日本のクラシックJaguarでは、右側の担い手がほぼいない。ここが主戦場になる。</figcaption>
-      </figure>
-    </section>
-
-    <!-- 02 JAGUAR -->
-    <section id="jaguar">
-      <p class="step">Step 02 · Where classic Jaguar stands</p>
-      <h2>Jaguarの現在地：「新しいJaguar」と「古いJaguar」の分断</h2>
-      <p class="kicker">メーカーは未来へ大きく跳んだ。その結果、ヘリテージを日常的に担う席が空いている。</p>
-
-      <ol class="timeline">
-        <li><span class="when">2023年末</span>F-TYPE、XF、XEの受注を終了。2025年からEV専売へ移行すると発表</li>
-        <li class="key"><span class="when">2024年11〜12月</span>リブランド「Copy Nothing」とコンセプトカーType 00を発表。旧来のファンから「名前だけのJaguar」「ブランドの葬式」という強い反発</li>
-        <li><span class="when">2025年</span>新車のラインナップがほぼ空白に。欧州の登録台数は、2025年4月に前年比97.5%減の49台と報じられた</li>
-        <li><span class="when">2025年4月</span>Jaguar Classicが、生産終了から半世紀以上たったEタイプのボディパネル約30点を新たに再生産</li>
-        <li><span class="when">2026年5月</span>新型の4ドアEV GTの名称を「Type 01」と発表（1,000hp級、約13万ドルから）</li>
-        <li class="key"><span class="when">2026年6月</span>Jaguar ClassicのC/Dタイプ・コンティニュエーションが日本に初上陸し、クラシックカーのミーティングで展示された</li>
+<main>
+  <header class="top">
+    <p class="meta">エムガレージ ／ 戦略 ／ 2026-10-31 版</p>
+    <h1>戦略：洗車×オーナーズインタビュー</h1>
+    <p class="lede">3名で、低コストに始められる内容に絞った戦略です。サイトの改修は含みません。</p>
+    <nav class="toc" aria-label="目次">
+      <ol>
+        <li><a href="#conclusion">結論</a></li>
+        <li><a href="#premise">前提</a></li>
+        <li><a href="#plan">施策の内容</a></li>
+        <li><a href="#why">この施策を選ぶ理由</a></li>
+        <li><a href="#must">必ずやること</a></li>
+        <li><a href="#notdo">やらないこと</a></li>
+        <li><a href="#steps">最初の90日</a></li>
+        <li><a href="#kpi">測る数字</a></li>
+        <li><a href="#decide">決めること</a></li>
+        <li><a href="#evidence">根拠となる調査</a></li>
       </ol>
+    </nav>
+  </header>
 
-      <div class="so"><b>示唆</b>SR400の生産終了がそうだったように、「もう作られない」は最強の動機になる。ただし、新しいJaguarを批判する語り方は悪手だ。正解は、失われゆくものへの敬意と、創業者ライオンズの「Grace, Space, Pace」を今に継ぐという前向きな語り方。メーカー自身もClassic部門でヘリテージを収益化しており、古いJaguarの価値は公式にも裏付けられている。</div>
-
-      <h3>意味と価格のギャップ</h3>
-      <figure class="diagram">
-        <p class="ft">XJとXJSは「意味の割に価格が低い」</p>
-        <p class="fs">概念図。位置は定性的な評価で、縮尺はない</p>
-        <svg viewBox="0 0 560 360" role="img" aria-label="横軸が市場価格、縦軸が文化的な意味の概念図。XJとXJSは意味が高く価格が低い左上に位置する">
-          <line x1="70" y1="310" x2="530" y2="310" stroke="var(--ink-2)" stroke-width="1"/>
-          <line x1="70" y1="310" x2="70" y2="24" stroke="var(--ink-2)" stroke-width="1"/>
-          <line x1="300" y1="24" x2="300" y2="310" stroke="var(--rule)" stroke-dasharray="4 4"/>
-          <line x1="70" y1="167" x2="530" y2="167" stroke="var(--rule)" stroke-dasharray="4 4"/>
-          <text x="530" y="334" text-anchor="end" font-size="12" fill="var(--muted)" style="fill:var(--muted)">市場価格 → 高い</text>
-          <text x="58" y="30" text-anchor="end" font-size="12" style="fill:var(--muted)">意味</text>
-          <text x="58" y="46" text-anchor="end" font-size="12" style="fill:var(--muted)">高い</text>
-          <rect x="82" y="34" width="208" height="122" rx="6" fill="var(--brass-soft)" stroke="var(--brass)" stroke-width="1.5"/>
-          <text x="96" y="58" font-size="12" style="fill:var(--brass);font-weight:700">過小評価された本物</text>
-          <circle cx="150" cy="104" r="8" fill="var(--brass)"/>
-          <text x="166" y="100" font-size="15" style="font-weight:700">XJ・XJS</text>
-          <text x="166" y="120" font-size="12" style="fill:var(--ink-2)">100〜250万円台が中心</text>
-          <circle cx="470" cy="60" r="8" fill="var(--mark)"/>
-          <text x="456" y="56" text-anchor="end" font-size="15" style="font-weight:700">Eタイプ</text>
-          <text x="456" y="76" text-anchor="end" font-size="12" style="fill:var(--ink-2)">世界的アイコン</text>
-          <circle cx="420" cy="130" r="8" fill="var(--mark)"/>
-          <text x="406" y="134" text-anchor="end" font-size="13" style="fill:var(--ink-2)">国産スポーツ旧車（高騰）</text>
-          <circle cx="160" cy="262" r="8" fill="var(--muted)"/>
-          <text x="176" y="266" font-size="13" style="fill:var(--ink-2)">一般的な中古輸入セダン</text>
-          <path d="M168 136 C 230 170, 270 150, 318 112" fill="none" stroke="var(--brass)" stroke-width="2" stroke-dasharray="5 4"/>
-          <polygon points="318,112 306,113 314,123" fill="var(--brass)"/>
-          <text x="326" y="104" font-size="12" style="fill:var(--brass);font-weight:700">記録のある個体は</text>
-          <text x="326" y="120" font-size="12" style="fill:var(--brass);font-weight:700">正当な評価へ</text>
-        </svg>
-        <figcaption>狙うのは投機的な値上がりではなく、市場の二層化。来歴と整備記録のある個体は正当なプレミアムで評価され、記録のない個体は今の価格のまま残る。欧州でも「記録の揃ったオリジナル車が値を保つ」と報告されている（Classic Trader）。この「記録」を作れるのは、整備を担う専門店だけだ。</figcaption>
-      </figure>
-
-      <h3>個体・部品・コミュニティ</h3>
-      <div class="tbl wide">
-        <table>
-          <thead><tr><th>領域</th><th>現状</th><th>読み解き</th></tr></thead>
-          <tbody>
-            <tr><td>入口価格</td><td>X300系の平均は120〜130万円前後（総生産92,038台）。X350系は150〜180万円前後。英国ではXJSの状態の良いクーペが£5,000〜8,000</td><td>新型の軽自動車並みの価格で「英国の本物」が買える。ただし安い個体ほど整備の“負債”を抱えている</td></tr>
-            <tr><td>部品</td><td>Jaguar Classicの部品はX300、XJS、シリーズ3、XJ40、X308などに対応し、XJ（S3）とXJSで2万1,000点超の部品番号を持つ。100%の供給は現実的ではないとも明言</td><td>部品は「ある程度は手に入る」。本当のボトルネックは、組める技術者と診断の知見</td></tr>
-            <tr><td>コミュニティ</td><td>2005年に約100台が集まった「ジャガー・デイ」の記録はあるが、現在のクラブ活動は外から見えにくい。英国では最大級のJaguarクラブが会員1万5,000人超</td><td>集まる場と顔がほぼ空白。単独では母数が小さいので、英国クラシック全体の文脈を使う</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3>SWOT</h3>
-      <div class="tbl">
-        <table>
-          <tbody>
-            <tr><th>強み</th><td>美しさ（Eタイプ、XJのプロポーション）。英国紳士のイメージ。手頃な入口価格。30年の整備の知見。メーカーによる部品の再生産</td></tr>
-            <tr><th>弱み</th><td>「壊れる」「おじさんの車」という評判。オーナーがばらばら。集まる場と顔がない。母数が小さい</td></tr>
-            <tr><th>機会</th><td>リブランドが生んだ“終わりの物語”。若い世代のアナログ志向。国産旧車の高騰で、輸入クラシックが相対的に割安。来歴を重視する市場の流れ</td></tr>
-            <tr><th>脅威</th><td>旧車重課の税制。整備士の高齢化。安い個体が悪評を再生産すること。新しいJaguarとの混同</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- 03 CASES -->
-    <section id="cases">
-      <p class="step">Step 03 · Lessons from other worlds</p>
-      <h2>他業界の型：熱はどこで生まれ、どう続いたか</h2>
-      <p class="kicker">車、バイク、メディア、音楽から13の事例を集め、「何が起きたか」「なぜ効いたか」「Jaguarに置き換えると何か」の3段で整理した。</p>
-
-      <div class="cases">
-        <article class="case"><header><h4>Harley-Davidson H.O.G.</h4><span class="heat">熱源② 所属</span></header><dl>
-          <dt>事実</dt><dd>1983年に会員250人のツーリングから始まり、販売店の希望で地域支部ができた。初期は会費無料、新車購入で1年間自動入会。6年で9万人、2000年に50万人を超え、2023年には約68万人・1,500支部に達した。</dd>
-          <dt>なぜ</dt><dd>製品ではなく「所属先」を売った。販売店が地域コミュニティの拠点になった。</dd>
-          <dt>翻訳</dt><dd class="tr">専門店を地域の“部室”にする。購入した人は自動的にオーナーズサークルの一員になる。</dd></dl></article>
-
-        <article class="case"><header><h4>Royal Enfield</h4><span class="heat">熱源② 所属 ⑧ 連合</span></header><dl>
-          <dt>事実</dt><dd>ブランディングの起点を「ライド」に置き、機能を訴求する広告を事実上やめた。ヒマラヤを18日間走る旅などが象徴になった。独立系の専門メカニックやカスタムビルダーを巻き込み、一部をコンサルタントに迎えた。</dd>
-          <dt>なぜ</dt><dd>体験の物語が広告の代わりになった。外部の職人を競合ではなく仲間にした。</dd>
-          <dt>翻訳</dt><dd class="tr">「Jaguarで行く旅」を企画する。他の英国車専門店や職人を仲間として巻き込む。</dd></dl></article>
-
-        <article class="case"><header><h4>Luftgekühlt（空冷ポルシェ）</h4><span class="heat">熱源③ 文化への格上げ</span></header><dl>
-          <dt>事実</dt><dd>元ファクトリードライバーらが創設。数十台の集まりから、約1,000台・観客8,000人規模に成長し、ポーランド、ミュンヘン、アトランタへ広がった。マグナス・ウォーカーのような象徴的な人物が集客の核になった。</dd>
-          <dt>なぜ</dt><dd>会場を倉庫や映画スタジオにし、車をアートのように見せた。写真やアパレルの人々を巻き込み、車の集まりをカルチャーイベントに格上げした。</dd>
-          <dt>翻訳</dt><dd class="tr">ミーティングを品評会ではなく、英国カルチャー（仕立て、写真、ウイスキー、建築）との交差点にする。</dd></dl></article>
-
-        <article class="case"><header><h4>Goodwood Revival</h4><span class="heat">熱源③ 文化への格上げ</span></header><dl>
-          <dt>事実</dt><dd>来場者の大多数が時代衣装で訪れ、パドックではジャケットとタイが必須。現代の車はサーキットから排除される。毎年完売し、来場者は約13万人規模とされる。</dd>
-          <dt>なぜ</dt><dd>車ではなく「時代」を体験させる。服装という、車がなくても担える役割を観客に与えている。</dd>
-          <dt>翻訳</dt><dd class="tr">英国のドレスコードの日を作り、車を持っていない人にも参加の役割を用意する。</dd></dl></article>
-
-        <article class="case"><header><h4>Radwood</h4><span class="heat">熱源④ 未評価世代への旗</span></header><dl>
-          <dt>事実</dt><dd>2017年にポッドキャスターが創設した、1980〜90年代の車・服・音楽のイベント。フィラデルフィアでは約600台が集まり、2022年にHagertyが買収した。日本や英国でも開催され、来場者は「10代とシニアが半々」と描写される。</dd>
-          <dt>なぜ</dt><dd>多くのショーが1973年で線を引く中、まだ評価されていない世代に旗を立てた。手頃な車が若者の入口になった。</dd>
-          <dt>翻訳</dt><dd class="tr">XJ40、X300、XJSを「まだ評価されていない英国の傑作」と位置づけ、手の届くJaguarが主役の日を作る。</dd></dl></article>
-
-        <article class="case"><header><h4>Bring a Trailer</h4><span class="heat">熱源⑤ 集合知と信頼</span></header><dl>
-          <dt>事実</dt><dd>中古車情報サイトの物件を紹介するブログから始まり、2025年の取引額は約17億ドル。複数の論者が「秘伝のタレはコメント欄」と評する。整備士やマニアが写真から再塗装を見抜き、出品者の主張は数時間で検証される。出品者には回答する文化がある。</dd>
-          <dt>なぜ</dt><dd>集合知による相互検証が信頼を生み、信頼が価格と取引量を生む。ただし、サクラ入札や熱狂による高値づかみといった限界も指摘されている。</dd>
-          <dt>翻訳</dt><dd class="tr">質問にはすべて答え、弱点は先に開示する。オーナーのコメントが、その車の来歴の証拠になる。</dd></dl></article>
-
-        <article class="case"><header><h4>Hagerty</h4><span class="heat">熱源⑥ 無料の接点</span></header><dl>
-          <dt>事実</dt><dd>保険を軸に、Drivers Club（会員83万人超、継続率84〜89%）、登録者300万人超のYouTube、イベント、相場ツール、マーケットを統合した。YouTube視聴者の最大層は40歳未満で、イベントやツールの利用が保険加入の確率を高める「フライホイール」だと株主に説明している。</dd>
-          <dt>なぜ</dt><dd>お金を払う前の接点を大量に作り、その一部が本業の顧客になる。メディアは費用ではなく、顧客を獲得する経路として位置づけられている。</dd>
-          <dt>翻訳</dt><dd class="tr">図鑑、相場レポート、YouTube、ミーティングを「無料の接点」として設計し、販売・整備・買取につなげる。</dd></dl></article>
-
-        <article class="case"><header><h4>マツダ ロードスター</h4><span class="heat">熱源⑦ 直し続ける宣言</span></header><dl>
-          <dt>事実</dt><dd>軽井沢ミーティングは1日に1,000台超が集まり、2024年の参加者は2,617名、そのうち約41%が初参加だった。2017年に初代NAのレストアサービスを始め、170部品を復刻。説明会には600人以上の愛好家が集まった。</dd>
-          <dt>なぜ</dt><dd>長く続くイベントでも新陳代謝が起きている。メーカーが「古い車を直し続ける」と宣言したことで、所有の安心と中古の価値が底上げされた。</dd>
-          <dt>翻訳</dt><dd class="tr">対応車種、部品確保の方針、整備士育成の方針を公開し、「この車はうちが直し続ける」と宣言する。</dd></dl></article>
-
-        <article class="case"><header><h4>ジャパンミニデイ</h4><span class="heat">熱源⑧ 連合</span></header><dl>
-          <dt>事実</dt><dd>浜名湖に約3,000台が集まり、過去最多を記録した。主催はミニ専門店の団体JMSA。ミニ以外の英国車も参加できる。</dd>
-          <dt>なぜ</dt><dd>競合する専門店が組むことで、一店では作れない規模の祭りになった。間口を少し広げて母数を確保している。</dd>
-          <dt>翻訳</dt><dd class="tr">英国車の専門店が連合して「英国クラシックの日」を作り、Jaguarはその主役級の一角を担う。</dd></dl></article>
-
-        <article class="case"><header><h4>ヤマハ SR400 と カワサキ Z1/Z2</h4><span class="heat">熱源① 終わり・希少</span></header><dl>
-          <dt>事実</dt><dd>SR400は最終モデルの予約が完売し、2021年の販売は前年の約3倍になった（下図）。最終型には新車価格の2倍超のプレミアが付いた。Z1/Z2は約10年前の300万円前後から800万円台になり、Z2では1,000万円超の販売例もある。</dd>
-          <dt>なぜ</dt><dd>「もう作られない」は最強の購買動機。ただし相場が高騰すると、若者が締め出されて投機筋が入る。</dd>
-          <dt>翻訳</dt><dd class="tr">“終わりの物語”は使うが、「値上がりするから買え」とは言わない。入口価格帯の在庫を必ず持つ。</dd></dl></article>
-
-        <article class="case"><header><h4>アルファロメオ</h4><span class="heat">熱源⑨ 感覚の記号</span></header><dl>
-          <dt>事実</dt><dd>販売台数は多くないがブランド力は極めて高く、熱狂的な愛好家に支えられている。V6の「アルファサウンド」を求めて乗り継ぐオーナーもいる。新型の電動化やSUV化には否定的な反応も出た。</dd>
-          <dt>なぜ</dt><dd>音や盾形グリルといった感覚的な記号が、乗り継ぐ文化を作っている。新型への違和感が、旧型への愛着を強めている。</dd>
-          <dt>翻訳</dt><dd class="tr">直6やV12の音、ウッドとレザーの匂い、リーピングキャットを言葉と映像にする。</dd></dl></article>
-
-        <article class="case"><header><h4>アナログレコード、純喫茶、フィルムカメラ</h4><span class="heat">熱源⑩ アナログの新しさ</span></header><dl>
-          <dt>事実</dt><dd>国内のアナログレコード生産は2025年に約338万枚で、生産額は37年ぶりに80億円を超えた。新譜は2011年の41タイトルから2024年には900タイトルに増えた。純喫茶の客層が変わった最大の要因は、Instagramのリールや TikTokの紹介動画とされる。</dd>
-          <dt>なぜ</dt><dd>デジタルが当たり前の世代にとって、アナログは懐かしいものではなく新しいもの。不便さそのものが価値になる。</dd>
-          <dt>翻訳</dt><dd class="tr">「手がかかる」を、大人の趣味としての物語に変える。ショート動画を入口に設計する。</dd></dl></article>
-
-        <article class="case"><header><h4>反面教師：Petrolicious</h4><span class="heat">リスク：顔への依存</span></header><dl>
-          <dt>事実</dt><dd>美しい映像でカーカルチャーを牽引したが、2020年に創業者の過去のSNS投稿が問題になって退任し、会社は売却された。YouTubeの再生数も急減した。</dd>
-          <dt>翻訳</dt><dd class="tr">「顔」を立てる戦略は強いが、一人に依存しない。顔は複数立て、店のブランドと個人を分ける。</dd></dl></article>
-      </div>
-
-      <figure class="chart" data-chart="sr">
-        <p class="ft">ヤマハ SR400 の年間販売台数</p>
-        <p class="fs">台。2021年3月に最終モデルを発売</p>
-        <div class="plot"></div>
-        <figcaption>最終モデルの発売後、3〜8月の6ヶ月連続で251cc以上クラスの販売1位になった。出典：二輪車新聞のデータ（ベストカーWeb）</figcaption>
-      </figure>
-
-      <h3>横断して見えたこと</h3>
+  <section id="conclusion">
+    <h2>1. 結論</h2>
+    <div class="box">
+      <p>徹底洗車のサービスと、YouTubeの「洗車×オーナーズインタビュー」企画を組み合わせて始める。</p>
       <ol class="plain">
-        <li><b>熱は車からではなく、人と場と物語から生まれる。</b>どの事例でも、製品の改良ではなく「集まる理由」の設計が転機になった。</li>
-        <li><b>売り手が文化の主催者になっている。</b>メーカー（H.O.G.）、保険会社（Hagerty）、専門店の連合（JMSA）、マーケット（BaT）。文化に投資した売り手のもとに、本業の需要が後からついてきた。</li>
-        <li><b>入口は必ず手が届くもの。</b>Radwood、初代ロードスター、純喫茶。最高峰は憧れの記号として使い、入口は手頃なモデルに置く。</li>
-        <li><b>続く鍵は新陳代謝。</b>軽井沢では初参加者が4割。常連だけの閉じた場になると、熱は冷める。</li>
+        <li>動画で新しいお客様を集める</li>
+        <li>コアオーナーとの接触回数を増やす</li>
+        <li>整備・乗り換え・買取の相談につなげる</li>
       </ol>
-    </section>
+    </div>
+    <p>既存の設備と人員、スマートフォンで始められる。サイトの改修や新しい設備投資はしない。</p>
+  </section>
 
-    <!-- 04 USERS -->
-    <section id="users">
-      <p class="step">Step 04 · Voices of one</p>
-      <h2>N1の声：一人の人間は、なぜ買い、なぜ去り、なぜ語るのか</h2>
-      <p class="kicker">統計では見えない動機を、公開されているオーナーの声から拾った。発言は要約し、引用は短くしている。</p>
+  <section id="premise">
+    <h2>2. 前提</h2>
+    <div class="tbl"><table>
+      <tbody>
+        <tr><th>運営</th><td>3名。本人（戦略・顧客管理）、兄（企画・撮影・編集）、父（洗車の監修・点検・オーナー対応・インタビューの聞き手）</td></tr>
+        <tr><th>予算</th><td>小さく始める。サイト改修と設備投資はしない</td></tr>
+        <tr><th>主なお客様</th><td>クラシックJaguarと、高価格帯の車のオーナー。仕事が忙しい人が多い</td></tr>
+        <tr><th>店の強み</th><td>クラシックJaguarの販売・整備・修理で30年以上の実績</td></tr>
+      </tbody>
+    </table></div>
+  </section>
 
-      <div class="voices">
-        <figure class="voice"><blockquote>就職して初めて買ったのがXJS。はっきり言って最高。一生乗り続けたい。</blockquote><span class="who">XJSオーナー。それまではペーパードライバー（carview!）</span><span class="read">若い人が「最初の1台」にJaguarを選ぶ例は実在する。比較せず、好きだから選んでいる。</span></figure>
-        <figure class="voice"><blockquote>ボクスターを検討していたが、XJSの流麗なスタイリングを見て「コレしかない！」と思った。</blockquote><span class="who">XJS V12クーペのオーナー。知人の勧めで出会った（automotive-quantum）</span><span class="read">スポーツカーからクラシックへの乗り換えは実在する。きっかけは人の勧めと実車。</span></figure>
-        <figure class="voice"><blockquote>都内で一度見かけて一目惚れした。70年代らしい“無駄”を感じさせる造形が、今もど真ん中。</blockquote><span class="who">XJSコンバーチブルのオーナー（外車王SOKEN）</span><span class="read">路上で見かけること自体が最大の広告になる。“無駄”が価値になる。</span></figure>
-        <figure class="voice"><blockquote>とにかく故障が多かった。</blockquote><span class="who">1年ほどで手放したXJSのオーナー。電気系の弱さを指摘（goo自動車）</span><span class="read">去る理由は故障そのものより「想定外」と「相談相手がいない」こと。</span></figure>
-        <figure class="voice"><blockquote>外車に乗るとはそういうこと。今まで乗った中で一番好きな車だった。</blockquote><span class="who">XJの口コミ。維持費は2.9点、総合4.1点、デザイン4.6点（カーセンサー）</span><span class="read">維持費への不満と車への愛着は両立する。評価が低いのは維持費だけ。</span></figure>
-        <figure class="voice"><blockquote>見栄だけでは乗り続けられない。きちんと手をかけ続ける必要がある。</blockquote><span class="who">クラシックカーに乗る業界人（WWDJAPAN）</span><span class="read">成功者らしさは、お金ではなく「手をかける余裕と美意識」から生まれる。</span></figure>
-      </div>
-      <p class="note">ほかに、XJS V12コンバーチブルを240万円で手に入れて普段使いした編集者（ENGINE WEB）、「もう一台ストックがいる車」と語るXJオーナー（carview!）、祖父のXJ6の記憶から一生の憧れを抱いた英国の愛好家（Car & Classic）、過去の良い思い出からX300を乗り継ぐ英語圏のオーナー（JaguarForum）、旧車の音に「生き物っぽさ」を感じる座談会参加者（KINTO）の声も参照した。</p>
+  <section id="plan">
+    <h2>3. 施策の内容</h2>
+    <h3>3-1. サービスと価格</h3>
+    <div class="tbl"><table>
+      <tbody>
+        <tr><th>徹底洗車</th><td>30,000円（作業範囲は決定事項）</td></tr>
+        <tr><th>出演特典</th><td>インタビューに出演すると5,000円引き（25,000円）</td></tr>
+        <tr><th>2回目以降</th><td>出演したオーナーにも、3〜4ヶ月ごとに次の洗車を案内する</td></tr>
+      </tbody>
+    </table></div>
 
-      <h3>声から読み取れる5つのインサイト</h3>
-      <div class="insight"><span class="id">I-1</span><div><h4>人は一目惚れで買い、伴走の有無で残るか去るかが決まる。</h4><p>獲得は「見せる」こと（路上、映像、イベント）、継続は「伴走」すること（整備、相談、仲間）。この2つは別の仕事として設計する。</p></div></div>
-      <div class="insight"><span class="id">I-2</span><div><h4>不安の正体は「壊れる」ではなく、「いくらかかるか、誰に相談すればいいか分からない」こと。</h4><p>経年劣化の連鎖は、予防整備で予測できるコストに変えられる。不確実性をなくすことが、最大の購買促進策になる。</p></div></div>
-      <div class="insight"><span class="id">I-3</span><div><h4>若い買い手は比較しない。だから「出会い」の設計がすべて。</h4><p>検索して比べるのではなく、遭遇して惚れる。ショート動画、街中、友人、イベントでの遭遇を増やす。</p></div></div>
-      <div class="insight"><span class="id">I-4</span><div><h4>家族の記憶や継承の物語は、価格を超える動機になる。</h4><p>「いい人が乗っていた車を継ぐ」という仮説は、声に裏付けられている。来歴は感傷ではなく、価格を支える情報資産だ。</p></div></div>
-      <div class="insight"><span class="id">I-5</span><div><h4>「成功者の印象」は、手をかける余裕と美意識から生まれる。</h4><p>見せ方を誤ると見栄に映る。発信のトーンは成功の誇示ではなく、手間を惜しまない生き方にする。</p></div></div>
+    <h3>3-2. 動画の構成（2段構造）</h3>
+    <div class="tbl wide"><table>
+      <thead><tr><th>段</th><th>内容</th><th>主な視聴者</th><th>役割</th></tr></thead>
+      <tbody>
+        <tr><td>1段目</td><td>洗車のビフォーアフター、作業の様子、愛車紹介</td><td>車好き、洗車動画の視聴者</td><td>再生数と新しい視聴者を集める</td></tr>
+        <tr><td>2段目</td><td>オーナーへのインタビュー（仕事、この車を選んだ理由、若い人に伝えたいこと）</td><td>一般の視聴者、将来の買い手</td><td>どんな人がこの車に乗っているかを伝え、信頼と憧れをつくる</td></tr>
+      </tbody>
+    </table></div>
+    <p>1台の撮影から、長尺動画1本（12〜20分）とショート動画3〜4本を作る。</p>
 
-      <h3>ペルソナ（仮説）</h3>
-      <div class="tbl wide">
-        <table>
-          <thead><tr><th>ペルソナ</th><th>年齢</th><th>動機</th><th>主な不安</th><th>最初の接点</th></tr></thead>
-          <tbody>
-            <tr><td><b>P1 憧れの若手</b><br><small>未来の市場</small></td><td class="n">20〜30代</td><td>人と違う。アナログの手触り。映画のような暮らし</td><td>維持できるか。どこで買えばいいか</td><td>ショート動画、Instagram、街中、友人</td></tr>
-            <tr><td><b>P2 乗り換えの実力者</b><br><small>主力の新規</small></td><td class="n">30〜50代</td><td>速さや新しさではなく、自分の美意識を表したい</td><td>故障、手間、家族の理解</td><td>人の勧め、イベント、YouTubeの長尺</td></tr>
-            <tr><td><b>P3 帰ってきた愛好家</b></td><td class="n">50〜70代</td><td>若い頃の夢。最後にもう一度</td><td>体力、相談先、手放す時のこと</td><td>検索、雑誌、専門店の評判</td></tr>
-            <tr><td><b>P4 現オーナー</b><br><small>コミュニティの核</small></td><td class="n">全世代</td><td>理解してくれる仲間。良い整備。自分の車を誇りたい</td><td>部品、整備士の後継、手放す時の評価</td><td>既存の関係</td></tr>
-            <tr><td><b>P5 継承する人</b></td><td class="n">全世代</td><td>大事にしてきた車を、分かる人に繋ぎたい</td><td>買い叩かれる。ぞんざいに扱われる</td><td>専門店への相談</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="note">現在の要件定義ではメインターゲットを「40〜70代の購入検討者」としている。本戦略では、P1（若手）を5〜10年後の市場として、意図して育てる対象に加える。</p>
+    <h3>3-3. 営業へのつなげ方</h3>
+<pre class="flow">洗車の予約 → 洗車・撮影・インタビュー → 動画公開 → 視聴者から新しい予約
+                  │
+                  ├─ 洗車中に父が車を点検 → 気づいた点を報告 → 整備の受注
+                  │
+                  └─ インタビューで「次に乗りたい車」「手放す予定」を聞いて記録
+                        ├─ 3〜4ヶ月後に次の洗車を案内（接触回数が増える）
+                        └─ 条件に合う車が入ったら個別に連絡（乗り換え・買取）</pre>
+  </section>
 
-      <h3>ジャーニーと「熱が冷める地点」</h3>
-      <figure>
-        <p class="ft">どこで人が離れるか</p>
-        <p class="fs">各段階の下段が、熱が冷める地点</p>
-        <div class="journey">
-          <div><b>遭遇</b>映像、街中、友人<span class="cold">若い世代との接点がない</span></div>
-          <div><b>憧れ</b>物語に共感する<span class="cold">「おじさんの車」という印象</span></div>
-          <div><b>検討</b>維持費と相談先を調べる<span class="cold">いくらかかるか分からない</span></div>
-          <div><b>購入</b>専門店を選ぶ<span class="cold">どの店を信じればいいか</span></div>
-          <div><b>1年目</b>最初の故障<span class="cold">想定外の出費で離脱</span></div>
-          <div><b>継続</b>仲間と誇り<span class="cold">孤独と飽き</span></div>
-          <div><b>継承</b>次のオーナーへ<span class="cold">価値を分かってもらえない</span></div>
-        </div>
-      </figure>
-    </section>
+  <section id="why">
+    <h2>4. この施策を選ぶ理由</h2>
+    <div class="tbl wide"><table>
+      <thead><tr><th>理由</th><th>根拠</th></tr></thead>
+      <tbody>
+        <tr><td>費用が小さい</td><td>既存の設備、人員、スマートフォンで始められる。サイト改修が不要</td></tr>
+        <tr><td>洗車動画は再生されやすい</td><td>ビフォーアフターと作業音がYouTubeと相性が良いジャンルとされる。国内では、社員10人ほどの洗車専門店が洗車動画で登録者約10万人を集め、全国から来店客を得た例がある</td></tr>
+        <tr><td>若い層に届く経路と一致する</td><td>米国の調査で、Z世代がクラシックカーと接点を持つ場はYouTube（39%）とInstagram（38%）</td></tr>
+        <tr><td>繰り返し会う理由ができる</td><td>インタビューは1回だが、洗車は季節ごとに利用される</td></tr>
+        <tr><td>整備の受注につながる</td><td>洗車中は車の隅々まで見える。点検結果を報告すれば、売り込まずに整備を提案できる</td></tr>
+        <tr><td>車の記録が残る</td><td>欧州の市場では、記録の揃ったオリジナル車が値を保つと報告されている。動画と点検記録が、その車の記録になる</td></tr>
+      </tbody>
+    </table></div>
+  </section>
 
-    <!-- 05 SYNTHESIS -->
-    <section id="synthesis">
-      <p class="step">Step 05 · Synthesis</p>
-      <h2>分析と統合：本当の課題と勝ち筋</h2>
+  <section id="must">
+    <h2>5. 必ずやること（リスク対策）</h2>
+    <div class="tbl wide"><table>
+      <thead><tr><th>項目</th><th>理由</th><th>対応</th></tr></thead>
+      <tbody>
+        <tr><td>出演の同意書</td><td>映像の使い方で後から揉めないため。車を売る時に動画を使うには事前の同意が要る</td><td>同意書（ひな形あり）に署名をもらう</td></tr>
+        <tr><td>預かり中の事故への備え</td><td>高額な車を預かるため</td><td>預かった車の事故を補償する保険に入っているか確認する。作業前に車の傷を写真で記録する</td></tr>
+        <tr><td>塗装の保護</td><td>古い車は塗装が薄い場合がある</td><td>基本メニューに研磨（磨き）を入れない。研磨は父が個体ごとに判断する</td></tr>
+        <tr><td>個人情報</td><td>出演者の身元や自宅が特定されないようにするため</td><td>ナンバー、自宅、勤務先をぼかす。職業は一行のテロップのみ</td></tr>
+        <tr><td>PR表記</td><td>景品表示法のステマ規制（2023年10月施行）</td><td>出演者が自分のSNSで紹介する場合、割引を受けているので「PR」と表記してもらう</td></tr>
+      </tbody>
+    </table></div>
+  </section>
 
-      <h3>課題の構造（イシューツリー）</h3>
-      <figure class="tree">
-        <p>なぜ日本のクラシックJaguarの界隈は、ミニやロードスターのように盛り上がっていないのか</p>
-        <div class="branches">
-          <div class="br"><h4>A. 新しい人が入ってこない</h4><ul><li>若い世代との接点がない</li><li>「おじさんの車」「壊れる」という印象</li><li>維持費と相談先が分からない</li></ul><span class="who">一店舗で動かせる</span></div>
-          <div class="br"><h4>B. 入った人が残らない・語らない</h4><ul><li>購入後1年目の想定外で離脱</li><li>集まる場と仲間がいない</li><li>誇りを表現する場がない</li></ul><span class="who">一店舗で動かせる</span></div>
-          <div class="br"><h4>C. 良い個体が次に繋がらない</h4><ul><li>来歴が記録されず、価値が正しく評価されない</li><li>安い個体が整備の負債を抱えたまま流通する</li></ul><span class="who">一店舗で動かせる</span></div>
-          <div class="br struct"><h4>D. 個店では動かせない壁</h4><ul><li>旧車重課の税制、協定価額が低すぎる保険</li><li>整備士の高齢化と不足</li><li>ヘリテージの担い手の空席</li></ul><span class="who">連合（業界）で動かす</span></div>
-        </div>
-      </figure>
-      <div class="so"><b>示唆</b>A〜Cは一店舗でも動かせる。Dは業界として動かす必要がある。だから戦略は「事業」「コミュニティ」「業界」の3層で組み立てる。</div>
+  <section id="notdo">
+    <h2>6. やらないこと</h2>
+    <div class="tbl wide"><table>
+      <thead><tr><th>施策</th><th>理由</th></tr></thead>
+      <tbody>
+        <tr><td>サイトの改修</td><td>工数が大きい。まずこの企画に集中する</td></tr>
+        <tr><td>維持費の公開</td><td>実際の費用が公開額を上回った場合に信頼を損なう。費用は個別の相談で伝える</td></tr>
+        <tr><td>オーナーの集まり、オーナー同士のコミュニティ</td><td>忙しい人にはメリットが小さい。運営の負担が大きい</td></tr>
+        <tr><td>イベント開催、業界団体との取り組み</td><td>3名では手が回らない</td></tr>
+        <tr><td>新しいパッケージ商品</td><td>洗車でお客様との接点が増えてから検討する</td></tr>
+      </tbody>
+    </table></div>
+  </section>
 
-      <h3>熱源マップ：Jaguarの現状とポテンシャル</h3>
-      <div class="tbl wide">
-        <table>
-          <thead><tr><th>熱源</th><th>現状</th><th>伸びしろ</th><th>根拠</th><th>優先</th></tr></thead>
-          <tbody>
-            <tr><td>① 終わり・希少</td><td><span class="chip c2">○</span></td><td><span class="chip c3">◎</span></td><td>リブランドで「新車の本物はもうない」</td><td class="pri">高・今が旬</td></tr>
-            <tr><td>② 所属・部室</td><td><span class="chip c1">△</span></td><td><span class="chip c3">◎</span></td><td>専門店に30年の顧客基盤がある</td><td class="pri">高</td></tr>
-            <tr><td>③ 文化への格上げ</td><td><span class="chip c1">△</span></td><td><span class="chip c3">◎</span></td><td>英国カルチャーとの親和性が極めて高い</td><td class="pri">中</td></tr>
-            <tr><td>④ 未評価世代への旗</td><td><span class="chip c0">×</span></td><td><span class="chip c3">◎</span></td><td>XJ40、X300、XJSが手頃</td><td class="pri">高</td></tr>
-            <tr><td>⑤ 集合知と信頼</td><td><span class="chip c0">×</span></td><td><span class="chip c2">○</span></td><td>全開示とコメント運営はすぐ始められる</td><td class="pri">高</td></tr>
-            <tr><td>⑥ 無料の接点</td><td><span class="chip c1">△</span></td><td><span class="chip c3">◎</span></td><td>図鑑、年表、ブログを構築中</td><td class="pri">高</td></tr>
-            <tr><td>⑦ 直し続ける宣言</td><td><span class="chip c1">△</span></td><td><span class="chip c3">◎</span></td><td>30年の整備実績</td><td class="pri">高</td></tr>
-            <tr><td>⑧ 連合</td><td><span class="chip c0">×</span></td><td><span class="chip c2">○</span></td><td>ジャパンミニデイという先例</td><td class="pri">中・種まき</td></tr>
-            <tr><td>⑨ 感覚の記号</td><td><span class="chip c2">○</span></td><td><span class="chip c3">◎</span></td><td>直6やV12の音、ウッド、レザー</td><td class="pri">中</td></tr>
-            <tr><td>⑩ アナログの新しさ</td><td><span class="chip c1">△</span></td><td><span class="chip c2">○</span></td><td>ショート動画と純喫茶的な美意識</td><td class="pri">中</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="note">◎ 強い　○ ある　△ 弱い　× ない。①④⑤⑦は、今すぐ、低コストで、一店舗で着火できる。②⑥は既存資産の延長で薪になる。③⑧は2年目以降の大きな火として準備する。</p>
+  <section id="steps">
+    <h2>7. 最初の90日</h2>
+    <div class="tbl wide"><table>
+      <thead><tr><th>時期</th><th>やること</th><th>担当</th></tr></thead>
+      <tbody>
+        <tr><td class="n">1〜2週目</td><td>9章の決定事項を決める。保険を確認する。同意書を用意する</td><td>本人・父</td></tr>
+        <tr><td class="n">3〜4週目</td><td>在庫車で試しに1本撮る（出演者なしで撮影と編集の流れを確認。在庫車の紹介にもなる）</td><td>兄・父</td></tr>
+        <tr><td class="n">2ヶ月目</td><td>出演オーナーの洗車2台。動画を公開する</td><td>全員</td></tr>
+        <tr><td class="n">3ヶ月目</td><td>出演オーナーの洗車2台。8章の数字で3ヶ月を振り返る</td><td>全員</td></tr>
+      </tbody>
+    </table></div>
+    <p>ペースは月2台。長尺動画2本とショート動画6〜8本になる。</p>
+  </section>
 
-      <h3>4つの論点への結論</h3>
-      <div class="tbl wide">
-        <table>
-          <thead><tr><th>論点</th><th>結論</th><th>理由</th></tr></thead>
-          <tbody>
-            <tr><td><b>誰を主役にするか</b></td><td>主役は現オーナー。育てる市場は乗り換え組（P2）と若手（P1）</td><td>熱を生むのはオーナーの語り。P2は今の売上、P1は5〜10年後の市場</td></tr>
-            <tr><td><b>どこで戦うか</b></td><td>二層構造。深さはJaguar、広さは英国クラシック全体</td><td>母数の小ささを連合で補い、専門性は薄めない</td></tr>
-            <tr><td><b>何で勝つか</b></td><td>来歴（Provenance）×伴走（Partnership）</td><td>価格と在庫数では大手に勝てない。来歴と伴走は時間をかけた関係からしか生まれず、真似されにくい</td></tr>
-            <tr><td><b>当事者と第三者</b></td><td>本業と伴走はエムガレージの名前で。界隈の公共財は独立した名前で運営し、運営者を明示する</td><td>ステマ規制を守りながら、界隈全体の信頼を得る</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+  <section id="kpi">
+    <h2>8. 測る数字（毎月）</h2>
+    <div class="tbl wide"><table>
+      <thead><tr><th>区分</th><th>数字</th></tr></thead>
+      <tbody>
+        <tr><td>サービス</td><td>洗車の件数、うち出演の件数、2回目以降の予約の件数</td></tr>
+        <tr><td>動画</td><td>ショートの再生数、長尺の再生数と視聴維持率、チャンネル登録者数</td></tr>
+        <tr><td>営業</td><td>動画を見て来た問い合わせの件数、洗車から受注した整備の件数、乗り換え・買取の相談件数</td></tr>
+      </tbody>
+    </table></div>
+    <p>3ヶ月後に、続けるか、やり方を変えるかを判断する。判断の基準は、1〜2週目に数字の目標と合わせて決める。</p>
+  </section>
 
-    <!-- 06 STRATEGY -->
-    <section id="strategy">
-      <p class="step">Step 06 · Strategy</p>
-      <h2>戦略：コミュニティファーストの継承モデル</h2>
+  <section id="decide">
+    <h2>9. 決めること</h2>
+    <div class="tbl wide"><table>
+      <thead><tr><th>#</th><th>項目</th><th>選択肢・補足</th></tr></thead>
+      <tbody>
+        <tr><td class="n">1</td><td>洗車の作業範囲</td><td>外装、ホイール、室内、エンジンルームのどこまでを30,000円に含めるか。近隣の洗車・ディテイリング店の料金を3〜5件調べて決める</td></tr>
+        <tr><td class="n">2</td><td>出演特典の形</td><td>5,000円引き（案）。代わりに追加作業（レザーの手入れなど）で返す方法もある。追加作業なら30,000円という価格を下げずに済む</td></tr>
+        <tr><td class="n">3</td><td>保険</td><td>預かった車の事故を補償する保険の有無と補償額</td></tr>
+        <tr><td class="n">4</td><td>対象とする車</td><td>Jaguar・英国車に限るか、高価格帯の車全般に広げるか。広げると見込み客は増えるが、Jaguar専門店としての印象は薄まる</td></tr>
+        <tr><td class="n">5</td><td>最初の出演者</td><td>父のお得意様から3名</td></tr>
+        <tr><td class="n">6</td><td>引き取り・納車</td><td>忙しい人向けに行うか。行う場合の範囲と料金</td></tr>
+      </tbody>
+    </table></div>
+  </section>
 
-      <div class="statement">
-        <p class="tag">Strategy statement</p>
-        <p class="big">クラシックJaguarを、次の世代へ継ぐ。</p>
-        <ol>
-          <li><b>来歴を記録し</b>、良い個体の価値を正しく見える形にする</li>
-          <li><b>所有の不確実性をなくし</b>、新しい世代が安心して入ってこられるようにする</li>
-          <li><b>オーナーを主役にし</b>、広告ではなく語りで需要を生む</li>
-        </ol>
-      </div>
-      <p>やらないことも決めておく。</p>
-      <ul class="dont">
-        <li>値上がりを煽る</li><li>成功を誇示する演出</li><li>新しいJaguarの批判</li><li>匿名の口コミ工作</li><li>在庫数と価格での勝負</li>
-      </ul>
+  <section id="evidence">
+    <h2>10. 根拠となる調査</h2>
+    <h3>要点</h3>
+    <ol class="plain">
+      <li>世界のクラシックカー取引は、オンラインの比率が高まっている。若い世代の関心も高く、主な接点はYouTubeとInstagram。</li>
+      <li>Jaguarは新車をEV専業に切り替え中で、旧来のファンの反発が強い。XJやXJSの中古価格は100〜250万円台が中心で、手に入れやすい。</li>
+      <li>洗車動画は再生されやすいジャンルで、少人数の洗車専門店が動画で全国から集客した例がある。</li>
+      <li>オーナーの声では、購入のきっかけは「見た目に惚れた」「人に勧められた」が多い。手放す理由は「想定外の故障」と「相談先がない」ことが目立つ。</li>
+      <li>車の記録（整備歴や来歴）が揃った個体は、価値を保ちやすいと報告されている。</li>
+    </ol>
 
-      <h3>フライホイール</h3>
-      <figure class="diagram">
-        <p class="ft">記録から始まり、継承で一周する</p>
-        <p class="fs">真鍮色の段階でお金が生まれ、緑の段階は無料の接点として投資する</p>
-        <svg viewBox="0 0 560 440" role="img" aria-label="フライホイール。物語、遭遇と憧れ、安心の入口、伴走、記録、継承の6段階が時計回りに循環する">
-          <circle cx="280" cy="220" r="150" fill="none" stroke="var(--rule)" stroke-width="2"/>
-          <g fill="var(--muted)">
-            <polygon transform="translate(355,90) rotate(30)" points="-7,-6 7,0 -7,6"/>
-            <polygon transform="translate(430,220) rotate(90)" points="-7,-6 7,0 -7,6"/>
-            <polygon transform="translate(355,350) rotate(150)" points="-7,-6 7,0 -7,6"/>
-            <polygon transform="translate(205,350) rotate(210)" points="-7,-6 7,0 -7,6"/>
-            <polygon transform="translate(130,220) rotate(270)" points="-7,-6 7,0 -7,6"/>
-            <polygon transform="translate(205,90) rotate(330)" points="-7,-6 7,0 -7,6"/>
-          </g>
-          <g font-size="15" text-anchor="middle">
-            <g><rect x="210" y="44" width="140" height="52" rx="8" fill="var(--surface)" stroke="var(--mark)" stroke-width="2"/><text x="280" y="66" style="font-weight:700">① 物語</text><text x="280" y="85" font-size="11" style="fill:var(--ink-2)">オーナーが語る・図鑑</text></g>
-            <g><rect x="340" y="119" width="150" height="52" rx="8" fill="var(--surface)" stroke="var(--mark)" stroke-width="2"/><text x="415" y="141" style="font-weight:700">② 遭遇と憧れ</text><text x="415" y="160" font-size="11" style="fill:var(--ink-2)">ショート動画・街中・場</text></g>
-            <g><rect x="340" y="269" width="150" height="52" rx="8" fill="var(--brass-soft)" stroke="var(--brass)" stroke-width="2"/><text x="415" y="291" style="font-weight:700">③ 安心の入口</text><text x="415" y="310" font-size="11" style="fill:var(--ink-2)">維持費の可視化・入門車</text></g>
-            <g><rect x="210" y="344" width="140" height="52" rx="8" fill="var(--brass-soft)" stroke="var(--brass)" stroke-width="2"/><text x="280" y="366" style="font-weight:700">④ 伴走</text><text x="280" y="385" font-size="11" style="fill:var(--ink-2)">1年目・定額整備・仲間</text></g>
-            <g><rect x="70" y="269" width="150" height="52" rx="8" fill="var(--surface)" stroke="var(--mark)" stroke-width="2"/><text x="145" y="291" style="font-weight:700">⑤ 記録</text><text x="145" y="310" font-size="11" style="fill:var(--ink-2)">来歴・整備記録・声</text></g>
-            <g><rect x="70" y="119" width="150" height="52" rx="8" fill="var(--brass-soft)" stroke="var(--brass)" stroke-width="2"/><text x="145" y="141" style="font-weight:700">⑥ 継承</text><text x="145" y="160" font-size="11" style="fill:var(--ink-2)">買取・委託・次の人へ</text></g>
-          </g>
-          <text x="280" y="214" text-anchor="middle" font-size="13" style="fill:var(--muted)">起点は⑤記録</text>
-          <text x="280" y="234" text-anchor="middle" font-size="13" style="fill:var(--muted)">記録がなければ物語は嘘になる</text>
-        </svg>
-        <figcaption>Hagertyが株主に説明しているのと同じ構造。①②⑤は無料の接点として投資し、③（車両販売）、④（整備と定額プラン）、⑥（買取・委託手数料）で収益を得る。</figcaption>
-      </figure>
+    <h3>主な数字</h3>
+    <div class="tbl wide"><table>
+      <thead><tr><th>指標</th><th>数字</th><th>出典</th></tr></thead>
+      <tbody>
+        <tr><td>米国中心のオークション＋オンラインの取引額（2025年）</td><td>約48億ドル（うちオンライン約25億ドル）</td><td>Hagerty（CNBC）</td></tr>
+        <tr><td>クラシックカーを「所有したい」人</td><td>Z世代53%、ミレニアル世代57%、X世代49%、ブーマー世代33%</td><td>Hagerty（米国、n=10,000）</td></tr>
+        <tr><td>Z世代とクラシックカーの接点</td><td>YouTube 39%、Instagram 38%</td><td>Hagerty 2024</td></tr>
+        <tr><td>国内のX300系XJの平均価格</td><td>約120〜130万円</td><td>Motor-Fan（2026年10月）</td></tr>
+        <tr><td>秋田の洗車専門店の洗車チャンネル</td><td>登録者約10万人、最多再生225万回以上（運営会社は社員10人ほど）</td><td>PRESIDENT Online</td></tr>
+      </tbody>
+    </table></div>
 
-      <h3>3層の戦略</h3>
-      <div class="layers">
-        <article class="layer">
-          <header><span class="lv">Layer 1 · 当事者</span><h4>事業戦略：エムガレージが稼ぐ仕組み</h4><p>熱が冷める地点を、一つずつ商品とサービスで塞ぐ。</p></header>
-          <div class="tbl wide"><table>
-            <thead><tr><th>施策</th><th>内容</th><th>熱源</th></tr></thead>
-            <tbody>
-              <tr><td><b>B1 はじめてのJaguarパッケージ</b></td><td>X300、XJ40、XJSを対象に、車両、納車整備、1年間の伴走、予防整備の計画書をまとめて総額で示す</td><td>④⑦</td></tr>
-              <tr><td><b>B2 維持費の見える化</b></td><td>車種別の年間維持費（税、保険、消耗品、予防整備、想定外費用の積立）を公開する。税の重課も正直に書く</td><td>⑤</td></tr>
-              <tr><td><b>B3 定額メンテナンスプラン</b></td><td>年額制の点検と予防整備。「いくらかかるか分からない」を「毎年いくら」に変える</td><td>⑦</td></tr>
-              <tr><td><b>B4 来歴記録</b></td><td>整備記録、写真、オーナーの声、インタビュー動画を車台ごとに蓄積し、再販時に添付する</td><td>⑤</td></tr>
-              <tr><td><b>B5 継承の窓口</b></td><td>手放すオーナーから来歴ごと引き継ぐ。委託販売では、車両ページで受けた質問にすべて公開で答える</td><td>⑤</td></tr>
-              <tr><td><b>B6 体験と貸し出し</b></td><td>試乗体験。撮影や映像制作への車両貸し出し（PR表記付き）</td><td>③⑩</td></tr>
-              <tr><td><b>B7 直し続ける宣言</b></td><td>対応車種、部品確保の方針、整備士育成の方針を公開する</td><td>⑦</td></tr>
-            </tbody>
-          </table></div>
-        </article>
-        <article class="layer">
-          <header><span class="lv">Layer 2 · 当事者</span><h4>コミュニティ戦略：オーナーを主役にする</h4><p>オーナーが語り、集まり、誇れる場を、小さく続ける。</p></header>
-          <div class="tbl wide"><table>
-            <thead><tr><th>施策</th><th>内容</th><th>熱源</th></tr></thead>
-            <tbody>
-              <tr><td><b>C1 オーナーズサークル</b></td><td>購入・整備の顧客は自動で入会（H.O.G.型）。最初は公式LINEやLINEオープンチャットで、費用ゼロで始める</td><td>②</td></tr>
-              <tr><td><b>C2 オーナーズインタビュー</b></td><td>「仕事で大事にしてきたこと」「なぜこの車か」「20代の自分へ」。1回の撮影でショート3〜4本と長尺1本を作る。成功を語らせず、美意識を映す</td><td>③⑨</td></tr>
-              <tr><td><b>C3 コメント欄の運営</b></td><td>出演オーナーの一言を固定し、店はすべてのコメントに返信する。良い声は許可を得てアーカイブへ転載する</td><td>⑤</td></tr>
-              <tr><td><b>C4 朝の集まり</b></td><td>月1回、景色の良い場所で開く。毎回、初参加者を紹介する</td><td>②</td></tr>
-              <tr><td><b>C5 Grand Tour</b></td><td>年1回、英国車で行く1泊2日の旅。車を持っていない人の同乗枠も用意する</td><td>②③</td></tr>
-              <tr><td><b>C6 次世代オーナー枠</b></td><td>20〜30代のオーナーやクリエイターを複数名サポートし、発信の担い手になってもらう</td><td>③⑩</td></tr>
-              <tr><td><b>C7 Jaguarあるある図鑑</b></td><td>故障を愛着とユーモアで語り、最後に「こう直す」で締める</td><td>⑨</td></tr>
-            </tbody>
-          </table></div>
-        </article>
-        <article class="layer">
-          <header><span class="lv">Layer 3 · 第三者的</span><h4>業界戦略：界隈の公共財をつくる</h4><p>独立した名前で運営し、運営者がエムガレージであることを明記する。自社在庫への誘導はしない。</p></header>
-          <div class="tbl wide"><table>
-            <thead><tr><th>施策</th><th>内容</th><th>熱源</th></tr></thead>
-            <tbody>
-              <tr><td><b>I1 クラシックJaguarレジストリ</b></td><td>国内に現存する個体を車台番号で登録する台帳（任意登録、個人情報は非公開）。国内の現存台数を示す公的な統計はなく、初めての実数把握になる</td><td>⑤⑧</td></tr>
-              <tr><td><b>I2 相場・維持費レポート</b></td><td>四半期ごとに公開し、界隈の「基準」になる</td><td>⑥</td></tr>
-              <tr><td><b>I3 英国クラシック連合イベント</b></td><td>英国車の専門店や各クラブと共催する。Jaguarは主役級の一角</td><td>⑧③</td></tr>
-              <tr><td><b>I4 技術の継承</b></td><td>若手整備士への公開講座と、整備知見のデジタル化（図鑑・ライブラリと連動）</td><td>⑦</td></tr>
-              <tr><td><b>I5 制度への働きかけ</b></td><td>旧車重課や保険の協定価額の問題について、連合として声を上げる。レジストリのデータを根拠にする</td><td>—</td></tr>
-            </tbody>
-          </table></div>
-        </article>
-      </div>
+    <h3>参考になる事例</h3>
+    <div class="tbl wide"><table>
+      <thead><tr><th>事例</th><th>事実</th><th>この戦略への示唆</th></tr></thead>
+      <tbody>
+        <tr><td>秋田の洗車専門店</td><td>洗車動画のチャンネルで、全国の車好きが来店するようになった</td><td>少人数でも、洗車動画で遠方から集客できる</td></tr>
+        <tr><td>Bring a Trailer</td><td>コメント欄で専門家が車の状態を検証し、出品者が質問に答える。2025年の取引額は約17.1億ドル</td><td>良い点も気になる点も正直に見せる方が、信頼につながる</td></tr>
+        <tr><td>Hagerty</td><td>無料の動画や相場ツールを入口に、保険の加入につなげている。YouTube視聴者の最大層は40歳未満</td><td>動画は費用ではなく、お客様を集める手段</td></tr>
+      </tbody>
+    </table></div>
 
-      <h3>当事者と第三者的の使い分け</h3>
-      <div class="tbl wide">
-        <table>
-          <thead><tr><th></th><th>当事者（エムガレージ）</th><th>第三者的（界隈の公共財）</th></tr></thead>
-          <tbody>
-            <tr><th>名乗り</th><td>エムガレージとして</td><td>独立した名前。ただし「運営：エムガレージ」と必ず明記する</td></tr>
-            <tr><th>目的</th><td>販売、整備、伴走、継承</td><td>界隈全体の信頼と規模をつくる</td></tr>
-            <tr><th>ルール</th><td>本業を宣伝してよい</td><td>本業を宣伝しない。他店の個体も平等に扱う</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="so"><b>守るべき一線</b>2023年10月施行のステマ規制（景品表示法）では、事業者の表示であることが分かりにくい表示は違法になり、責任は依頼した事業者が負う。クリエイターや出演者に依頼・提供した投稿には必ずPR表記を付けてもらい、一般のファンを装った投稿は一切しない。また「Jaguar」はJLRの登録商標なので、イベントやレジストリの名前は公式と誤認されない表現にし、必要に応じて権利者に確認する。</div>
-    </section>
+    <div class="note"><b>調査の限界</b>　世界市場の数字は米国が中心。この環境の通信制限で個別ページの本文を取得できず、オーナーの声は検索結果に表示された範囲から集めた。国内のクラシックJaguarの現存台数には、公的な統計がない。</div>
 
-    <!-- 07 EXECUTION -->
-    <section id="execution">
-      <p class="step">Step 07 · Execution</p>
-      <h2>実行計画：火付けと薪</h2>
-      <p class="kicker">薪は熱を絶やさない継続的な取り組み、火付けは話題が跳ねる瞬間を作る取り組み。小さく始め、続けることを最優先にする。</p>
+    <h3>出典</h3>
+    <ul class="plain sources">
+      <li><a href="https://www.cnbc.com/2025/12/19/classic-cars-hagerty.html">CNBC：Classic-car auctions hit $4.8 billion this year</a></li>
+      <li><a href="https://www.oldcarsweekly.com/news/study-shows-that-gen-z-and-millennials-are-into-driving-and-classic-cars">Old Cars Weekly：Gen Z and Millennials into classic cars</a></li>
+      <li><a href="https://www.axios.com/2024/06/07/gen-z-falls-for-vintage-cars-whats-next">Axios：Gen Z falls for vintage cars</a></li>
+      <li><a href="https://motor-fan.jp/?p=1642745">Motor-Fan：XJの中古相場</a></li>
+      <li><a href="https://www.classic-trader.com/uk/cars/listing/jaguar/xj6/xj6-3-2/1992/254312">Classic Trader：XJ market</a></li>
+      <li><a href="https://president.jp/articles/-/57742">PRESIDENT Online：秋田の洗車専門店</a></li>
+      <li><a href="https://atsoho.com/blog/car-detailing-ai-youtube-monetization">カーディテイリング動画とYouTube</a></li>
+      <li><a href="https://theshopmag.com/news/bring-a-trailer-record-growth-2025/">The Shop：Bring a Trailer 2025</a></li>
+      <li><a href="https://www.insidehook.com/autos/inside-the-greatest-vintage-car-cult-on-the-internet-bring-a-trailer">InsideHook：Bring a Trailer</a></li>
+      <li><a href="https://annarborobserver.com/?p=96980">Ann Arbor Observer：Hagerty</a></li>
+      <li><a href="https://carmagazine.co.uk/features/car-culture/jaguar-ev-concept-debate">CAR Magazine：Jaguar Type 00</a></li>
+      <li><a href="https://www.itmedia.co.jp/business/spv/2310/17/news050_2.html">ITmedia：ステマ規制</a></li>
+    </ul>
+  </section>
 
-      <div class="roadmap">
-        <div class="phase"><span class="when">0〜3ヶ月</span><h4>基盤</h4><div><span class="k">薪</span><ul><li>N1インタビュー20名</li><li>ショート週1本、長尺月1本</li><li>オーナーズサークル開設</li></ul></div><div class="fire"><span class="k">火付け</span><ul><li>「最後の本物のJaguar」シリーズ公開</li></ul></div></div>
-        <div class="phase"><span class="when">3〜6ヶ月</span><h4>入口</h4><div><span class="k">薪</span><ul><li>朝の集まりを月1回</li><li>あるある図鑑</li><li>コメント欄の運営</li></ul></div><div class="fire"><span class="k">火付け</span><ul><li>はじめてのJaguarパッケージ発売</li><li>クリエイターとの協業3件</li><li>相場レポート創刊</li></ul></div></div>
-        <div class="phase"><span class="when">6〜12ヶ月</span><h4>循環</h4><div><span class="k">薪</span><ul><li>定額メンテナンスプラン</li><li>来歴記録の運用</li><li>次世代オーナー枠</li></ul></div><div class="fire"><span class="k">火付け</span><ul><li>第1回 Grand Tour</li><li>レジストリのβ版公開</li></ul></div></div>
-        <div class="phase"><span class="when">2〜3年目</span><h4>拡張</h4><div><span class="k">薪</span><ul><li>レジストリの拡充</li><li>若手整備士への講座</li></ul></div><div class="fire"><span class="k">火付け</span><ul><li>英国クラシック連合イベント（50〜100台規模から）</li><li>制度への提言</li></ul></div></div>
-      </div>
-
-      <h3>KPI</h3>
-      <div class="answer">
-        <p class="tag">北極星指標</p>
-        <p class="big">来歴が記録されたJaguarの台数</p>
-        <p style="margin:10px 0 0">記録が増えるほど、物語、信頼、継承のすべてが強くなる。アーカイブとレジストリの登録台数で測る。</p>
-      </div>
-      <div class="tbl wide">
-        <table>
-          <thead><tr><th>段階</th><th>先行指標</th><th>結果指標</th></tr></thead>
-          <tbody>
-            <tr><td>遭遇・憧れ</td><td>ショートの視聴数と保存数。ハッシュタグ付きの第三者投稿数</td><td>20〜30代のフォロワー比率</td></tr>
-            <tr><td>検討</td><td>維持費ページの閲覧数。LINE相談数（特に「動画を見て」）</td><td>相談から来店に至る割合</td></tr>
-            <tr><td>購入</td><td>入門パッケージへの問い合わせ数</td><td>新規オーナー数と、P1・P2の比率</td></tr>
-            <tr><td>伴走</td><td>1年目プログラムの完了率。定額プランの加入率</td><td><b>1年以内に手放す人の割合</b></td></tr>
-            <tr><td>コミュニティ</td><td>朝の集まりの参加台数。<b>初参加者の比率（目標30〜40%）</b></td><td>サークルで発言する人の割合</td></tr>
-            <tr><td>継承</td><td>来歴記録付きで再販した台数</td><td>記録の有無による成約価格と成約日数の差</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3>リスクと対策</h3>
-      <div class="tbl wide">
-        <table>
-          <thead><tr><th>リスク</th><th>起きること</th><th>対策</th></tr></thead>
-          <tbody>
-            <tr><td>投機化</td><td>相場が上がりすぎて若者が締め出され、投機筋が入る（Z1/Z2の例）</td><td>値上がりを語らない。入口価格帯の在庫を必ず持つ</td></tr>
-            <tr><td>信頼の毀損</td><td>第三者を装った発信が発覚すると致命傷になる</td><td>運営者の明記とPR表記を社内ルールにする</td></tr>
-            <tr><td>顔への依存</td><td>発信者個人の炎上がブランドを傷つける（Petroliciousの例）</td><td>顔は複数立てる。店と個人のブランドを分ける</td></tr>
-            <tr><td>品格の崩れ</td><td>成功の誇示や悪ノリで世界観が崩れる</td><td>トーンの指針を作る。美意識と敬意を基本に、ユーモアは自分たちを笑うところまで</td></tr>
-            <tr><td>運営の負荷</td><td>少人数の店では、イベントや発信が回らなくなる</td><td>月1回、週1本から。連合で負荷を分ける。記録と発信は本プラットフォームで省力化する</td></tr>
-            <tr><td>母数の小ささ</td><td>Jaguar単独では人が集まらない</td><td>英国クラシック全体で間口を開き、Jaguarで深さを出す</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3>本プラットフォームへの反映候補</h3>
-      <p>開発中のM-GARAGE Platformには、この戦略を支える土台がすでにある。要件に加えるかどうかは、発注者の判断を経てから決める。</p>
-      <div class="tbl wide">
-        <table>
-          <thead><tr><th>既存の要件</th><th>この戦略での使い方</th><th>追加の候補</th></tr></thead>
-          <tbody>
-            <tr><td>FR-OWN オーナーズアーカイブ</td><td>来歴記録（B4）とレジストリ（I1）の土台</td><td>オーナーの声の転載、インタビュー動画の紐付け、来歴のタイムライン</td></tr>
-            <tr><td>FR-CRM-002 顧客タイムライン</td><td>N1インタビューの記録、1年目の伴走の管理</td><td>インサイトのタグ（動機、不安、転機、誇り、離脱）</td></tr>
-            <tr><td>FR-CRM-004 リマインダー</td><td>予防整備の計画と、定額プランの点検時期</td><td>—</td></tr>
-            <tr><td>図鑑・ライブラリ・ブログ</td><td>無料の接点（熱源⑥）、あるある図鑑、維持費の解説</td><td>車種別の維持費モデルのページ</td></tr>
-            <tr><td>車両ページの自由入力</td><td>よくある故障、維持費、購入時の注意点を全部開示する</td><td>質問と回答の公開</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3>今週から始められること</h3>
-      <ol class="week">
-        <li><div><b>N1インタビューの候補を20名挙げる</b>乗り換え組、長年のオーナー、手放した元オーナー、問い合わせたが買わなかった人。質問ガイドは作業メモ（docs/strategy/04）にある。</div></li>
-        <li><div><b>最初のオーナーズインタビューを1名撮る</b>許諾書には、将来その車を販売する時にも動画を使ってよいかを必ず入れる。</div></li>
-        <li><div><b>X300とXJSの年間維持費モデルを1枚にまとめる</b>30年の整備記録から、実際の費用の幅を出す。</div></li>
-        <li><div><b>公式LINEにオーナーズサークルの入口を作る</b>既存の顧客に案内し、最初の朝の集まりの日程を決める。</div></li>
-        <li><div><b>「直し続ける」対応車種のリストを作る</b>店として責任を持てる範囲を言葉にする。</div></li>
-      </ol>
-
-      <h3>用意した実行キットと新しい画面</h3>
-      <p>上の5つを含め、すぐに動けるよう手順書とひな形を作った。リポジトリの <span class="num">docs/strategy/kit/</span> にある。最初に読むのは HANDOVER.md。</p>
-      <div class="tbl wide">
-        <table>
-          <thead><tr><th>キット</th><th>中身</th></tr></thead>
-          <tbody>
-            <tr><td>S-1 N1インタビュー</td><td>候補の選び方、依頼文、質問ガイド、記録シート、まとめ方</td></tr>
-            <tr><td>S-2 オーナーズインタビュー</td><td>構成と質問、編集の型、コメント運営、同意書のひな形</td></tr>
-            <tr><td>S-3 維持費モデル</td><td>X300・XJSの法定費用を計算済み。整備費は店の記入欄</td></tr>
-            <tr><td>S-4 オーナーズサークル</td><td>LINEオープンチャットの設計、ルール、案内文、朝の集まりの企画書</td></tr>
-            <tr><td>S-5 直し続ける車種</td><td>Jaguar Classicの部品対応を下敷きにした下書き。店の確認欄つき</td></tr>
-            <tr><td>S-6 12週間のコンテンツ</td><td>週ごとの企画表、「最後の本物のJaguar」台本3本、あるある図鑑10項目</td></tr>
-            <tr><td>S-7 トーン＆マナー</td><td>言葉づかい、やらないこと、公開前チェック、炎上時の対応</td></tr>
-            <tr><td>S-8 はじめてのJaguar</td><td>入門パッケージの構成と価格の示し方</td></tr>
-            <tr><td>S-9 業界の公共財</td><td>レジストリ、相場レポート、英国クラシック連合イベントの設計（凍結）</td></tr>
-            <tr><td><b>S-10 洗車×インタビュー</b></td><td><b>改訂後の中核。役割分担、1台の流れ、価格と特典、動画の構成、営業につなげる仕組み、リスク</b></td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p>サイトには、整備と部品のページ（/jaguar/keep-running）を新設し（維持費ガイドは改訂で取り下げ）、オーナーズアーカイブの「オーナーの声」と、車両ページの「購入前にお伝えしたいこと」を表示できるようにした。DBの変更はなく、本文はすべて管理画面の「画面を見ながら直す」から書き換えられる。反映はPR #9のマージ後になる。</p>
-    </section>
-
-    <!-- 08 METHOD -->
-    <section id="method">
-      <p class="step">Appendix · Method and sources</p>
-      <h2>調査の方法と限界</h2>
-      <ul class="plain">
-        <li>公開情報を中心に調べた（2026年10月30日時点）。数字は出典ごとに定義が違うため、本文では出典と組にして示した。</li>
-        <li>世界市場の数字は米国の取引が中心。調査会社による「市場規模」の推計（380〜410億ドル）は方法論が不明なため、判断の根拠には使っていない。</li>
-        <li>N1の声は、このクラウド環境の通信制限で個別ページの本文を取得できず、検索結果に表示された範囲から採録した。<b>自社でのN1インタビューで検証することを前提</b>にしている。</li>
-        <li>「リブランドでクラシックJaguarの需要が増えた」ことを示す定量データは、現時点で見つかっていない。仮説として扱い、自社の問い合わせデータで検証する。</li>
-        <li>国内のクラシックJaguarの現存台数、オーナーの年齢分布、専門店の数は、公的な統計がない。レジストリの構想はこの空白を埋めるものでもある。</li>
-      </ul>
-
-      <div class="sources">
-        <h4>市場構造</h4>
-        <ul>
-          <li><a href="https://www.cnbc.com/2025/12/19/classic-cars-hagerty.html">CNBC: Classic-car auctions hit $4.8 billion this year</a></li>
-          <li><a href="https://www.forbes.com/sites/michaelharley/2025/12/23/the-collector-car-market-has-shifted-to-newer-cars-says-hagerty/">Forbes: The Collector Car Market Has Shifted To Newer Cars</a></li>
-          <li><a href="https://www.motorious.com/articles/all/hagerty-ceo-sees-classic-car-market-shifting-aims-to-expand-data-driven-strategy/">Motorious: Hagerty CEO Sees Classic Car Market Shifting</a></li>
-          <li><a href="https://www.motorious.com/articles/all/seven-figure-collector-car-sales-top-1-billion-as-buyer-demographics-shift">Motorious: Seven-Figure Sales Top $1B as Buyer Demographics Shift</a></li>
-          <li><a href="https://theshopmag.com/news/bring-a-trailer-record-growth-2025/">The Shop: Bring a Trailer Record Growth 2025</a></li>
-          <li><a href="https://jalopnik.com/bring-a-trailer-sold-1-5-billion-worth-of-cars-last-ye-1851751622">Jalopnik: Bring a Trailer Sold $1.5 Billion</a></li>
-          <li><a href="https://www.cnbc.com/2024/01/16/classic-car-auction-site-bring-a-trailer-sales-hit-record-1point4-billion.html">CNBC: Bring a Trailer sales hit record $1.4 billion</a></li>
-          <li><a href="https://www.oldcarsweekly.com/news/study-shows-that-gen-z-and-millennials-are-into-driving-and-classic-cars">Old Cars Weekly: Gen Z and Millennials into classic cars</a></li>
-          <li><a href="https://www.axios.com/2024/06/07/gen-z-falls-for-vintage-cars-whats-next">Axios: Gen Z falls for vintage cars</a></li>
-          <li><a href="https://www.carscoops.com/2025/12/hagerty-picks-11-cars-to-buy-now-and-youll-thank-yourself-later/">Carscoops: Hagerty 2026 Bull Market List</a></li>
-          <li><a href="https://kuruma-news.jp/post/1039126">くるまのニュース：13年超の自動車税重課</a></li>
-          <li><a href="https://www.airia.or.jp/publish/file/syarei_2025.pdf">自動車検査登録情報協会：車齢 2025</a></li>
-          <li><a href="https://kuruma-news.jp/post/222312">くるまのニュース：25年ルールと国産旧車の流出</a></li>
-          <li><a href="https://bestcarweb.jp/?p=1266474">ベストカーWeb：整備士不足</a></li>
-          <li><a href="https://bestcarweb.jp/?p=1177874">ベストカーWeb：旧車と車両保険</a></li>
-        </ul>
-        <h4>Jaguar</h4>
-        <ul>
-          <li><a href="https://carmagazine.co.uk/features/car-culture/jaguar-ev-concept-debate">CAR Magazine: Jaguar Type 00 debate</a></li>
-          <li><a href="https://theconversation.com/why-jaguar-is-taking-such-a-big-risk-with-its-rebrand-and-pink-concept-car-245485">The Conversation: Why Jaguar is taking such a big risk</a></li>
-          <li><a href="https://www.marklines.com/ja/news/321042">MarkLines：JLRの2025年</a></li>
-          <li><a href="https://www.evo.co.uk/jaguar/gt/207614/jaguar-type-01-controversial-new-electric-gt-gets-a-name">evo: Jaguar Type 01</a></li>
-          <li><a href="https://goauto.com.au/news/jaguar/e-type/2025-04-16/96181.html">GoAuto: E-Type panels 2025</a></li>
-          <li><a href="https://jaguar.com/about-jaguar/jaguar-classic/jaguar-classic-parts.html">Jaguar Classic Parts</a></li>
-          <li><a href="https://jec.org.uk/2017/jec-2017-agm-minutes/">Jaguar Enthusiasts' Club: 2017 AGM minutes</a></li>
-          <li><a href="https://jec.org.uk/about/history">Jaguar Enthusiasts' Club: history</a></li>
-          <li><a href="https://www.as-web.jp/car/947323">as-web：C/Dタイプ・コンティニュエーション日本初上陸</a></li>
-          <li><a href="https://www.webcg.net/articles/-/12829">webCG：ジャガー・デイ2005</a></li>
-          <li><a href="https://motor-fan.jp/?p=1642745">Motor-Fan：XJの中古相場</a></li>
-          <li><a href="https://kuruma-news.jp/post/1010218">くるまのニュース：150万円以下のジャガー</a></li>
-          <li><a href="https://classics.honestjohn.co.uk/top-10s/top-10-affordable-jaguars/">Honest John Classics: Top 10 affordable Jaguars</a></li>
-          <li><a href="https://www.classic-trader.com/uk/cars/listing/jaguar/xj6/xj6-3-2/1992/254312">Classic Trader: XJ market</a></li>
-          <li><a href="https://classicsworld.co.uk/news/classic-jaguar-values/">Classics World: classic Jaguar values</a></li>
-        </ul>
-        <h4>他業界</h4>
-        <ul>
-          <li><a href="https://en.wikipedia.org/wiki/Harley_Owners_Group">Harley Owners Group</a></li>
-          <li><a href="https://ridermagazine.com/harley-owners-group-30th-anniversary-celebration/">Rider Magazine: H.O.G. 30th anniversary</a></li>
-          <li><a href="https://www.warc.com/newsandopinion/opinion/a-cult-brand-that-hates-ads/2444">WARC: A cult brand that hates ads</a></li>
-          <li><a href="https://www.outlookbusiness.com/magazine/business/story/siddhartha-lal-an-indian-powerhouse-on-two-wheels-6676">Outlook Business: Siddhartha Lal</a></li>
-          <li><a href="https://flatsixes.com/porsche-culture/porsche-car-shows/visiting-luftgekuhlt-magnus-walker-patrick-dempsey-chad-mcqueen/amp">flatsixes: Luftgekühlt</a></li>
-          <li><a href="https://theshopmag.com/features/how-the-luftgekuhlt-car-show-lifts-up-the-porsche-brand/?amp=1">The Shop: How Luftgekühlt lifts up the Porsche brand</a></li>
-          <li><a href="https://www.carandclassic.com/magazine/goodwood-revival-is-more-than-just-motorsport-its-time-travel/">Car & Classic: Goodwood Revival</a></li>
-          <li><a href="https://hagerty.co.uk/articles/events-articles/radwood/radwood-the-story-so-far">Hagerty UK: Radwood, the story so far</a></li>
-          <li><a href="https://www.insidehook.com/autos/inside-the-greatest-vintage-car-cult-on-the-internet-bring-a-trailer">InsideHook: Inside the greatest vintage car cult</a></li>
-          <li><a href="https://www.thedrive.com/podcast/bring-a-trailer-started-as-a-craigslist-blog-it-created-an-industry">The Drive: Bring a Trailer created an industry</a></li>
-          <li><a href="https://s28.q4cdn.com/107308082/files/doc_financials/2024/ar/2024-Annual-Report-4.pdf">Hagerty 2024 Annual Report</a></li>
-          <li><a href="https://annarborobserver.com/?p=96980">Ann Arbor Observer: Hagerty</a></li>
-          <li><a href="https://thehustle.co/12042020-hodinkee-watches">The Hustle: Hodinkee</a></li>
-          <li><a href="https://www.webcartop.jp/?p=1376885">WEB CARTOP：軽井沢ミーティング2024</a></li>
-          <li><a href="https://response.jp/article/2017/12/30/304296.html">レスポンス：マツダのNAレストア事業</a></li>
-          <li><a href="https://motor-fan.jp/article/297586/">Motor-Fan：ジャパンミニデイ</a></li>
-          <li><a href="https://bestcarweb.jp/news/365631">ベストカーWeb：SR400が年間ベストセラーに</a></li>
-          <li><a href="https://trafficnews.jp/post/108809">乗りものニュース：SR400</a></li>
-          <li><a href="https://young-machine.com/2021/11/29/271269/">ヤングマシン：Z2の販売例</a></li>
-          <li><a href="https://bestcarweb.jp/?p=330485">ベストカーWeb：高騰する絶版車</a></li>
-          <li><a href="https://bestcarweb.jp/news/176395">ベストカーWeb：アルファロメオの魅力と課題</a></li>
-          <li><a href="https://news.ksb.co.jp/article/16793450">KSB：アナログレコード生産2025</a></li>
-          <li><a href="https://www.nippon.com/ja/japan-data/h02304/">nippon.com：アナログレコード</a></li>
-          <li><a href="https://www.moneypost.jp/833679">マネーポスト：Z世代と昭和レトロ</a></li>
-          <li><a href="https://www.moneypost.jp/1073010/0">マネーポスト：純喫茶の客層の変化</a></li>
-          <li><a href="https://www.carscoops.com/2020/08/petrolicious-sold-after-founders-social-media-posts-come-back-to-haunt-him/">Carscoops: Petrolicious sold</a></li>
-          <li><a href="https://www.itmedia.co.jp/business/spv/2310/17/news050_2.html">ITmedia：新・ステマ規制のリスク</a></li>
-        </ul>
-        <h4>N1の声</h4>
-        <ul>
-          <li><a href="https://carview.yahoo.co.jp/ncar/catalog/jaguar/xj-s_coupe/urev/detail/185283/">carview!：XJ-Sクーペのレビュー</a></li>
-          <li><a href="https://automotive-quantum.jp/21546">automotive-quantum：愛車探訪 XJS V12クーペ</a></li>
-          <li><a href="https://www.gaisha-oh.com/soken/jaguar-xjs-uchida/">外車王SOKEN：XJSコンバーチブルのオーナー</a></li>
-          <li><a href="https://news.yahoo.co.jp/articles/d74642cba4daa72acf9df5a31bf13d9f025c43cf">ENGINE WEB：240万円で手にいれた夢のカーライフ</a></li>
-          <li><a href="https://autos.goo.ne.jp/catalog/jaguar/xj-s/review/17190.html">goo自動車：XJ-Sの口コミ</a></li>
-          <li><a href="https://www.carsensor.net/catalog/jaguar/xj_series/review/">カーセンサー：XJの口コミ</a></li>
-          <li><a href="https://carview.yahoo.co.jp/ncar/catalog/jaguar/xj_series/chiebukuro/detail/?qid=1356823048">carview!：XJシリーズの質問</a></li>
-          <li><a href="https://www.jaguarforum.com/threads/why-you-bought-an-x300.42160/">JaguarForum: Why you bought an X300</a></li>
-          <li><a href="https://www.carandclassic.com/magazine/1990-jaguar-xj40-car-classic-fleet/">Car & Classic: 1990 Jaguar XJ40</a></li>
-          <li><a href="https://kinto-jp.com/magazine/kmz20211006/">KINTO：旧車オーナー座談会</a></li>
-          <li><a href="https://www.wwdjapan.com/articles/1877127">WWDJAPAN：業界人の乗るクラシックカー</a></li>
-          <li><a href="https://carcareplus.jp/article/2026/05/23/13932.html">カーケアプラス：旧車と共にある人生</a></li>
-        </ul>
-      </div>
-      <footer class="end">作業メモ（Step 01〜06）はリポジトリの docs/strategy/ にある。数字の更新や自社データでの検証結果は、そこに追記していく。</footer>
-    </section>
-  </main>
-</div>
-<div id="tip" hidden></div>
-
-<script>
-(function () {
-  var DATA = {
-    bat: { unit: "億ドル", fmt: function (v) { return v.toFixed(1); }, max: 20, ticks: [0, 5, 10, 15, 20],
-      rows: [["2023", 14.0, "約14億ドル（CNBC）"], ["2024", 15.0, "約15億ドル（Jalopnik）"], ["2025", 17.1, "約17.1億ドル、49,486件（The Shop）"]] },
-    gen: { unit: "%", fmt: function (v) { return v + "%"; }, max: 60, ticks: [0, 20, 40, 60],
-      rows: [["Z世代", 53, "Z世代 53%"], ["ミレニアル", 57, "ミレニアル世代 57%"], ["X世代", 49, "X世代 49%"], ["ブーマー", 33, "ブーマー世代 33%"]] },
-    sr: { unit: "台", fmt: function (v) { return v.toLocaleString("ja-JP"); }, max: 8000, ticks: [0, 2000, 4000, 6000, 8000],
-      rows: [["2020", 2450, "2020年 2,450台"], ["2021", 6966, "2021年 6,966台（最終モデル発売）"]] }
-  };
-  var NS = "http://www.w3.org/2000/svg";
-  var tip = document.getElementById("tip");
-  function el(n, a) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); return e; }
-  function showTip(text, x, y) { tip.textContent = text; tip.hidden = false; var w = tip.offsetWidth; var left = Math.min(x + 12, window.innerWidth - w - 12); tip.style.left = Math.max(8, left) + "px"; tip.style.top = (y - 40) + "px"; }
-  function hideTip() { tip.hidden = true; }
-
-  document.querySelectorAll(".chart[data-chart]").forEach(function (fig) {
-    var d = DATA[fig.getAttribute("data-chart")]; if (!d) return;
-    var W = 360, H = 220, L = 44, R = 12, T = 22, B = 30;
-    var pw = W - L - R, ph = H - T - B;
-    var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": fig.querySelector(".ft").textContent });
-    d.ticks.forEach(function (t) {
-      var y = T + ph - (t / d.max) * ph;
-      if (t > 0) svg.appendChild(el("line", { x1: L, x2: W - R, y1: y, y2: y, "class": "grid" }));
-      var tx = el("text", { x: L - 8, y: y + 4, "text-anchor": "end" }); tx.textContent = t.toLocaleString("ja-JP"); svg.appendChild(tx);
-    });
-    var n = d.rows.length, slot = pw / n, bw = Math.min(56, slot * 0.5);
-    d.rows.forEach(function (r, i) {
-      var cx = L + slot * i + slot / 2, h = (r[1] / d.max) * ph, y = T + ph - h, x = cx - bw / 2, rad = 4;
-      var path = "M" + x + "," + (T + ph) + " V" + (y + rad) + " Q" + x + "," + y + " " + (x + rad) + "," + y + " H" + (x + bw - rad) + " Q" + (x + bw) + "," + y + " " + (x + bw) + "," + (y + rad) + " V" + (T + ph) + " Z";
-      var hit = el("rect", { x: cx - slot / 2 + 2, y: T, width: slot - 4, height: ph, "class": "hit", tabindex: "0", "aria-label": r[2] });
-      var bar = el("path", { d: path, "class": "bar" });
-      var val = el("text", { x: cx, y: y - 6, "text-anchor": "middle", "class": "val" }); val.textContent = d.fmt(r[1]);
-      var lab = el("text", { x: cx, y: H - 10, "text-anchor": "middle" }); lab.textContent = r[0];
-      svg.appendChild(bar); svg.appendChild(val); svg.appendChild(lab); svg.appendChild(hit);
-      hit.addEventListener("pointermove", function (e) { showTip(r[2], e.clientX, e.clientY); });
-      hit.addEventListener("pointerleave", hideTip);
-      hit.addEventListener("focus", function () { var b = hit.getBoundingClientRect(); showTip(r[2], b.left + b.width / 2, b.top + 30); });
-      hit.addEventListener("blur", hideTip);
-    });
-    svg.appendChild(el("line", { x1: L, x2: W - R, y1: T + ph, y2: T + ph, "class": "base" }));
-    var plot = fig.querySelector(".plot"); plot.appendChild(svg);
-    var det = document.createElement("details");
-    var sum = document.createElement("summary"); sum.textContent = "数値を表で見る"; det.appendChild(sum);
-    var wrap = document.createElement("div"); wrap.className = "tbl";
-    var tb = "<table><thead><tr><th>項目</th><th>値（" + d.unit + "）</th></tr></thead><tbody>";
-    d.rows.forEach(function (r) { tb += "<tr><td>" + r[0] + "</td><td class=\"n\">" + d.fmt(r[1]) + "</td></tr>"; });
-    wrap.innerHTML = tb + "</tbody></table>"; det.appendChild(wrap); plot.appendChild(det);
-  });
-  window.addEventListener("scroll", hideTip, { passive: true });
-})();
-</script>
+  <footer>運用手順、同意書のひな形、調査の詳細は、リポジトリの docs/strategy/ にあります（operations.md、consent_form.md、research_summary.md）。</footer>
+</main>

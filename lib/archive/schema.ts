@@ -4,7 +4,7 @@ import { z } from "zod";
 export const ownerArchiveEntryFormSchema = z.object({
   restoration_history: z.string().nullable(),
   sales_history: z.string().nullable(),
-  // FR-OWN-004: 公開ページに「オーナーの声」として表示する（本人の許可を得た内容のみ、BR-CONTENT-003）
+  // 将来対応：入力欄のみ用意し、公開ページにはまだ表示しない（01_public_ui_spec.md 13章）
   owner_comment: z.string().nullable(),
   is_published: z.boolean(),
 });

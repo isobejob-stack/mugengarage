@@ -95,9 +95,7 @@ export default async function Page() {
   // 在庫の車名で図鑑を引き当てる（図鑑側は在庫に依存しない設計のまま保つ）。
   const stockModelNames = Array.from(
     new Set(
-      vehicles
-        .map((v) => v.models?.name)
-        .filter((n): n is string => Boolean(n)),
+      vehicles.map((v) => v.models?.name).filter((n): n is string => Boolean(n)),
     ),
   );
   const modernModels = models.filter(
@@ -363,25 +361,6 @@ Xタイプは、ジャガーとしては小柄な4ドアセダンです。ジャ
           </Link>
         </p>
 
-        {/* 読み物で興味を持った人が次に知りたいのは「持てるのか」。
-            部品と整備の見通しを示す（docs/strategy/04 インサイトI-2）。
-            維持費の金額は、実際の費用が上ぶれした場合の信頼リスクを避けるため公開ページには載せず、
-            個別の相談でお伝えする方針にした（2026-10-31、docs/strategy/07_revision_small_team.md）。 */}
-        <p className="mt-6 text-base">
-          <Link
-            href="/jaguar/keep-running"
-            className="text-primary-700 ease-standard inline-flex min-h-11 items-center gap-1.5 font-medium underline decoration-1 underline-offset-4 transition-colors duration-200 hover:decoration-2"
-          >
-            <SiteText
-              k="jaguar.link.keep_running"
-              description="ジャガーを知る 整備と部品のページへのリンク文言"
-            >
-              部品はまだ手に入るのか、誰が直せるのか
-            </SiteText>
-            <span aria-hidden="true">→</span>
-          </Link>
-        </p>
-
         <section className="mt-12">
           <div className="bg-charcoal-900 shadow-medium rounded-2xl px-6 py-10 text-white sm:px-10 sm:py-12">
             {timelineSpan && (
@@ -428,8 +407,7 @@ Xタイプは、ジャガーとしては小柄な4ドアセダンです。ジャ
           </p>
           {stockFrom !== null && stockTo !== null && (
             <p className="text-foreground-muted mt-2 text-base">
-              いまご覧いただけるのは{stockFrom}年〜{stockTo}年式の
-              {vehicles.length}
+              いまご覧いただけるのは{stockFrom}年〜{stockTo}年式の{vehicles.length}
               台です。
             </p>
           )}

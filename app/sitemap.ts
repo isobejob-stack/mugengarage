@@ -22,12 +22,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // 個別ページより高い優先度で載せる（2026-08-17新設）。
     // 整備実績（/maintenance-records）は同日にブログへ統合し、URLは /blog へ転送している。
     { url: `${SITE_URL}/jaguar`, changeFrequency: "weekly", priority: 0.7 },
-    // 整備と部品の方針（2026-10-30新設、FR-ENC-007）。
-    {
-      url: `${SITE_URL}/jaguar/keep-running`,
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
     {
       url: `${SITE_URL}/encyclopedia`,
       changeFrequency: "weekly",
