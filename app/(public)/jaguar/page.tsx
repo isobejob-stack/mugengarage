@@ -95,7 +95,9 @@ export default async function Page() {
   // 在庫の車名で図鑑を引き当てる（図鑑側は在庫に依存しない設計のまま保つ）。
   const stockModelNames = Array.from(
     new Set(
-      vehicles.map((v) => v.models?.name).filter((n): n is string => Boolean(n)),
+      vehicles
+        .map((v) => v.models?.name)
+        .filter((n): n is string => Boolean(n)),
     ),
   );
   const modernModels = models.filter(
@@ -361,6 +363,67 @@ Xタイプは、ジャガーとしては小柄な4ドアセダンです。ジャ
           </Link>
         </p>
 
+        {/* 読み物で興味を持った人が次に知りたいのは「持てるのか」。
+            維持費と整備の見通しを先に示す（docs/strategy/04 インサイトI-2）。 */}
+        <section className="mt-12">
+          <p className="text-primary-700 text-sm font-medium tracking-[0.08em]">
+            <SiteText
+              k="jaguar.ownership.eyebrow"
+              description="ジャガーを知る 持つ前に知っておきたいことの小見出し"
+            >
+              持つ前に知っておきたいこと
+            </SiteText>
+          </p>
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+            <li>
+              <Link
+                href="/jaguar/running-costs"
+                className="hover:border-primary-300 ease-standard flex min-h-11 flex-col gap-1 rounded-xl border border-neutral-200 bg-white p-5 transition-colors duration-200"
+              >
+                <span className="text-charcoal-900 font-serif text-lg font-bold">
+                  <SiteText
+                    k="jaguar.ownership.costs.title"
+                    description="ジャガーを知る 維持費ガイドへのリンク見出し"
+                  >
+                    維持費ガイド
+                  </SiteText>
+                </span>
+                <span className="text-foreground-muted text-base">
+                  <SiteText
+                    k="jaguar.ownership.costs.body"
+                    description="ジャガーを知る 維持費ガイドへのリンク説明"
+                  >
+                    毎年かかる税金と保険を、車種別に計算しました。
+                  </SiteText>
+                </span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/jaguar/keep-running"
+                className="hover:border-primary-300 ease-standard flex min-h-11 flex-col gap-1 rounded-xl border border-neutral-200 bg-white p-5 transition-colors duration-200"
+              >
+                <span className="text-charcoal-900 font-serif text-lg font-bold">
+                  <SiteText
+                    k="jaguar.ownership.keep.title"
+                    description="ジャガーを知る 整備と部品の方針へのリンク見出し"
+                  >
+                    整備と部品のこと
+                  </SiteText>
+                </span>
+                <span className="text-foreground-muted text-base">
+                  <SiteText
+                    k="jaguar.ownership.keep.body"
+                    description="ジャガーを知る 整備と部品の方針へのリンク説明"
+                  >
+                    部品はまだ手に入るのか。誰が直せるのか。
+                  </SiteText>
+                </span>
+              </Link>
+            </li>
+          </ul>
+        </section>
+
         <section className="mt-12">
           <div className="bg-charcoal-900 shadow-medium rounded-2xl px-6 py-10 text-white sm:px-10 sm:py-12">
             {timelineSpan && (
@@ -407,7 +470,8 @@ Xタイプは、ジャガーとしては小柄な4ドアセダンです。ジャ
           </p>
           {stockFrom !== null && stockTo !== null && (
             <p className="text-foreground-muted mt-2 text-base">
-              いまご覧いただけるのは{stockFrom}年〜{stockTo}年式の{vehicles.length}
+              いまご覧いただけるのは{stockFrom}年〜{stockTo}年式の
+              {vehicles.length}
               台です。
             </p>
           )}

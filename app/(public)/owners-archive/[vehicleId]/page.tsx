@@ -39,6 +39,7 @@ export async function generateMetadata({
   return buildPageMetadata({
     title: displayName,
     description:
+      excerptFromMarkdown(entry.owner_comment) ||
       excerptFromMarkdown(entry.restoration_history) ||
       excerptFromMarkdown(entry.sales_history) ||
       `${displayName}の販売実績・レストア履歴をご紹介します。`,
@@ -121,6 +122,20 @@ export default async function Page({
           vehicleName={vehicleName}
         />
       </div>
+
+      {/* FR-OWN-004: オーナーの声。来歴のなかで、数字や記録では伝わらない部分を担う
+          （docs/strategy/04 インサイトI-4「継承の物語は価格を超える動機になる」）。
+          本人の許可を得た言葉だけが管理画面から入る運用（BR-CONTENT-003）。 */}
+      {entry.owner_comment && (
+        <section className="bg-cream-100 mt-8 rounded-2xl border border-neutral-200 px-6 py-6">
+          <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
+            オーナーの声
+          </h2>
+          <div className="prose mt-2 max-w-none">
+            <Markdown>{entry.owner_comment}</Markdown>
+          </div>
+        </section>
+      )}
 
       {entry.restoration_history && (
         <section className="mt-8">

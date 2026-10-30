@@ -245,7 +245,7 @@ er_diagram.mdで定義した全テーブルを対象とする。DB製品はPostg
 | vehicle_id          | uuid        | FK→vehicles, NOT NULL, UNIQUE |                                    |
 | restoration_history | text        | NULL可                        | Markdown                           |
 | sales_history       | text        | NULL可                        | Markdown                           |
-| owner_comment       | text        | NULL可                        | 将来対応：現時点では入力欄のみ用意 |
+| owner_comment       | text        | NULL可                        | 公開画面に「オーナーの声」として表示（FR-OWN-004）。本人の許可を得た内容のみ（BR-CONTENT-003） |
 | is_published        | boolean     | NOT NULL DEFAULT true         |                                    |
 | deleted_at          | timestamptz | NULL可                        |                                    |
 

@@ -106,6 +106,10 @@ export const EDITABLE_TARGETS: Record<string, EditableTargetConfig> = {
       engine_features: { label: "エンジンの特徴", input: "markdown" },
       common_issues: { label: "よくある故障", input: "markdown" },
       maintenance_cost: { label: "維持費", input: "markdown" },
+      purchase_notes: {
+        label: "購入前にお伝えしたいこと",
+        input: "markdown",
+      },
     },
   },
   // 車両の写真。列ではなく vehicle_photos への追加なので、保存経路が他と違う。
