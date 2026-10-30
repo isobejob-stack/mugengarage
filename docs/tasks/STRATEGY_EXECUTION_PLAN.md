@@ -51,6 +51,6 @@
 
 ### ラウンドZ: 仕上げ
 
-- [ ] Z-1 `docs/strategy/kit/HANDOVER.md`（朝いちでやること、店に記入してほしいこと、SQL）
+- [x] Z-1 `docs/strategy/kit/HANDOVER.md`（朝いちでやること、店に記入してほしいこと、SQL）
 - [ ] Z-2 最終レポート（Artifact）に「実行キット」への導線を追記して再公開
 - [ ] Z-3 PR #9 の説明を更新、定期タスクを無効化
