@@ -69,7 +69,7 @@ Jaguarオーナー向けの徹底洗車サービスと、YouTubeの「洗車×�
 | 車の記録が残る | 欧州の市場では、記録の揃ったオリジナル車が値を保つと報告されている。動画と点検記録が、その車の記録になる |
 | Jaguarに絞る | 専門店としての一貫性が保てる。父の知識を動画で最も生かせる |
 
-数字と出典は [research_summary.md](research_summary.md) を参照。
+数字と出典は [research_summary.md](research_summary.md) を参照。詳しい調査は [research/](research/) にある。
 
 ## 5. 必ずやること（リスク対策）
 
