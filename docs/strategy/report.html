@@ -1,0 +1,402 @@
+<title>市場調査及び戦略提案書</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a plain working document. One reading column, tables carry the facts, contents list at the top. */
+:root {
+  --bg: #F4F6F4;
+  --surface: #FFFFFF;
+  --ink: #18211C;
+  --ink-2: #3E4A44;
+  --muted: #67736C;
+  --rule: #D6DDD8;
+  --accent: #1E5A43;
+  --accent-soft: #E6EFEA;
+  --warn-soft: #F6EEDC;
+  --warn: #7A5A1C;
+  --f-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101512; --surface: #161D19; --ink: #E4EAE6; --ink-2: #BAC5BE; --muted: #8D998F; --rule: #2C3631;
+    --accent: #8CCBAA; --accent-soft: #1A2A21; --warn-soft: #2A2416; --warn: #D7B573;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101512; --surface: #161D19; --ink: #E4EAE6; --ink-2: #BAC5BE; --muted: #8D998F; --rule: #2C3631;
+  --accent: #8CCBAA; --accent-soft: #1A2A21; --warn-soft: #2A2416; --warn: #D7B573;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.8;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 64px;
+}
+main { max-width: 760px; margin: 0 auto; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+header.top { padding: 40px 0 24px; border-bottom: 1px solid var(--rule); }
+.meta { font-family: var(--f-mono); font-size: 0.75rem; color: var(--muted); letter-spacing: 0.06em; margin: 0 0 10px; }
+h1 { font-size: clamp(1.6rem, 4.6vw, 2.2rem); line-height: 1.35; margin: 0 0 10px; text-wrap: balance; }
+.lede { color: var(--ink-2); margin: 0; }
+nav.toc { margin: 20px 0 0; }
+nav.toc ol { margin: 0; padding-left: 1.4em; columns: 2; column-gap: 32px; font-size: 0.92rem; }
+@media (max-width: 520px) { nav.toc ol { columns: 1; } }
+section { padding-top: 44px; scroll-margin-top: 16px; }
+h2 { font-size: 1.35rem; line-height: 1.4; margin: 0 0 12px; padding-bottom: 6px; border-bottom: 2px solid var(--accent); text-wrap: balance; }
+h3 { font-size: 1.05rem; margin: 24px 0 8px; }
+p { margin: 0 0 12px; }
+ol.plain, ul.plain { margin: 0 0 12px; padding-left: 1.4em; }
+ol.plain li, ul.plain li { margin-bottom: 4px; }
+.box { background: var(--accent-soft); border-radius: 6px; padding: 16px 18px; margin: 0 0 16px; }
+.box p:last-child, .box ol:last-child { margin-bottom: 0; }
+.note { background: var(--warn-soft); border-radius: 6px; padding: 12px 16px; font-size: 0.92rem; margin: 12px 0; }
+.note b { color: var(--warn); }
+.tbl { overflow-x: auto; margin: 8px 0 16px; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; line-height: 1.65; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--rule); }
+tr:last-child td { border-bottom: 0; }
+th { background: var(--bg); color: var(--ink-2); font-size: 0.8rem; white-space: nowrap; }
+td.n { font-family: var(--f-mono); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.wide table { min-width: 560px; }
+pre.flow { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; overflow-x: auto; font-family: var(--f-mono); font-size: 0.8rem; line-height: 1.7; color: var(--ink); margin: 8px 0 16px; }
+.sources { font-size: 0.82rem; color: var(--ink-2); }
+.sources li { overflow-wrap: anywhere; margin-bottom: 2px; }
+footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--rule); font-size: 0.85rem; color: var(--muted); }
+</style>
+
+<main>
+  <header class="top">
+    <p class="meta">エムガレージ ／ 2026-10-31 版（決定事項を反映）</p>
+    <h1>市場調査及び戦略提案書</h1>
+    <p class="lede" style="margin-bottom:8px"><b>提案：洗車×オーナーズインタビュー</b></p>
+    <p class="lede">3名で、低コストに始められる内容に絞った戦略です。対象はJaguarのオーナーです。サイトの改修は含みません。後半（10〜14章）に、前提となる調査をまとめています。</p>
+    <nav class="toc" aria-label="目次">
+      <ol>
+        <li><a href="#conclusion">結論</a></li>
+        <li><a href="#premise">前提</a></li>
+        <li><a href="#plan">施策の内容</a></li>
+        <li><a href="#why">この施策を選ぶ理由</a></li>
+        <li><a href="#must">必ずやること</a></li>
+        <li><a href="#notdo">やらないこと</a></li>
+        <li><a href="#steps">最初の90日</a></li>
+        <li><a href="#kpi">測る数字</a></li>
+        <li><a href="#decide">決定事項</a></li>
+        <li><a href="#research">調査：市場構造</a></li>
+        <li><a href="#research-jaguar">調査：Jaguarの状況</a></li>
+        <li><a href="#research-cases">調査：事例</a></li>
+        <li><a href="#research-voices">調査：オーナーの声</a></li>
+        <li><a href="#research-analysis">分析のまとめ</a></li>
+        <li><a href="#sources">出典</a></li>
+      </ol>
+    </nav>
+  </header>
+
+  <section id="conclusion">
+    <h2>1. 結論</h2>
+    <div class="box">
+      <p>Jaguarオーナー向けの徹底洗車サービスと、YouTubeの「洗車×オーナーズインタビュー」企画を組み合わせて始める。</p>
+      <ol class="plain">
+        <li>動画で新しいお客様を集める</li>
+        <li>コアオーナーとの接触回数を増やす</li>
+        <li>整備・乗り換え・買取の相談につなげる</li>
+      </ol>
+    </div>
+    <p>既存の設備と人員、スマートフォンで始められる。サイトの改修や新しい設備投資はしない。</p>
+  </section>
+
+  <section id="premise">
+    <h2>2. 前提</h2>
+    <div class="tbl"><table>
+      <tbody>
+        <tr><th>運営</th><td>3名。本人（戦略・顧客管理）、兄（企画・撮影・編集）、父（洗車の監修・点検・オーナー対応・インタビューの聞き手）</td></tr>
+        <tr><th>予算</th><td>小さく始める。サイト改修と設備投資はしない</td></tr>
+        <tr><th>対象</th><td>Jaguarのオーナー</td></tr>
+        <tr><th>店の強み</th><td>クラシックJaguarの販売・整備・修理で30年以上の実績</td></tr>
+        <tr><th>保険</th><td>預かった車の事故に備える保険に加入済み</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="plan">
+    <h2>3. 施策の内容</h2>
+    <h3>3-1. サービスと価格</h3>
+    <div class="tbl"><table>
+      <tbody>
+        <tr><th>メニュー</th><td>徹底洗車のみ。コーティングと研磨（磨き）は行わない</td></tr>
+        <tr><th>価格</th><td>30,000円</td></tr>
+        <tr><th>出演特典</th><td>インタビューに出演すると、レザーの手入れを無料で追加する</td></tr>
+        <tr><th>2回目以降</th><td>出演したオーナーにも、3〜4ヶ月ごとに次の洗車を案内する</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>3-2. 動画の構成（2段構造）</h3>
+    <div class="tbl wide"><table>
+      <thead><tr><th>段</th><th>内容</th><th>主な視聴者</th><th>役割</th></tr></thead>
+      <tbody>
+        <tr><td>1段目</td><td>洗車のビフォーアフター、作業の様子、愛車紹介</td><td>車好き、洗車動画の視聴者</td><td>再生数と新しい視聴者を集める</td></tr>
+        <tr><td>2段目</td><td>オーナーへのインタビュー（仕事、この車を選んだ理由、若い人に伝えたいこと）</td><td>一般の視聴者、将来の買い手</td><td>どんな人がJaguarに乗っているかを伝え、信頼と憧れをつくる</td></tr>
+      </tbody>
+    </table></div>
+    <p>1台の撮影から、長尺動画1本（12〜20分）とショート動画3〜4本を作る。</p>
+
+    <h3>3-3. 営業へのつなげ方</h3>
+<pre class="flow">洗車の予約 → 洗車・撮影・インタビュー → 動画公開 → 視聴者から新しい予約
+                  │
+                  ├─ 洗車中に父が車を点検 → 気づいた点を報告 → 整備の受注
+                  │
+                  └─ インタビューで「次に乗りたい車」「手放す予定」を聞いて記録
+                        ├─ 3〜4ヶ月後に次の洗車を案内（接触回数が増える）
+                        └─ 条件に合う車が入ったら個別に連絡（乗り換え・買取）</pre>
+  </section>
+
+  <section id="why">
+    <h2>4. この施策を選ぶ理由</h2>
+    <div class="tbl wide"><table>
+      <thead><tr><th>理由</th><th>根拠</th></tr></thead>
+      <tbody>
+        <tr><td>費用が小さい</td><td>既存の設備、人員、スマートフォンで始められる。サイト改修が不要</td></tr>
+        <tr><td>洗車動画は再生されやすい</td><td>ビフォーアフターと作業音がYouTubeと相性が良いジャンルとされる。国内では、社員10人ほどの洗車専門店が洗車動画で登録者約10万人を集め、全国から来店客を得た例がある</td></tr>
+        <tr><td>若い層に届く経路と一致する</td><td>米国の調査で、Z世代がクラシックカーと接点を持つ場はYouTube（39%）とInstagram（38%）</td></tr>
+        <tr><td>繰り返し会う理由ができる</td><td>インタビューは1回だが、洗車は季節ごとに利用される</td></tr>
+        <tr><td>整備の受注につながる</td><td>洗車中は車の隅々まで見える。点検結果を報告すれば、売り込まずに整備を提案できる</td></tr>
+        <tr><td>車の記録が残る</td><td>欧州の市場では、記録の揃ったオリジナル車が値を保つと報告されている。動画と点検記録が、その車の記録になる</td></tr>
+        <tr><td>Jaguarに絞る</td><td>専門店としての一貫性が保てる。父の知識を動画で最も生かせる</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="must">
+    <h2>5. 必ずやること（リスク対策）</h2>
+    <div class="tbl wide"><table>
+      <thead><tr><th>項目</th><th>理由</th><th>対応</th></tr></thead>
+      <tbody>
+        <tr><td>出演の同意書</td><td>映像の使い方で後から揉めないため。車を売る時に動画を使うには事前の同意が要る</td><td>同意書（ひな形あり）に署名をもらう</td></tr>
+        <tr><td>作業前の記録</td><td>預かった車の状態を、後から確認できるようにするため</td><td>作業前に車の傷を写真で記録し、オーナーと共有する（保険は加入済み）</td></tr>
+        <tr><td>塗装の保護</td><td>古い車は塗装が薄い場合がある</td><td>研磨とコーティングは行わない。薬剤は目立たない場所で試してから使う</td></tr>
+        <tr><td>個人情報</td><td>出演者の身元や自宅が特定されないようにするため</td><td>ナンバー、自宅、勤務先をぼかす。職業は一行のテロップのみ</td></tr>
+        <tr><td>PR表記</td><td>景品表示法のステマ規制（2023年10月施行）</td><td>出演者が自分のSNSで紹介する場合、出演特典を受けているので「PR」と表記してもらう</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="notdo">
+    <h2>6. やらないこと</h2>
+    <div class="tbl wide"><table>
+      <thead><tr><th>施策</th><th>理由</th></tr></thead>
+      <tbody>
+        <tr><td>コーティング・研磨</td><td>磨きが必要で、古い塗装を傷めるリスクがある</td></tr>
+        <tr><td>Jaguar以外の車の受け付け</td><td>当面はJaguarに絞る</td></tr>
+        <tr><td>サイトの改修</td><td>工数が大きい。まずこの企画に集中する</td></tr>
+        <tr><td>維持費の公開</td><td>実際の費用が公開額を上回った場合に信頼を損なう。費用は個別の相談で伝える</td></tr>
+        <tr><td>オーナーの集まり、オーナー同士のコミュニティ</td><td>忙しい人にはメリットが小さい。運営の負担が大きい</td></tr>
+        <tr><td>イベント開催、業界団体との取り組み</td><td>3名では手が回らない</td></tr>
+        <tr><td>新しいパッケージ商品</td><td>洗車でお客様との接点が増えてから検討する</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="steps">
+    <h2>7. 最初の90日</h2>
+    <div class="tbl wide"><table>
+      <thead><tr><th>時期</th><th>やること</th><th>担当</th></tr></thead>
+      <tbody>
+        <tr><td class="n">1〜2週目</td><td>同意書と案内文を用意する。撮影機材（スマートフォン、ピンマイク、三脚）をそろえる</td><td>本人・兄</td></tr>
+        <tr><td class="n">3〜4週目</td><td>在庫のJaguarで試しに1本撮る（出演者なしで撮影と編集の流れを確認。在庫車の紹介にもなる）</td><td>兄・父</td></tr>
+        <tr><td class="n">2ヶ月目</td><td>出演オーナーの洗車2台。動画を公開する</td><td>全員</td></tr>
+        <tr><td class="n">3ヶ月目</td><td>出演オーナーの洗車2台。8章の数字で3ヶ月を振り返る</td><td>全員</td></tr>
+      </tbody>
+    </table></div>
+    <p>ペースは月2台。長尺動画2本とショート動画6〜8本になる。</p>
+  </section>
+
+  <section id="kpi">
+    <h2>8. 測る数字（毎月）</h2>
+    <div class="tbl wide"><table>
+      <thead><tr><th>区分</th><th>数字</th></tr></thead>
+      <tbody>
+        <tr><td>サービス</td><td>洗車の件数、うち出演の件数、2回目以降の予約の件数</td></tr>
+        <tr><td>動画</td><td>ショートの再生数、長尺の再生数と視聴維持率、チャンネル登録者数</td></tr>
+        <tr><td>営業</td><td>動画を見て来た問い合わせの件数、洗車から受注した整備の件数、乗り換え・買取の相談件数</td></tr>
+      </tbody>
+    </table></div>
+    <p>3ヶ月後に、続けるか、やり方を変えるかを判断する。</p>
+  </section>
+
+  <section id="decide">
+    <h2>9. 決定事項</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>項目</th><th>決定</th></tr></thead>
+      <tbody>
+        <tr><td>メニュー</td><td>徹底洗車のみ（コーティング・研磨は行わない）</td></tr>
+        <tr><td>出演特典</td><td>徹底洗車にレザーの手入れを追加</td></tr>
+        <tr><td>保険</td><td>加入済み</td></tr>
+        <tr><td>対象</td><td>当面はJaguarに絞る</td></tr>
+      </tbody>
+    </table></div>
+    <h3>後で決めること</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>項目</th><th>決める時期</th></tr></thead>
+      <tbody>
+        <tr><td>最初の出演者</td><td>在庫車での試し撮り（3〜4週目）が終わってから</td></tr>
+        <tr><td>引き取り・納車を行うか</td><td>出演オーナーの洗車を始める前（2ヶ月目まで）</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="research">
+    <h2>10. 調査：市場構造</h2>
+    <p>米国中心の数字を含む。数字は出典ごとに定義が違うため、出典と組にして扱う。</p>
+    <div class="tbl wide"><table>
+      <thead><tr><th>指標</th><th>数字</th><th>出典</th></tr></thead>
+      <tbody>
+        <tr><td>オークション＋オンラインの取引額（2025年）</td><td>約48億ドル（前年比+10%）。うちオンライン約25億ドルで、全体の半分超</td><td>Hagerty（CNBC）</td></tr>
+        <tr><td>Bring a Trailer の取引額</td><td>2023年 約14億ドル → 2024年 約15億ドル → 2025年 約17.1億ドル</td><td>CNBC、Jalopnik、The Shop</td></tr>
+        <tr><td>Hagertyの市場レーティング</td><td>2026年1月 58.28（約15年ぶりの低水準。相場は横ばい）</td><td>Motorious</td></tr>
+        <tr><td>クラシックカーを「所有したい」人</td><td>Z世代53%、ミレニアル世代57%、X世代49%、ブーマー世代33%</td><td>Hagerty（n=10,000）</td></tr>
+        <tr><td>Z世代とクラシックカーの接点</td><td>YouTube 39%、Instagram 38%</td><td>Hagerty 2024</td></tr>
+        <tr><td>100万ドル超で落札された車の平均年式</td><td>5年で約12年新しくなった</td><td>Motorious</td></tr>
+      </tbody>
+    </table></div>
+    <h3>日本市場の特徴</h3>
+    <div class="tbl wide"><table>
+      <thead><tr><th>項目</th><th>事実</th><th>戦略への影響</th></tr></thead>
+      <tbody>
+        <tr><td>旧車の税金</td><td>自動車税は初度登録から13年超で約15%増。重量税は13年超と18年超の2段階で増える</td><td>維持費の高さの一部は制度による</td></tr>
+        <tr><td>車を長く使う傾向</td><td>乗用車の平均車齢は9.44年（2025年3月末、31年連続で過去最高）</td><td>古い車に長く乗ることは、社会の流れと合っている</td></tr>
+        <tr><td>国産旧車の海外流出</td><td>米国の25年ルールで国産スポーツカーが流出し、国内価格が上がった</td><td>輸入クラシックは相対的に割安</td></tr>
+        <tr><td>整備士の不足</td><td>若者の志望が減り、平均年齢が上昇。整備業者の倒産も増加</td><td>古い車を直せる専門店の価値が上がる</td></tr>
+      </tbody>
+    </table></div>
+    <p>分かること：取引はオンラインに移り、若い世代の関心が高い。若い人は手の届く価格の車から入り、接点はYouTubeとInstagram。</p>
+  </section>
+
+  <section id="research-jaguar">
+    <h2>11. 調査：クラシックJaguarの状況</h2>
+    <div class="tbl wide"><table>
+      <thead><tr><th>時期・項目</th><th>内容</th><th>出典</th></tr></thead>
+      <tbody>
+        <tr><td class="n">2023年末</td><td>F-TYPE、XF、XEの受注を終了。EV専売へ移行すると発表</td><td>MarkLines</td></tr>
+        <tr><td class="n">2024年12月</td><td>リブランドとコンセプトカー「Type 00」を発表。旧来のファンから強い反発</td><td>CAR Magazine、The Conversation</td></tr>
+        <tr><td class="n">2025年4月</td><td>Jaguar Classicが、Eタイプのボディパネル約30点を再生産</td><td>GoAuto</td></tr>
+        <tr><td class="n">2026年5月</td><td>4ドアEVの名称を「Type 01」と発表（約13万ドル〜）</td><td>evo、Autoblog</td></tr>
+        <tr><td>国内の中古価格</td><td>X300系XJの平均は約120〜130万円、X350系は約150〜180万円</td><td>Motor-Fan（2026年10月）</td></tr>
+        <tr><td>欧州の相場</td><td>XJ全般はおおむね横ばい。記録の揃ったオリジナル車は値を保つ</td><td>Classic Trader</td></tr>
+        <tr><td>部品</td><td>Jaguar ClassicがX300、XJS、シリーズ3、XJ40、X308などの純正部品を供給。ただし「100%の供給は現実的ではない」</td><td>Jaguar公式、JEC議事録</td></tr>
+        <tr><td>国内のオーナーの集まり</td><td>2005年に約100台が集まった記録はあるが、現在の活動は外から見えにくい</td><td>webCG</td></tr>
+      </tbody>
+    </table></div>
+    <div class="tbl wide"><table>
+      <thead><tr><th>区分</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>強み</td><td>デザイン、英国車のイメージ、手頃な入口価格（X300、XJS）、30年の整備の知識、メーカーによる部品の再生産</td></tr>
+        <tr><td>弱み</td><td>「壊れる」「年配の人の車」という印象。オーナー同士のつながりや、発信する人が少ない</td></tr>
+        <tr><td>機会</td><td>従来の形のJaguarは新車で買えなくなった。若い世代の関心。記録を重視する市場の流れ</td></tr>
+        <tr><td>脅威</td><td>旧車の税金の重課。整備士の高齢化。安い個体による悪評。新型Jaguarとの混同</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="research-cases">
+    <h2>12. 調査：他の業界・車種の事例</h2>
+    <div class="tbl wide"><table>
+      <thead><tr><th>事例</th><th>事実</th><th>示唆</th></tr></thead>
+      <tbody>
+        <tr><td>ビューティフルカーズ（秋田の洗車専門店）</td><td>社員10人ほど。洗車チャンネルの登録者約10万人、最多再生225万回以上。全国から来店客</td><td>少人数でも洗車動画で集客できる（中心の施策の根拠）</td></tr>
+        <tr><td>Bring a Trailer</td><td>コメント欄で専門家が車の状態を検証し、出品者が答える。2025年の取引額約17.1億ドル</td><td>正直に見せる方が信頼につながる</td></tr>
+        <tr><td>Hagerty</td><td>無料の動画（登録者300万人超）や相場ツールから保険の加入につなげる。視聴者の最大層は40歳未満</td><td>動画はお客様を集める手段</td></tr>
+        <tr><td>Harley-Davidson H.O.G.</td><td>新車購入で自動入会。販売店が地域の拠点になり、2023年時点で約68万人</td><td>店が通い続ける場所になることが関係の土台</td></tr>
+        <tr><td>マツダ ロードスター</td><td>NAのレストアと170部品の復刻。軽井沢の集まりは参加者の約41%が初参加</td><td>直し続けられる見通しが安心につながる</td></tr>
+        <tr><td>Radwood</td><td>手頃な1980〜90年代の車のイベント。来場者は10代とシニアが半々</td><td>若い人は手の届く車から入る</td></tr>
+        <tr><td>SR400、Z1/Z2</td><td>SR400は最終型で販売が約3倍。Z2は1,000万円超の例も</td><td>「もう作られない」は強い動機。値上がりの宣伝は避ける</td></tr>
+        <tr><td>アナログレコード、純喫茶</td><td>レコード生産額は37年ぶりに80億円超。純喫茶の若い客はショート動画がきっかけ</td><td>若い世代の入口はショート動画</td></tr>
+        <tr><td>Petrolicious（注意すべき例）</td><td>創業者のSNS投稿の問題で退任・売却。再生数が急減</td><td>一人の出演者に頼りすぎない</td></tr>
+      </tbody>
+    </table></div>
+    <p>このほか、Royal Enfield、Luftgekühlt、Goodwood Revival、ジャパンミニデイ、アルファロメオを含む14事例を、リポジトリの research/03_case_studies.md にまとめている。</p>
+  </section>
+
+  <section id="research-voices">
+    <h2>13. 調査：オーナーの声</h2>
+    <div class="tbl wide"><table>
+      <thead><tr><th>声（要約）</th><th>出典</th><th>分かること</th></tr></thead>
+      <tbody>
+        <tr><td>就職して初めて買った車がXJS。一生乗り続けたい</td><td>carview!</td><td>若い人が最初の1台にJaguarを選ぶ例がある</td></tr>
+        <tr><td>ボクスターを検討していたが、知人の勧めでXJSを見て決めた</td><td>automotive-quantum</td><td>スポーツカーからの乗り換えがある</td></tr>
+        <tr><td>故障が多く、1年ほどで手放した</td><td>goo自動車</td><td>想定外の故障と相談先のなさが離脱につながる</td></tr>
+        <tr><td>維持費の評価は2.9点だが、総合4.1点。「今まで乗った中で一番好きな車」</td><td>カーセンサー</td><td>維持費への不満と車への満足は両立する</td></tr>
+        <tr><td>大きな故障はないが、いろいろな部分が劣化していく</td><td>carview!</td><td>計画的に部品を替えれば費用を予測しやすい</td></tr>
+        <tr><td>見栄だけでは乗り続けられない。手をかけ続ける必要がある</td><td>WWDJAPAN</td><td>成功している人らしさは、手をかける姿から伝わる</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="research-analysis">
+    <h2>14. 分析のまとめ</h2>
+    <div class="tbl wide"><table>
+      <thead><tr><th>課題</th><th>洗車×インタビューでの対応</th></tr></thead>
+      <tbody>
+        <tr><td>若い世代との接点がない</td><td>YouTubeの長尺動画とショート動画</td></tr>
+        <tr><td>「壊れる」という印象</td><td>実際のオーナーが、付き合い方と苦労を自分の言葉で話す</td></tr>
+        <tr><td>相談先が分からない</td><td>洗車で定期的に会い、父が点検結果を伝える</td></tr>
+        <tr><td>購入後の想定外の故障</td><td>点検で気になる点を早めに見つけ、整備を提案する</td></tr>
+        <tr><td>車の記録が残っていない</td><td>動画、点検記録、インタビューが、その車の記録になる</td></tr>
+        <tr><td>税金、保険、整備士不足</td><td>対応しない（業界全体の課題で、3名体制では対象外）</td></tr>
+      </tbody>
+    </table></div>
+    <p>XJやXJSは、知名度や歴史に比べて価格が低い。ただし値上がりを狙うのではなく、整備記録や来歴を残して「記録のある車」を増やすことが、専門店の強みを生かす方向になる。</p>
+    <div class="note"><b>調査の限界</b>　世界市場の数字は米国が中心。この環境の通信制限で個別ページの本文を取得できず、オーナーの声は検索結果に表示された範囲から集めた。リブランドで古いJaguarの需要が増えたことを示す数字は見つかっていない。国内のクラシックJaguarの現存台数には公的な統計がない。</div>
+  </section>
+
+  <section id="sources">
+    <h2>15. 出典</h2>
+    <ul class="plain sources">
+      <li><a href="https://www.cnbc.com/2025/12/19/classic-cars-hagerty.html">CNBC：Classic-car auctions hit $4.8 billion this year</a></li>
+      <li><a href="https://www.motorious.com/articles/news/hagerty-sees-continued-momentum/">Motorious：Hagerty Sees Continued Momentum</a></li>
+      <li><a href="https://www.motorious.com/articles/all/seven-figure-collector-car-sales-top-1-billion-as-buyer-demographics-shift">Motorious：Seven-Figure Sales and Buyer Demographics</a></li>
+      <li><a href="https://www.oldcarsweekly.com/news/study-shows-that-gen-z-and-millennials-are-into-driving-and-classic-cars">Old Cars Weekly：Gen Z and Millennials into classic cars</a></li>
+      <li><a href="https://www.axios.com/2024/06/07/gen-z-falls-for-vintage-cars-whats-next">Axios：Gen Z falls for vintage cars</a></li>
+      <li><a href="https://kuruma-news.jp/post/1039126">くるまのニュース：13年超の自動車税</a></li>
+      <li><a href="https://www.airia.or.jp/publish/file/syarei_2025.pdf">自動車検査登録情報協会：車齢 2025</a></li>
+      <li><a href="https://kuruma-news.jp/post/222312">くるまのニュース：25年ルール</a></li>
+      <li><a href="https://bestcarweb.jp/?p=1266474">ベストカーWeb：整備士不足</a></li>
+      <li><a href="https://www.marklines.com/ja/news/321042">MarkLines：JLR</a></li>
+      <li><a href="https://carmagazine.co.uk/features/car-culture/jaguar-ev-concept-debate">CAR Magazine：Jaguar Type 00</a></li>
+      <li><a href="https://www.evo.co.uk/jaguar/gt/207614/jaguar-type-01-controversial-new-electric-gt-gets-a-name">evo：Jaguar Type 01</a></li>
+      <li><a href="https://goauto.com.au/news/jaguar/e-type/2025-04-16/96181.html">GoAuto：E-Type panels 2025</a></li>
+      <li><a href="https://jaguar.com/about-jaguar/jaguar-classic/jaguar-classic-parts.html">Jaguar Classic Parts</a></li>
+      <li><a href="https://motor-fan.jp/?p=1642745">Motor-Fan：XJの中古相場</a></li>
+      <li><a href="https://www.classic-trader.com/uk/cars/listing/jaguar/xj6/xj6-3-2/1992/254312">Classic Trader：XJ market</a></li>
+      <li><a href="https://www.webcg.net/articles/-/12829">webCG：ジャガー・デイ2005</a></li>
+      <li><a href="https://president.jp/articles/-/57742">PRESIDENT Online：秋田の洗車専門店</a></li>
+      <li><a href="https://atsoho.com/blog/car-detailing-ai-youtube-monetization">カーディテイリング動画とYouTube</a></li>
+      <li><a href="https://theshopmag.com/news/bring-a-trailer-record-growth-2025/">The Shop：Bring a Trailer 2025</a></li>
+      <li><a href="https://www.insidehook.com/autos/inside-the-greatest-vintage-car-cult-on-the-internet-bring-a-trailer">InsideHook：Bring a Trailer</a></li>
+      <li><a href="https://annarborobserver.com/?p=96980">Ann Arbor Observer：Hagerty</a></li>
+      <li><a href="https://en.wikipedia.org/wiki/Harley_Owners_Group">Harley Owners Group</a></li>
+      <li><a href="https://www.webcartop.jp/?p=1376885">WEB CARTOP：軽井沢ミーティング2024</a></li>
+      <li><a href="https://response.jp/article/2017/12/30/304296.html">レスポンス：マツダのNAレストア事業</a></li>
+      <li><a href="https://hagerty.co.uk/articles/events-articles/radwood/radwood-the-story-so-far">Hagerty UK：Radwood</a></li>
+      <li><a href="https://bestcarweb.jp/news/365631">ベストカーWeb：SR400</a></li>
+      <li><a href="https://young-machine.com/2021/11/29/271269/">ヤングマシン：Z2の販売例</a></li>
+      <li><a href="https://news.ksb.co.jp/article/16793450">KSB：アナログレコード生産2025</a></li>
+      <li><a href="https://www.moneypost.jp/1073010/0">マネーポスト：純喫茶の客層</a></li>
+      <li><a href="https://www.carscoops.com/2020/08/petrolicious-sold-after-founders-social-media-posts-come-back-to-haunt-him/">Carscoops：Petrolicious</a></li>
+      <li><a href="https://carview.yahoo.co.jp/ncar/catalog/jaguar/xj-s_coupe/urev/detail/185283/">carview!：XJ-Sクーペのレビュー</a></li>
+      <li><a href="https://automotive-quantum.jp/21546">automotive-quantum：XJS V12クーペ</a></li>
+      <li><a href="https://autos.goo.ne.jp/catalog/jaguar/xj-s/review/17190.html">goo自動車：XJ-Sの口コミ</a></li>
+      <li><a href="https://www.carsensor.net/catalog/jaguar/xj_series/review/">カーセンサー：XJの口コミ</a></li>
+      <li><a href="https://www.wwdjapan.com/articles/1877127">WWDJAPAN：業界人の乗るクラシックカー</a></li>
+      <li><a href="https://www.itmedia.co.jp/business/spv/2310/17/news050_2.html">ITmedia：ステマ規制</a></li>
+    </ul>
+  </section>
+
+  <footer>運用手順、同意書のひな形、調査の詳細は、リポジトリの docs/strategy/ にあります（operations.md、consent_form.md、research/ の01〜05）。</footer>
+</main>
