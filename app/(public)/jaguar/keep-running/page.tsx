@@ -150,12 +150,12 @@ export default async function Page() {
                 </SiteText>
               </Button>
             )}
-            <Button href="/jaguar/running-costs" variant="outline" size="md">
+            <Button href="/vehicles" variant="outline" size="md">
               <SiteText
-                k="keep_running.cta.costs"
-                description="整備と部品のこと 維持費ガイドへのボタン文言"
+                k="keep_running.cta.vehicles"
+                description="整備と部品のこと 在庫ボタンの文言"
               >
-                維持費ガイドを見る
+                在庫車両を見る
               </SiteText>
             </Button>
           </div>

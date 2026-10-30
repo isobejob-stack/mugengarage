@@ -364,65 +364,23 @@ Xタイプは、ジャガーとしては小柄な4ドアセダンです。ジャ
         </p>
 
         {/* 読み物で興味を持った人が次に知りたいのは「持てるのか」。
-            維持費と整備の見通しを先に示す（docs/strategy/04 インサイトI-2）。 */}
-        <section className="mt-12">
-          <p className="text-primary-700 text-sm font-medium tracking-[0.08em]">
+            部品と整備の見通しを示す（docs/strategy/04 インサイトI-2）。
+            維持費の金額は、実際の費用が上ぶれした場合の信頼リスクを避けるため公開ページには載せず、
+            個別の相談でお伝えする方針にした（2026-10-31、docs/strategy/07_revision_small_team.md）。 */}
+        <p className="mt-6 text-base">
+          <Link
+            href="/jaguar/keep-running"
+            className="text-primary-700 ease-standard inline-flex min-h-11 items-center gap-1.5 font-medium underline decoration-1 underline-offset-4 transition-colors duration-200 hover:decoration-2"
+          >
             <SiteText
-              k="jaguar.ownership.eyebrow"
-              description="ジャガーを知る 持つ前に知っておきたいことの小見出し"
+              k="jaguar.link.keep_running"
+              description="ジャガーを知る 整備と部品のページへのリンク文言"
             >
-              持つ前に知っておきたいこと
+              部品はまだ手に入るのか、誰が直せるのか
             </SiteText>
-          </p>
-          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-            <li>
-              <Link
-                href="/jaguar/running-costs"
-                className="hover:border-primary-300 ease-standard flex min-h-11 flex-col gap-1 rounded-xl border border-neutral-200 bg-white p-5 transition-colors duration-200"
-              >
-                <span className="text-charcoal-900 font-serif text-lg font-bold">
-                  <SiteText
-                    k="jaguar.ownership.costs.title"
-                    description="ジャガーを知る 維持費ガイドへのリンク見出し"
-                  >
-                    維持費ガイド
-                  </SiteText>
-                </span>
-                <span className="text-foreground-muted text-base">
-                  <SiteText
-                    k="jaguar.ownership.costs.body"
-                    description="ジャガーを知る 維持費ガイドへのリンク説明"
-                  >
-                    毎年かかる税金と保険を、車種別に計算しました。
-                  </SiteText>
-                </span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/jaguar/keep-running"
-                className="hover:border-primary-300 ease-standard flex min-h-11 flex-col gap-1 rounded-xl border border-neutral-200 bg-white p-5 transition-colors duration-200"
-              >
-                <span className="text-charcoal-900 font-serif text-lg font-bold">
-                  <SiteText
-                    k="jaguar.ownership.keep.title"
-                    description="ジャガーを知る 整備と部品の方針へのリンク見出し"
-                  >
-                    整備と部品のこと
-                  </SiteText>
-                </span>
-                <span className="text-foreground-muted text-base">
-                  <SiteText
-                    k="jaguar.ownership.keep.body"
-                    description="ジャガーを知る 整備と部品の方針へのリンク説明"
-                  >
-                    部品はまだ手に入るのか。誰が直せるのか。
-                  </SiteText>
-                </span>
-              </Link>
-            </li>
-          </ul>
-        </section>
+            <span aria-hidden="true">→</span>
+          </Link>
+        </p>
 
         <section className="mt-12">
           <div className="bg-charcoal-900 shadow-medium rounded-2xl px-6 py-10 text-white sm:px-10 sm:py-12">

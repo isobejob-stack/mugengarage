@@ -11,6 +11,8 @@
 | 04 | [04_user_insights_n1.md](04_user_insights_n1.md) | N1の声、インサイト、ペルソナ、ジャーニー、自社N1インタビューの設計 |
 | 05 | [05_synthesis.md](05_synthesis.md) | イシューツリー、意味と価格のギャップ、熱源の優先度、4つの論点 |
 | 06 | [06_strategy.md](06_strategy.md) | 戦略ステートメント、フライホイール、3層の施策、ロードマップ、KPI、リスク |
+| 07 | [07_revision_small_team.md](07_revision_small_team.md) | **改訂（2026-10-31）**：3人体制に合わせた絞り込み。中核は「洗車×オーナーズインタビュー」 |
+| kit | [kit/](kit/) | 実行キット。最初に [kit/HANDOVER.md](kit/HANDOVER.md)、中核の企画は [kit/S10_wash_interview_series.md](kit/S10_wash_interview_series.md) |
 | — | [report.html](report.html) | 上記を統合した最終レポート（Artifactとして公開したページのソース） |
 
 調査日：2026-10-30。数字は出典ごとに定義が異なるため、各ファイルの出典とセットで扱うこと。

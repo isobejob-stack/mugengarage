@@ -1,5 +1,7 @@
 # 引き継ぎ：クラシックJaguar継承戦略の実行（2026-10-30 夜〜10-31）
 
+> **2026-10-31 改訂**：体制（実質1〜3名）とフィードバックに合わせて戦略を絞り込んだ。維持費ガイドは公開をやめ、朝の集まり・サークル・連合イベントなどは撤回または凍結した。中核は「洗車×オーナーズインタビュー」（`docs/strategy/07_revision_small_team.md`、`kit/S10_wash_interview_series.md`）。
+
 **まずこのファイルだけ読めば、朝やることと、判断してほしいことが分かるようにしてあります。**
 作業はすべて PR #9（ブランチ `claude/owners-interview-strategy-3mdzgq`）にあります。**`main` には入れていません**（本番へ即反映されるため）。
 
@@ -14,9 +16,8 @@
 ### ② PR #9 のプレビューで、新しい画面を見る
 | 画面 | URL | 見てほしいところ |
 |---|---|---|
-| 維持費ガイド（新設） | `/jaguar/running-costs` | 税額・保険料の表と計算例。整備費の段落に、店の実績の数字を足すかどうか |
 | 整備と部品のこと（新設） | `/jaguar/keep-running` | 「当店が直し続ける車種」を書き足すかどうか（下書きは `S5_keep_them_running_list.md`） |
-| ジャガーを知る | `/jaguar` | 図鑑へのリンクの下に「持つ前に知っておきたいこと」を追加 |
+| ジャガーを知る | `/jaguar` | 図鑑へのリンクの下に「整備と部品のこと」へのリンクを追加 |
 | オーナーズアーカイブ詳細 | `/owners-archive/…` | 管理画面で「オーナーの声」を入れると表示される |
 | 車両詳細 | `/vehicles/…` | 管理画面で「購入前にお伝えしたいこと」を入れると表示される |
 
@@ -36,9 +37,10 @@
 
 | ファイル | 何を | 優先度 |
 |---|---|---|
-| `kit/S3_running_cost_model.md` 2章 | 車種別の整備費の実績、予防整備の部位と周期、想定外修理費の分布 | 高（維持費ガイドの説得力が上がる） |
+| `kit/S10_wash_interview_series.md` 8章 | 洗車メニューと価格、保険の確認、出演特典、最初の出演者3名、対象車の範囲 | **最優先** |
+| `kit/S3_running_cost_model.md` 2章 | 車種別の整備費の実績（公開せず、相談時の資料として使う） | 中 |
 | `kit/S5_keep_them_running_list.md` | 車種ごとの対応（◎○△）、部品の確保ルート、技術継承の方針 | 高 |
-| `kit/S8_first_jaguar_package.md` 5章 | 対象車種、納車整備の内容と価格、1年目の伴走、手放す時の約束 | 中 |
+| `kit/S8_first_jaguar_package.md` 5章 | （保留）洗車シリーズで接点が増えてから | 低 |
 | `kit/S6_content_plan_12weeks.md` 3章 A-1 | 台本の「店の見立て」（AJ16の腰下の傾向） | 中（`docs/tasks/CONTENT_FACTCHECK.md` の確認待ち項目と同じ） |
 | `kit/S6_content_plan_12weeks.md` 4章 | あるある図鑑10項目の「こう付き合う」 | 中 |
 
@@ -50,9 +52,7 @@
 |---|---|
 | N1インタビュー（15〜20名） | `kit/S1_n1_interview_kit.md` |
 | オーナーズインタビューの撮影（同意書つき） | `kit/S2_owners_interview_production_kit.md` |
-| LINEオープンチャットの開設と招待 | `kit/S4_owners_circle_launch_kit.md` |
-| 第1回 朝の集まり | 同上 5章 |
-| ショート動画の撮影・投稿 | `kit/S6_content_plan_12weeks.md` |
+| 洗車×オーナーズインタビューのパイロット（在庫車で1本） | `kit/S10_wash_interview_series.md` |
 
 投稿の前には `kit/S7_tone_and_manner.md` のチェックリストを通してください。
 

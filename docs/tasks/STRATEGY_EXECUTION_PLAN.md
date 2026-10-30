@@ -54,3 +54,12 @@
 - [x] Z-1 `docs/strategy/kit/HANDOVER.md`（朝いちでやること、店に記入してほしいこと、SQL）
 - [x] Z-2 最終レポート（Artifact）に「実行キット」への導線を追記して再公開
 - [x] Z-3 PR #9 の説明を更新、定期タスクを無効化
+
+---
+
+## 改訂（2026-10-31、発注者のフィードバック）
+
+- [x] R-1 維持費ガイドの公開を撤回（ページ・導線・サイトマップを削除。FR-ENC-006を取り下げ）
+- [x] R-2 3人体制に合わせた戦略の改訂（`docs/strategy/07_revision_small_team.md`）
+- [x] R-3 中核の企画書「洗車×オーナーズインタビュー」（`docs/strategy/kit/S10_wash_interview_series.md`）
+- [x] R-4 撤回・凍結したキットに注記、HANDOVERを更新

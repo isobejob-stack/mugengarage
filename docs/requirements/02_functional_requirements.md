@@ -165,7 +165,7 @@ docs/tasks/ISSUE-006-vehicle-listing-requirements.md を参照。
 | FR-ENC-003 | 在庫非依存の独立公開             | 対応する在庫車両が存在しなくても図鑑項目単体で公開できる                               |
 | FR-ENC-004 | 図鑑項目のSEO設定                | 項目ごとにTitle/Description/OGP/Slug等を設定できる                                     |
 | FR-ENC-005 | 関連在庫車両表示                 | 図鑑項目に該当する在庫車両があれば自動的に一覧表示する                                 |
-| FR-ENC-006 | 維持費ガイド                     | クラシックJaguarの年間維持費（法定費用は計算済みの数字、整備費は店の実績）を読み物として公開する。本文はライブ編集で直せる（2026-10-30 追加。`docs/strategy/kit/S3_running_cost_model.md`） |
+| FR-ENC-006 | （取り下げ）維持費ガイド       | 2026-10-31 取り下げ。公開した金額より実際の費用が上ぶれした場合に信頼を損なうリスクがあるため、維持費は公開ページに載せず、個別相談で個体ごとに伝える（`docs/strategy/07_revision_small_team.md`） |
 | FR-ENC-007 | 整備と部品の方針                 | 店が直し続ける車種と、部品の確保・技術の継承の方針を公開する。本文はライブ編集で直せる（2026-10-30 追加。`docs/strategy/kit/S5_keep_them_running_list.md`） |
 
 ## 10. Timeline（年表）
