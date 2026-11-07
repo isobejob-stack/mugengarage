@@ -34,7 +34,8 @@ export async function POST(request: NextRequest) {
   //
   // 送信元にはエラーを返さず成功として扱う（サイレントに破棄する）。
   // 「弾かれた」と分かるとボット側が回避策を試すため、成否を教えないほうが有効。
-  const { name, phone, email, category, message, website } = parsed.data;
+  const { name, contact_method, contact, category, message, website } =
+    parsed.data;
 
   if (website) {
     return NextResponse.json({ data: { spam: true } }, { status: 201 });
@@ -42,24 +43,34 @@ export async function POST(request: NextRequest) {
 
   const supabase = createAdminClient();
 
+  // 返信に使う連絡先は、本人が選んだ1つだけを保存する。
+  // 選ばれなかった側の列は空のままにしておく（預からない）。
+  const phone = contact_method === "phone" ? contact : null;
+  const email = contact_method === "email" ? contact : null;
+
+  // 氏名は任意。未入力なら顧客名を連絡先で代用する
+  // （customers.name は NOT NULL で、空文字だと一覧で行が無名になる）。
+  const customerName = name || contact;
+
   let customerId: string | null = null;
 
-  if (phone || email) {
-    let existingQuery = supabase
+  {
+    const existingQuery = supabase
       .from("customers")
       .select("id")
       .is("deleted_at", null);
-    existingQuery = phone
-      ? existingQuery.eq("phone", phone)
-      : existingQuery.eq("email", email as string);
-    const { data: existingCustomer } = await existingQuery.maybeSingle();
+    const { data: existingCustomer } = await (
+      phone
+        ? existingQuery.eq("phone", phone)
+        : existingQuery.eq("email", email as string)
+    ).maybeSingle();
 
     if (existingCustomer) {
       customerId = existingCustomer.id;
     } else {
       const { data: newCustomer, error: customerError } = await supabase
         .from("customers")
-        .insert({ name, phone: phone || null, email: email || null })
+        .insert({ name: customerName, phone, email })
         .select("id")
         .single();
 

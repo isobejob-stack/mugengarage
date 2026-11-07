@@ -1,19 +1,16 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getAdminIdentity } from "@/lib/api/require-admin";
 import { listAdminAccounts } from "@/lib/auth/queries";
 import { AdminAccountsManager } from "@/components/admin/admin-accounts-manager";
 
 // FR-ADM-002: 管理アカウント。
 // 店主のほかに、家族・スタッフが管理画面へ入れるようにするための画面。
 export default async function Page() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   // レイアウトでも検証しているが、ここでは「いまログインしているのは誰か」を
   // 画面に渡す必要がある（自分自身を停止させないため）。
-  if (!user) redirect("/admin/login");
+  // cache() 済みなので、レイアウトの判定と合わせて問い合わせは1回に畳まれる。
+  const identity = await getAdminIdentity();
+  if (!identity) redirect("/admin/login");
 
   const accounts = await listAdminAccounts();
 
@@ -29,7 +26,7 @@ export default async function Page() {
 
       <AdminAccountsManager
         initialAccounts={accounts}
-        currentUserId={user.id}
+        currentUserId={identity.user.id}
       />
     </main>
   );

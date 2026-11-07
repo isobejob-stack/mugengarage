@@ -22,6 +22,14 @@ export type AdminAccount = {
   created_at: string;
   /** false のあいだはログインできない（停止中）。停止は取り消せる */
   enabled: boolean;
+  /**
+   * admin_users に登録があるか。
+   *
+   * 管理画面を使えるのはこれが true の人だけ（lib/api/require-admin.ts）。
+   * Supabaseのダッシュボードから直接ユーザーを作ると false のまま増えるため、
+   * 一覧では「ログインできる人」と区別して出す必要がある。
+   */
+  isAdmin: boolean;
 };
 
 // アカウントを止めるときにSupabaseへ渡す期間。
@@ -57,12 +65,13 @@ export async function listAdminAccounts(): Promise<AdminAccount[]> {
         id: user.id,
         // admin_users に行が無いユーザー（Supabaseの画面から直接作られた等）も隠さず出す。
         // 隠すと「作ったはずのアカウントが一覧に出ない」という調べようのない状態になる。
-        name: profile?.name ?? "（名前が未登録）",
+        name: profile?.name ?? "（管理者として未登録）",
         email: user.email ?? "",
         role: profile?.role ?? "admin",
         last_sign_in_at: user.last_sign_in_at ?? null,
         created_at: profile?.created_at ?? user.created_at,
         enabled: !bannedUntil || new Date(bannedUntil) <= new Date(),
+        isAdmin: Boolean(profile),
       };
     })
     .sort((a, b) => a.created_at.localeCompare(b.created_at));
@@ -145,6 +154,8 @@ export async function createAdminAccount(
       last_sign_in_at: null,
       created_at: profile.created_at,
       enabled: true,
+      // この関数は auth.users と admin_users の両方を作ったうえで成功を返す
+      isAdmin: true,
     },
   };
 }
