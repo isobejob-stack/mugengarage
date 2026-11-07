@@ -83,7 +83,7 @@ curl -s -o /dev/null -w "%{http_code}" -X POST https://mugengarage.vercel.app/ap
 0. **在庫の入れ替えSQLの実行**（2026-11-07 追加）
    `supabase/replace-inventory-2026-11-07.sql` をSupabaseのSQL Editorで1回実行する。
    いまの在庫をすべて消し（売約済は残す）、車選びドットコム掲載中の20台に入れ替わる。
-   確認してほしい点・グーネット分の扱いは
+   車名は掲載の表記のまま（店主の指示）。登録の方針・グーネット分の扱いは
    [INVENTORY_IMPORT_2026-11-07.md](INVENTORY_IMPORT_2026-11-07.md) を参照
 
 1. **車両写真のアップロード**（最重要）
@@ -157,6 +157,9 @@ curl -s -o /dev/null -w "%{http_code}" -X POST https://mugengarage.vercel.app/ap
   （`supabase/replace-inventory-2026-11-07.sql`、詳細は
   [INVENTORY_IMPORT_2026-11-07.md](INVENTORY_IMPORT_2026-11-07.md)）。
   本番と同じスキーマのローカルDBで、削除・登録・再実行時に重複しないことを確認済み
+- 車名（メーカー・車種・グレードやキャッチ）は掲載の表記のまま登録し、正式名称などは備考に残す方針
+  （店主の指示）。メーカー「デイムラー」は掲載とお店の表記に合わせて「ディムラー」に改名し、
+  `setup.sql` の再実行で戻らないよう直した（v4）
 - グーネットはサイト側が作業環境からの接続を拒否したため未取り込み。
   8月のグーネット掲載15台のうち13台は車選びドットコムにも掲載されている
 
