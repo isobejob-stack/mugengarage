@@ -4,7 +4,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react";
 // 共有UIプリミティブ: Button（デザイン刷新プロジェクト フェーズ1）
 // 03_ui_rules.md 4章: タップ領域は最低44px四方、本文は16px以上を確保する（sizeごとの min-h・text を参照）。
 export type ButtonVariant =
-  "primary" | "secondary" | "outline" | "ghost" | "destructive" | "instagram";
+  "primary" | "secondary" | "outline" | "ghost" | "destructive";
 
 export type ButtonSize = "sm" | "md" | "lg";
 
@@ -41,12 +41,6 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   ghost:
     "bg-transparent text-charcoal-800 hover:bg-neutral-100 active:bg-neutral-200",
   destructive: "bg-red-600 text-white hover:bg-red-700 active:bg-red-800",
-  // 問い合わせ窓口（InstagramのDM）専用。相談の窓口はInstagramに統一した（2026-11-08、lib/settings/sns.ts）。
-  // サービスの色で、押すとどこへ行くかを一目で分かるようにする。
-  // ブランドカラーのマゼンタ（#C13584）は白文字で約7.3:1あり、WCAG AAを満たす
-  // （ロゴのグラデーションは橙側で白文字が2.4:1まで落ちるため、ボタンの地には使わない）。
-  instagram:
-    "bg-[#C13584] text-white shadow-soft hover:brightness-110 hover:-translate-y-0.5 hover:shadow-medium active:translate-y-0 active:scale-[0.98]",
 };
 
 // 既定(md)・ヒーローCTA(lg)は本文16px以上・44px以上のタップ領域を満たす。
