@@ -14,6 +14,8 @@ import {
 } from "@/lib/seo/structured-data";
 import { getSiteSettings } from "@/lib/settings/queries";
 import { LineConsultationMenu } from "@/components/layout/line-consultation-menu";
+import { InstagramDmButton } from "@/components/layout/instagram-dm-button";
+import { findSnsContacts } from "@/lib/settings/sns";
 import { Button } from "@/components/ui/button";
 import { Card, CardImage, CardBody, CardTitle } from "@/components/ui/card";
 import { VehicleFeatureBadges } from "@/components/ui/status-badge";
@@ -89,6 +91,9 @@ export default async function Page() {
 
   // トップに出す在庫の上限を超えた場合は「すべて見る」ボタンで在庫一覧へ送る。
   const hasMoreVehicles = vehicleCount > TOP_PAGE_VEHICLE_LIMIT;
+
+  // 公式SNS（返信が早い問い合わせ窓口）。ヒーローのボタンに使う
+  const sns = findSnsContacts(settings.external_links);
 
   const heroImageUrl = settings.hero_image_path
     ? getSiteAssetPublicUrl(settings.hero_image_path)
@@ -168,6 +173,16 @@ export default async function Page() {
                   LINEで相談する
                 </Button>
               )}
+              {sns.instagram && (
+                <InstagramDmButton href={sns.instagram.dmUrl} size="lg">
+                  <SiteText
+                    k="home.hero.instagram"
+                    description="トップページ 冒頭のInstagram DMボタンの文言"
+                  >
+                    InstagramのDMで相談する
+                  </SiteText>
+                </InstagramDmButton>
+              )}
             </div>
           </div>
         </section>
@@ -206,6 +221,16 @@ export default async function Page() {
                 <Button href={settings.line_url} variant="line" size="lg">
                   LINEで相談する
                 </Button>
+              )}
+              {sns.instagram && (
+                <InstagramDmButton href={sns.instagram.dmUrl} size="lg">
+                  <SiteText
+                    k="home.hero.instagram"
+                    description="トップページ 冒頭のInstagram DMボタンの文言"
+                  >
+                    InstagramのDMで相談する
+                  </SiteText>
+                </InstagramDmButton>
               )}
             </div>
           </section>

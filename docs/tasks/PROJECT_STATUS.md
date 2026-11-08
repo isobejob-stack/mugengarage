@@ -107,7 +107,15 @@ curl -s -o /dev/null -w "%{http_code}" -X POST https://mugengarage.vercel.app/ap
    3. 「サイトマップ」に `sitemap.xml` を送信。「URL検査」でトップと在庫一覧の「インデックス登録をリクエスト」
    独自ドメイン（ISSUE-003）に移る場合は、移った後にそのドメインでも登録する
 
-3. **店舗情報・LINE URLの入力**
+3. **公式SNS（Instagram・Threads）の登録**（2026-11-08 追加）
+   店主いわく、問い合わせはメール・電話よりInstagramのDM・Threadsのほうが返信が早い。
+   管理画面 > 設定 > 店舗情報・リンク >「掲載媒体・公式SNS」に次の2行を足して保存すると、
+   ヘッダー・フッター・トップ・お問い合わせ・店舗情報・車両詳細に問い合わせボタンが出る（lib/settings/sns.ts）。
+   - リンク名「Instagram」 URL `https://www.instagram.com/mgarage9333/`
+   - リンク名「Threads」 URL `https://www.threads.com/@mgarage9333`
+   InstagramのボタンはDM画面（`https://ig.me/m/mgarage9333`）を直接開く。車両詳細では、押すと車名とURLがコピーされる
+
+4. **店舗情報・LINE URLの入力**
    管理画面 > **設定 > 店舗情報・リンク** から入力する。
    `site_settings` は現在すべて未入力（NULL）。
    一度入れたあとの直しは、`/about` を開いて数字や文字を押すだけでもできる
@@ -178,6 +186,8 @@ curl -s -o /dev/null -w "%{http_code}" -X POST https://mugengarage.vercel.app/ap
   車両ごとに「先頭N枚」と「枚数」をDB側で数える読み方に変えた。PostgRESTが1回に返す行数の上限（1,000行）で
   写真1,140枚の一部が切り捨てられ、管理画面の枚数が少なく出ていたため。削除済みの写真を数えていた不具合もあわせて解消
 - Google Search Console の確認タグを、環境変数 `GOOGLE_SITE_VERIFICATION` で出せるようにした
+- 公式SNS（Instagram・Threads）への問い合わせボタンを各所に追加。「掲載媒体・公式SNS」に登録されたURLから
+  自動で出し分ける。車両詳細のInstagramボタンは、押すと車名とページのURLをコピーする（DMは文章を入れた状態で開けないため）
 
 ### 2026-08-28（管理アカウント・管理画面の使い勝手・ライブ編集の拡張）
 

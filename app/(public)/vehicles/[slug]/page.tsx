@@ -34,6 +34,8 @@ import {
   buildLineConsultationUrl,
 } from "@/lib/site-config";
 import { getSiteSettings } from "@/lib/settings/queries";
+import { findSnsContacts } from "@/lib/settings/sns";
+import { InstagramDmButton } from "@/components/layout/instagram-dm-button";
 import { absoluteTitle } from "@/lib/seo/metadata";
 import {
   formatMileage,
@@ -209,6 +211,14 @@ export default async function Page({
   // （seoMeta は車両を引いた1行から得ているので、ここで読み直さない）
   const canonicalPath = buildPublicPath("vehicle", slug) ?? `/vehicles/${slug}`;
   const canonicalUrl = seoMeta?.canonical_url || `${SITE_URL}${canonicalPath}`;
+  // 公式SNS（店主いわく、メール・電話より返信が早い問い合わせ窓口。lib/settings/sns.ts）。
+  // InstagramのDMは最初の文章を入れた状態で開けないため、ボタンを押したときに
+  // 車名とこのページのURLをコピーし、DM画面では貼り付けるだけで「どの車か」が伝わるようにする。
+  const sns = findSnsContacts(settings.external_links);
+  const inquiryCopyText = `${
+    seoMeta?.title?.replace(/｜.*$/, "") || vehicleName
+  }\n${canonicalUrl}`;
+
   const structuredData = buildVehicleStructuredData({
     vehicle,
     name: vehicleName,
@@ -477,7 +487,31 @@ export default async function Page({
             </SiteText>
           </Button>
         )}
+        {sns.instagram && (
+          <InstagramDmButton
+            href={sns.instagram.dmUrl}
+            size="md"
+            copyText={inquiryCopyText}
+          >
+            <SiteText
+              k="vehicle.cta.instagramTop"
+              description="車両詳細 上部のInstagram DMボタンの文言"
+            >
+              この車をInstagramのDMで問い合わせる
+            </SiteText>
+          </InstagramDmButton>
+        )}
       </div>
+      {sns.instagram && (
+        <p className="text-foreground-muted mt-2 text-sm">
+          <SiteText
+            k="vehicle.cta.instagramHint"
+            description="車両詳細 Instagram DMボタンの下の案内文"
+          >
+            ボタンを押すと、この車の名前とページのURLがコピーされます。DMの入力欄に貼り付けて送ってください。
+          </SiteText>
+        </p>
+      )}
 
       {/* 写真の枠ごと編集対象にする。写真が1枚も無いときの「準備中」表示も含めて囲むのは、
           写真ゼロの車両こそ写真を足したい相手であり、囲まないと押す場所が無くなるため。 */}
@@ -525,6 +559,20 @@ export default async function Page({
                   写真をLINEで請求する
                 </SiteText>
               </Button>
+            )}
+            {sns.instagram && (
+              <InstagramDmButton
+                href={sns.instagram.dmUrl}
+                size="md"
+                copyText={inquiryCopyText}
+              >
+                <SiteText
+                  k="vehicle.photo.empty.instagram"
+                  description="車両詳細 写真をInstagramのDMで請求するボタンの文言"
+                >
+                  写真をDMで請求する
+                </SiteText>
+              </InstagramDmButton>
             )}
           </div>
         ) : (
@@ -641,7 +689,10 @@ export default async function Page({
       {/* LINE・電話とも未設定のあいだは、空のバーだけが残らないよう固定バーごと非表示にする。
           数百万円の商材で連絡手段がLINEのみだと、LINEを使わない層を取りこぼす。
           店舗の電話番号が設定されていれば併記する（設定は管理画面 > 店舗情報・リンク）。 */}
-      {(lineConsultUrl || settings.phone) && (
+      {/* 公式SNSがあるときは、メッセージの窓口をLINEではなくInstagramのDMにする
+          （店主いわく、いちばん返信が早い）。バーはスマートフォンの幅に収めるため最大2つまで。
+          LINEは上部の問い合わせボタンに残る。 */}
+      {(lineConsultUrl || settings.phone || sns.instagram) && (
         <div className="shadow-strong fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm">
           <div className="mx-auto flex h-14 max-w-3xl items-center justify-center gap-3 px-4 sm:h-16">
             {settings.phone && (
@@ -659,20 +710,36 @@ export default async function Page({
                 </SiteText>
               </Button>
             )}
-            {lineConsultUrl && (
-              <Button
-                href={lineConsultUrl}
-                variant="line"
+            {sns.instagram ? (
+              <InstagramDmButton
+                href={sns.instagram.dmUrl}
                 size="md"
                 className="w-full max-w-xs"
+                copyText={inquiryCopyText}
               >
                 <SiteText
-                  k="vehicle.cta.lineBottom"
-                  description="車両詳細 下部固定バー LINEボタンの文言"
+                  k="vehicle.cta.instagramBottom"
+                  description="車両詳細 下部固定バー Instagram DMボタンの文言"
                 >
-                  この車をLINEで相談する
+                  InstagramでDM
                 </SiteText>
-              </Button>
+              </InstagramDmButton>
+            ) : (
+              lineConsultUrl && (
+                <Button
+                  href={lineConsultUrl}
+                  variant="line"
+                  size="md"
+                  className="w-full max-w-xs"
+                >
+                  <SiteText
+                    k="vehicle.cta.lineBottom"
+                    description="車両詳細 下部固定バー LINEボタンの文言"
+                  >
+                    この車をLINEで相談する
+                  </SiteText>
+                </Button>
+              )
             )}
           </div>
         </div>

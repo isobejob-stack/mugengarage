@@ -3,11 +3,14 @@ import { SiteNav } from "@/components/layout/site-nav";
 import { getSiteSettings } from "@/lib/settings/queries";
 import { Button } from "@/components/ui/button";
 import { SiteText } from "@/components/live-edit/site-text";
+import { InstagramDmButton } from "@/components/layout/instagram-dm-button";
+import { findSnsContacts } from "@/lib/settings/sns";
 
 // 03_ui_rules.md 7章: グローバルヘッダーはロゴ・主要ナビ・LINE相談ボタンを常設する
 // デザイン刷新: 常時 shadow-soft を出して面としての境界を明確にする（実装コストの低い常時表示を採用）
 export async function SiteHeader() {
   const settings = await getSiteSettings();
+  const sns = findSnsContacts(settings.external_links);
 
   return (
     <header className="bg-surface shadow-soft border-b border-neutral-200">
@@ -34,10 +37,25 @@ export async function SiteHeader() {
               仮URLや空リンクへ飛ばすより、導線を見せないほうが利用者を裏切らない。 */}
           {settings.line_url && (
             <Button href={settings.line_url} variant="line" size="md">
-              <SiteText k="header.line" description="ヘッダー LINE相談ボタンの文言">
+              <SiteText
+                k="header.line"
+                description="ヘッダー LINE相談ボタンの文言"
+              >
                 LINEで相談する
               </SiteText>
             </Button>
+          )}
+          {/* 店主いわく、InstagramのDMが最も返信が早い。どのページからでも1タップで届くよう常設する。
+              管理画面の「掲載媒体・公式SNS」にInstagramが無いあいだは出さない（lib/settings/sns.ts）。 */}
+          {sns.instagram && (
+            <InstagramDmButton href={sns.instagram.dmUrl} size="md">
+              <SiteText
+                k="header.instagram"
+                description="ヘッダー InstagramのDMボタンの文言"
+              >
+                InstagramでDM
+              </SiteText>
+            </InstagramDmButton>
           )}
         </div>
       </div>
