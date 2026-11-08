@@ -1,6 +1,12 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
+import {
+  VEHICLE_PHOTO_SUMMARY_SELECT,
+  toVehiclePhotoSummary,
+  withVehiclePhotoSummary,
+  type VehiclePhotoSummaryColumns,
+} from "@/lib/inventory/queries";
 
 // FR-ADM-003: メディア管理。
 //
@@ -25,28 +31,21 @@ export type VehicleMediaStatus = {
 export async function listVehicleMediaStatus(): Promise<VehicleMediaStatus[]> {
   const supabase = createAdminClient();
 
-  const [vehicles, photos, videos] = await Promise.all([
-    supabase
-      .from("vehicles")
-      .select("id, status, display_order, manufacturers(name), models(name)")
-      .is("deleted_at", null)
-      .order("display_order"),
-    supabase
-      .from("vehicle_photos")
-      .select("vehicle_id, storage_path, display_order")
-      .order("display_order"),
+  // 写真は車両の行に「先頭1枚」と「枚数」を埋め込んで読む。写真の行を全件読むと、
+  // 1,000枚を超えたところで読み込みの上限に切り捨てられ、枚数が少なく出ていた。
+  const [vehicles, videos] = await Promise.all([
+    withVehiclePhotoSummary(
+      supabase
+        .from("vehicles")
+        .select(
+          `id, status, display_order, manufacturers(name), models(name), ${VEHICLE_PHOTO_SUMMARY_SELECT}`,
+        )
+        .is("deleted_at", null)
+        .order("display_order"),
+      1,
+    ),
     supabase.from("vehicle_videos").select("vehicle_id"),
   ]);
-
-  const photosByVehicle = new Map<string, string[]>();
-  for (const row of (photos.data ?? []) as Array<{
-    vehicle_id: string;
-    storage_path: string;
-  }>) {
-    const list = photosByVehicle.get(row.vehicle_id) ?? [];
-    list.push(row.storage_path);
-    photosByVehicle.set(row.vehicle_id, list);
-  }
 
   const videoCountByVehicle = new Map<string, number>();
   for (const row of (videos.data ?? []) as Array<{ vehicle_id: string }>) {
@@ -56,13 +55,17 @@ export async function listVehicleMediaStatus(): Promise<VehicleMediaStatus[]> {
     );
   }
 
-  const rows = ((vehicles.data ?? []) as unknown as Array<{
-    id: string;
-    status: string;
-    manufacturers: { name: string } | null;
-    models: { name: string } | null;
-  }>).map((vehicle) => {
-    const paths = photosByVehicle.get(vehicle.id) ?? [];
+  const rows = (
+    (vehicles.data ?? []) as unknown as Array<
+      {
+        id: string;
+        status: string;
+        manufacturers: { name: string } | null;
+        models: { name: string } | null;
+      } & VehiclePhotoSummaryColumns
+    >
+  ).map((vehicle) => {
+    const summary = toVehiclePhotoSummary(vehicle);
     return {
       id: vehicle.id,
       name:
@@ -70,9 +73,11 @@ export async function listVehicleMediaStatus(): Promise<VehicleMediaStatus[]> {
           .filter(Boolean)
           .join(" ") || "（車種未設定）",
       status: vehicle.status,
-      photoCount: paths.length,
+      photoCount: summary.total,
       videoCount: videoCountByVehicle.get(vehicle.id) ?? 0,
-      leadPhotoUrl: paths[0] ? getVehiclePhotoPublicUrl(paths[0]) : null,
+      leadPhotoUrl: summary.paths[0]
+        ? getVehiclePhotoPublicUrl(summary.paths[0])
+        : null,
     };
   });
 
@@ -84,5 +89,7 @@ export async function listVehicleMediaStatus(): Promise<VehicleMediaStatus[]> {
     return 2;
   };
 
-  return rows.sort((a, b) => priority(a) - priority(b) || a.photoCount - b.photoCount);
+  return rows.sort(
+    (a, b) => priority(a) - priority(b) || a.photoCount - b.photoCount,
+  );
 }

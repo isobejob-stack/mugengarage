@@ -4,7 +4,7 @@ import {
   type VehicleSearchFilters,
 } from "@/lib/inventory/search";
 import {
-  getVehiclePhotoPathsByVehicle,
+  getVehicleCardPhotos,
   attachVehicleSlugs,
 } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
@@ -96,14 +96,15 @@ export default async function Page({
     ]);
   const meta = buildPaginationMeta(pagination, totalCount);
 
-  // 一覧カードで数枚めくれるようにするため、車両ごとに先頭数枚を1クエリで取得する（N+1回避）
-  const [vehicles, photoPaths] = await Promise.all([
+  // 一覧カードで数枚めくれるようにするため、車両ごとに先頭数枚と写真の総数を1クエリで取得する（N+1回避）
+  const [vehicles, cardPhotos] = await Promise.all([
     attachVehicleSlugs(rows),
-    getVehiclePhotoPathsByVehicle(rows.map((v) => v.id)),
+    getVehicleCardPhotos(rows.map((v) => v.id)),
   ]);
   const photoUrlsByVehicle = rows.map((v) =>
-    (photoPaths.get(v.id) ?? []).map((p) => getVehiclePhotoPublicUrl(p)),
+    (cardPhotos.get(v.id)?.paths ?? []).map((p) => getVehiclePhotoPublicUrl(p)),
   );
+  const photoCountByVehicle = rows.map((v) => cardPhotos.get(v.id)?.total ?? 0);
 
   // 「21台中 1〜20台を表示」のための範囲。
   // 総件数だけだと、今どのあたりを見ているのかが分からない。
@@ -345,6 +346,7 @@ export default async function Page({
                   />
                   <VehicleCardPhotos
                     urls={photoUrlsByVehicle[index]}
+                    totalCount={photoCountByVehicle[index]}
                     alt={vehicleName}
                     priority={index < PRIORITY_IMAGE_COUNT}
                   />
