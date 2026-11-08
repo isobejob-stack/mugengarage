@@ -94,7 +94,7 @@ curl -s -o /dev/null -w "%{http_code}" -X POST https://mugengarage.vercel.app/ap
    - 管理画面 > 運用 > **画面を見ながら直す** … 「準備中」の枠を押してその場で追加
    - 現地なら `/admin/vehicles/quick-new`（登録してそのまま撮影へ進む）
 
-   ※ 写真が無いあいだ、車両詳細は「写真は準備中です／写真をLINEで請求できます」
+   ※ 写真が無いあいだ、車両詳細は「写真は準備中です／写真をDMで請求できます」
    という導線を出すようにした（離脱を問い合わせに変換する暫定策）。
 
 2. **Google Search Console への登録**（2026-11-08 追加）
@@ -107,22 +107,25 @@ curl -s -o /dev/null -w "%{http_code}" -X POST https://mugengarage.vercel.app/ap
    3. 「サイトマップ」に `sitemap.xml` を送信。「URL検査」でトップと在庫一覧の「インデックス登録をリクエスト」
    独自ドメイン（ISSUE-003）に移る場合は、移った後にそのドメインでも登録する
 
-3. **公式SNS（Instagram・Threads）の登録**（2026-11-08 追加）
-   店主いわく、問い合わせはメール・電話よりInstagramのDM・Threadsのほうが返信が早い。
-   管理画面 > 設定 > 店舗情報・リンク >「掲載媒体・公式SNS」に次の2行を足して保存すると、
-   ヘッダー・フッター・トップ・お問い合わせ・店舗情報・車両詳細に問い合わせボタンが出る（lib/settings/sns.ts）。
-   - リンク名「Instagram」 URL `https://www.instagram.com/mgarage9333/`
-   - リンク名「Threads」 URL `https://www.threads.com/@mgarage9333`
-   InstagramのボタンはDM画面（`https://ig.me/m/mgarage9333`）を直接開く。車両詳細では、押すと車名とURLがコピーされる
+3. **問い合わせ窓口の設定（InstagramのDMに統一）**（2026-11-08 追加）
+   店主の判断で、問い合わせの窓口は **InstagramのDM** に統一した（メール・電話より返信が早いため）。
+   Instagramを使っていない人のために電話・メールを「お使いでない方は」として添え、
+   お問い合わせページの入力フォームも残す。LINE・Threadsは窓口を増やして複雑にしないため使わない。
+   1. **SupabaseのSQL Editorで次の1行を実行**（メールアドレスを入れる欄を作る。最初に1回だけ）
+      `alter table site_settings add column if not exists email text;`
+      （`supabase/migrations/20261108120000_add_email_to_site_settings.sql` と同じ。setup.sql v5 にも入っている）
+   2. 管理画面 > 設定 > 店舗情報・リンク で次を入れて保存
+      - 「掲載媒体・公式SNS」にリンク名「Instagram」 URL `https://www.instagram.com/mgarage9333/`
+      - 「電話番号」「メールアドレス」（お問い合わせの窓口の欄）
+   Instagramのボタンは DM画面（`https://ig.me/m/mgarage9333`）を直接開く。車両詳細では、押すと車名とURLがコピーされる。
+   出る場所: ヘッダー、フッター、トップ、在庫一覧（一覧の下）、車両詳細（上部・写真が無いとき・下部固定バー）、
+   お問い合わせ、店舗情報。未入力の窓口は出さない（components/layout/inquiry-channels.tsx）
 
-4. **店舗情報・LINE URLの入力**
+4. **店舗情報の入力**
    管理画面 > **設定 > 店舗情報・リンク** から入力する。
    `site_settings` は現在すべて未入力（NULL）。
    一度入れたあとの直しは、`/about` を開いて数字や文字を押すだけでもできる
    （管理画面 > 運用 > 画面を見ながら直す）。
-   - **LINE URL** ← これを入れた時点で全ページのLINE CTAが復活する。
-     未設定のあいだLINEボタンは表示されない（仮URLへ飛ばすより害が小さいため）
-   - 電話番号 ← 入れると車両詳細の下部固定バーに「電話で問い合わせる」が出る
    - 住所・営業時間 ← `/about` の `AutoDealer` 構造化データにも反映される
    - 掲載媒体リンク（グーネット / 車選びドットコム / Instagram / Facebook）
    - トップページのヒーロー写真
@@ -186,8 +189,11 @@ curl -s -o /dev/null -w "%{http_code}" -X POST https://mugengarage.vercel.app/ap
   車両ごとに「先頭N枚」と「枚数」をDB側で数える読み方に変えた。PostgRESTが1回に返す行数の上限（1,000行）で
   写真1,140枚の一部が切り捨てられ、管理画面の枚数が少なく出ていたため。削除済みの写真を数えていた不具合もあわせて解消
 - Google Search Console の確認タグを、環境変数 `GOOGLE_SITE_VERIFICATION` で出せるようにした
-- 公式SNS（Instagram・Threads）への問い合わせボタンを各所に追加。「掲載媒体・公式SNS」に登録されたURLから
-  自動で出し分ける。車両詳細のInstagramボタンは、押すと車名とページのURLをコピーする（DMは文章を入れた状態で開けないため）
+- 問い合わせ窓口をInstagramのDMに統一（店主の判断）。電話・メールを「Instagramをお使いでない方は」として添え、
+  フォームは残す。LINE（未設定で表示されていなかった）とThreadsは使わないことにし、LINEのボタン・相談カテゴリ・
+  管理画面のLINE URL欄を外した。店舗情報にメールアドレスの欄を追加（要SQL、上の「問い合わせ窓口の設定」）。
+  在庫一覧の下にも問い合わせ欄を追加。車両詳細のInstagramボタンは押すと車名とURLをコピーし、
+  メールは件名に車名・本文にURLを入れて開く
 
 ### 2026-08-28（管理アカウント・管理画面の使い勝手・ライブ編集の拡張）
 

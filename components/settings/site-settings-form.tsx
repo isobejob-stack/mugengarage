@@ -166,21 +166,29 @@ export function SiteSettingsForm({
 
       <section>
         <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
-          LINE相談のURL
+          お問い合わせの窓口
         </h2>
         <p className="text-foreground-muted mt-2 text-base">
-          公式LINEアカウントのURLです。サイト全体の「LINEで相談する」ボタンの遷移先になります。
+          お問い合わせは
+          <strong className="text-charcoal-900">InstagramのDM</strong>
+          を中心にご案内します。下の「掲載媒体・公式SNS」にInstagramのURLを入れると、
+          サイト全体に「InstagramのDMで問い合わせる」ボタンが出ます。
+        </p>
+        <p className="text-foreground-muted mt-2 text-base">
+          Instagramを使っていない方のために、上の電話番号とこのメールアドレスを
+          「お電話・メールでも承ります」として添えます。
           <strong className="text-charcoal-900">
-            未設定のあいだはLINEボタンを表示しません。
+            未入力の項目は表示しません。
           </strong>
         </p>
         <div className="mt-4">
-          <Field label="LINEのURL" error={errors.line_url?.message}>
+          <Field label="メールアドレス" error={errors.email?.message}>
             <input
-              type="url"
+              type="email"
               className="input"
-              placeholder="https://lin.ee/xxxxxxx"
-              {...register("line_url")}
+              placeholder="info@example.com"
+              autoComplete="off"
+              {...register("email")}
             />
           </Field>
         </div>
@@ -193,6 +201,8 @@ export function SiteSettingsForm({
         <p className="text-foreground-muted mt-2 text-base">
           グーネット、車選びドットコム、Instagram、Facebookなどのリンクです。
           フッターと店舗情報ページに、ここで並べた順に表示されます。
+          InstagramのURL（https://www.instagram.com/アカウント名/）を入れると、
+          お問い合わせボタンにも使われます。
         </p>
 
         <div className="mt-6 flex flex-col gap-4">

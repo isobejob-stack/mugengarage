@@ -13,19 +13,8 @@ const optionalText = (max: number, label: string) =>
     .transform((value) => (value === "" ? null : value))
     .nullable();
 
-// httpsのURLのみ許可する。httpや任意文字列を許すと、掲載媒体リンクが
+// URLは https のみ許可する。httpや任意文字列を許すと、掲載媒体リンクが
 // そのまま公開サイトの外部リンクとして出力されるため、最低限の形式検証を行う。
-const optionalUrl = (label: string) =>
-  z
-    .string()
-    .trim()
-    .transform((value) => (value === "" ? null : value))
-    .nullable()
-    .refine(
-      (value) => value === null || /^https:\/\/.+/.test(value),
-      `${label}は https:// から始まるURLを入力してください`,
-    );
-
 export const externalLinkSchema = z.object({
   label: z
     .string()
@@ -66,8 +55,18 @@ export const siteSettingsFormSchema = z.object({
     ),
   representative_name: optionalText(50, "代表者名"),
   access_info: optionalText(500, "アクセス"),
-  // 最重要CTAの遷移先。未設定のあいだは画面側でLINEボタンを出さない
-  line_url: optionalUrl("LINEのURL"),
+  // 問い合わせ用メールアドレス。問い合わせはInstagramのDMに統一し（2026-11-08）、
+  // Instagramを使っていない人のために電話とメールを併記する。未設定のあいだは出さない
+  email: z
+    .string()
+    .trim()
+    .max(254, "メールアドレスが長すぎます")
+    .transform((value) => (value === "" ? null : value))
+    .nullable()
+    .refine(
+      (value) => value === null || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+      "メールアドレスの形式が正しくありません",
+    ),
   external_links: z.array(externalLinkSchema).max(20, "リンクは20件までです"),
 });
 
@@ -85,6 +84,6 @@ export const emptySiteSettingsFormValues: SiteSettingsFormValues = {
   founded_year: "",
   representative_name: "",
   access_info: "",
-  line_url: "",
+  email: "",
   external_links: [],
 };

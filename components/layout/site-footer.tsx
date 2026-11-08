@@ -1,15 +1,14 @@
 import Link from "next/link";
 import { getSiteSettings } from "@/lib/settings/queries";
-import { Button } from "@/components/ui/button";
 import { SiteText } from "@/components/live-edit/site-text";
 import { InstagramDmButton } from "@/components/layout/instagram-dm-button";
-import { findSnsContacts } from "@/lib/settings/sns";
+import { findInstagramContact } from "@/lib/settings/sns";
 
-// 03_ui_rules.md 7章: フッターでもLINE相談CTAを再掲する
+// 03_ui_rules.md 7章: フッターでも相談CTAを再掲する（窓口はInstagramのDMに統一。2026-11-08）
 // 店舗情報・掲載媒体リンクは管理画面から編集する（lib/settings/queries.ts）。
 export async function SiteFooter() {
   const settings = await getSiteSettings();
-  const sns = findSnsContacts(settings.external_links);
+  const instagram = findInstagramContact(settings.external_links);
 
   return (
     <footer className="bg-cream-100 mt-16 border-t border-neutral-200">
@@ -27,7 +26,7 @@ export async function SiteFooter() {
 
         {/* 住所・電話番号は実店舗の信頼性に直結する情報のため、全ページのフッターに出す。
             未設定の項目は表示しない（空欄や誤情報を見せない）。 */}
-        {(settings.address || settings.phone) && (
+        {(settings.address || settings.phone || settings.email) && (
           <address className="text-foreground-muted mt-3 not-italic">
             {settings.address && (
               <p>
@@ -44,6 +43,18 @@ export async function SiteFooter() {
                   className="ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
                 >
                   {settings.phone}
+                </a>
+              </p>
+            )}
+            {/* Instagramを使っていない人のための窓口（問い合わせはInstagramのDMに統一。2026-11-08） */}
+            {settings.email && (
+              <p className="mt-1 break-all">
+                MAIL:{" "}
+                <a
+                  href={`mailto:${settings.email}`}
+                  className="ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
+                >
+                  {settings.email}
                 </a>
               </p>
             )}
@@ -139,20 +150,10 @@ export async function SiteFooter() {
               プライバシーポリシー
             </SiteText>
           </Link>
-          {settings.line_url && (
-            <Button href={settings.line_url} variant="line" size="md">
-              <SiteText
-                k="footer.line"
-                description="フッター LINE相談ボタンの文言"
-              >
-                LINEで相談する
-              </SiteText>
-            </Button>
-          )}
-          {/* 公式SNSは返信が早い問い合わせ窓口（lib/settings/sns.ts）。下の一覧のリンクとは別に、
+          {/* InstagramのDMは返信が早い問い合わせ窓口（lib/settings/sns.ts）。下の一覧のリンクとは別に、
               問い合わせのボタンとして見せる */}
-          {sns.instagram && (
-            <InstagramDmButton href={sns.instagram.dmUrl} size="md">
+          {instagram && (
+            <InstagramDmButton href={instagram.dmUrl} size="md">
               <SiteText
                 k="footer.instagram"
                 description="フッター InstagramのDMボタンの文言"
@@ -160,16 +161,6 @@ export async function SiteFooter() {
                 InstagramのDMで問い合わせる
               </SiteText>
             </InstagramDmButton>
-          )}
-          {sns.threads && (
-            <Button href={sns.threads.profileUrl} variant="threads" size="md">
-              <SiteText
-                k="footer.threads"
-                description="フッター Threadsボタンの文言"
-              >
-                Threadsで問い合わせる
-              </SiteText>
-            </Button>
           )}
         </div>
 

@@ -1,6 +1,6 @@
 -- ============================================================
 -- エムガレージ サイト セットアップ用SQL（これ1つを実行すれば完了）
--- 版数: v4
+-- 版数: v5
 --
 -- 使い方:
 --   1. https://supabase.com/dashboard を開く
@@ -48,6 +48,9 @@ alter table site_settings enable row level security;
 
 -- トップページの大きな写真の保存場所（あとで管理画面からアップロードします）
 alter table site_settings add column if not exists hero_image_path text;
+
+-- 問い合わせ用のメールアドレス（Instagramを使っていない方向けの窓口。未設定なら出しません）
+alter table site_settings add column if not exists email text;
 
 -- 設定を入れる箱を1つだけ用意します
 insert into site_settings (id) values ('singleton')
@@ -306,5 +309,5 @@ on conflict do nothing;
 --    （版数は、最新のファイルを貼り付けられているか確認するためのものです）
 -- ============================================================
 select
-  'v4' as 版数,
+  'v5' as 版数,
   (select count(*) from vehicles where id::text like 'c0000000-0000-4000-8000-%') as 登録された車両の台数;

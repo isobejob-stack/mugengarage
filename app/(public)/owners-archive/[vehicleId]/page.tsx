@@ -13,7 +13,8 @@ import { RelatedInventorySection } from "@/components/related/related-discovery"
 import { getVehiclesRelatedToTitle } from "@/lib/related/auto";
 import { getLeadVehiclePhotoPaths } from "@/lib/inventory/queries";
 import { getSiteSettings } from "@/lib/settings/queries";
-import { buildLineConsultationUrl } from "@/lib/site-config";
+import { findInstagramContact } from "@/lib/settings/sns";
+import { InstagramDmButton } from "@/components/layout/instagram-dm-button";
 
 // 車両名を組み立ててtitleに使う。従来はルートlayoutの値を継承しており、
 // アーカイブ全件が検索結果で同じ文言になっていた（docs/tasks/ISSUE-005）。
@@ -89,11 +90,8 @@ export default async function Page({
     return path ? getVehiclePhotoPublicUrl(path) : undefined;
   });
   const settings = await getSiteSettings();
-  const lineConsultUrl = buildLineConsultationUrl(
-    settings.line_url,
-    "purchase",
-    vehicleName,
-  );
+  // 相談の窓口はInstagramのDMに統一（2026-11-08、店主の判断。lib/settings/sns.ts）
+  const instagram = findInstagramContact(settings.external_links);
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
@@ -128,9 +126,7 @@ export default async function Page({
             レストア履歴
           </h2>
           <div className="prose mt-2 max-w-none">
-            <Markdown>
-              {entry.restoration_history}
-            </Markdown>
+            <Markdown>{entry.restoration_history}</Markdown>
           </div>
         </section>
       )}
@@ -141,9 +137,7 @@ export default async function Page({
             販売履歴
           </h2>
           <div className="prose mt-2 max-w-none">
-            <Markdown>
-              {entry.sales_history}
-            </Markdown>
+            <Markdown>{entry.sales_history}</Markdown>
           </div>
         </section>
       )}
@@ -167,9 +161,13 @@ export default async function Page({
             <Button href="/vehicles" variant="primary" size="md">
               在庫車両を見る
             </Button>
-            {lineConsultUrl && (
-              <Button href={lineConsultUrl} variant="line" size="md">
-                LINEで相談する
+            {instagram ? (
+              <InstagramDmButton href={instagram.dmUrl} size="md">
+                InstagramのDMで相談する
+              </InstagramDmButton>
+            ) : (
+              <Button href="/contact" variant="outline" size="md">
+                問い合わせる
               </Button>
             )}
           </div>

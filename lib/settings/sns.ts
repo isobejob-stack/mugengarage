@@ -1,31 +1,23 @@
 import type { ExternalLink } from "@/lib/settings/schema";
 
-// 公式SNS（Instagram・Threads）への問い合わせ導線。
+// 公式Instagramへの問い合わせ導線。
 //
-// 店主によると、問い合わせはメール・電話より InstagramのDM・Threads のほうが返信が早い（2026-11-08）。
-// そのため、SNSを「フッターに並ぶリンクの1つ」ではなく、問い合わせボタンとして各所に出す。
+// 問い合わせは InstagramのDM に統一する（2026-11-08、店主の判断）。
+// メール・電話よりDMのほうが返信が早いため。Instagramを使っていない人のために
+// 電話とメールの窓口は併記する（components/layout/inquiry-channels.tsx）。
+// LINE・Threadsは窓口を増やして複雑にしないため使わない。
 //
-// SNSのURLは管理画面の「掲載媒体・公式SNS」（site_settings.external_links）に入っている。
+// InstagramのURLは管理画面の「掲載媒体・公式SNS」（site_settings.external_links）に入っている。
 // 専用の列を増やさないのは、external_links が「媒体は今後増減しうるため列を増やさない」
-// 方針で作られているため。ここではURLのホスト名からInstagram・Threadsを見分け、
-// アカウント名を取り出して問い合わせ用のURLを組み立てる。
-// 管理画面でSNSのリンクを消せば、問い合わせボタンも自動で消える。
+// 方針で作られているため。ここではURLのホスト名からInstagramを見分け、
+// アカウント名を取り出してDM画面のURLを組み立てる。
+// 管理画面でInstagramのリンクを消せば、問い合わせボタンも自動で消える。
 
 export type InstagramContact = {
   username: string;
   profileUrl: string;
   /** DM画面を直接開くURL（Instagram公式の ig.me リンク） */
   dmUrl: string;
-};
-
-export type ThreadsContact = {
-  username: string;
-  profileUrl: string;
-};
-
-export type SnsContacts = {
-  instagram: InstagramContact | null;
-  threads: ThreadsContact | null;
 };
 
 // Instagramのユーザー名に使える文字（英数字・ピリオド・アンダースコア、30文字まで）
@@ -43,27 +35,21 @@ const INSTAGRAM_RESERVED_PATHS = new Set([
   "tv",
 ]);
 
-function parseUrl(value: string): URL | null {
+export function parseInstagramUrl(value: string): InstagramContact | null {
+  let url: URL;
   try {
-    return new URL(value);
+    url = new URL(value);
   } catch {
     return null;
   }
-}
+  if (
+    url.hostname !== "instagram.com" &&
+    !url.hostname.endsWith(".instagram.com")
+  ) {
+    return null;
+  }
 
-function hostIs(url: URL, domain: string) {
-  return url.hostname === domain || url.hostname.endsWith(`.${domain}`);
-}
-
-function firstPathSegment(url: URL) {
-  return url.pathname.split("/").filter(Boolean)[0] ?? "";
-}
-
-export function parseInstagramUrl(value: string): InstagramContact | null {
-  const url = parseUrl(value);
-  if (!url || !hostIs(url, "instagram.com")) return null;
-
-  const username = firstPathSegment(url);
+  const username = url.pathname.split("/").filter(Boolean)[0] ?? "";
   if (
     !USERNAME_PATTERN.test(username) ||
     INSTAGRAM_RESERVED_PATHS.has(username.toLowerCase())
@@ -79,32 +65,13 @@ export function parseInstagramUrl(value: string): InstagramContact | null {
   };
 }
 
-export function parseThreadsUrl(value: string): ThreadsContact | null {
-  const url = parseUrl(value);
-  if (!url || !(hostIs(url, "threads.com") || hostIs(url, "threads.net"))) {
-    return null;
-  }
-
-  const segment = firstPathSegment(url);
-  if (!segment.startsWith("@")) return null;
-  const username = segment.slice(1);
-  if (!USERNAME_PATTERN.test(username)) return null;
-
-  return {
-    username,
-    profileUrl: `https://www.threads.com/@${username}`,
-  };
-}
-
-// 掲載媒体・公式SNSの一覧から、最初に見つかったInstagram・Threadsを返す
-export function findSnsContacts(links: ExternalLink[]): SnsContacts {
-  let instagram: InstagramContact | null = null;
-  let threads: ThreadsContact | null = null;
-
+// 掲載媒体・公式SNSの一覧から、最初に見つかったInstagramを返す
+export function findInstagramContact(
+  links: ExternalLink[],
+): InstagramContact | null {
   for (const link of links) {
-    instagram ??= parseInstagramUrl(link.url);
-    threads ??= parseThreadsUrl(link.url);
+    const contact = parseInstagramUrl(link.url);
+    if (contact) return contact;
   }
-
-  return { instagram, threads };
+  return null;
 }

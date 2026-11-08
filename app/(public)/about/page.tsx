@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardTitle, CardMeta } from "@/components/ui/card";
 import { SiteText } from "@/components/live-edit/site-text";
 import { Editable } from "@/components/live-edit/editable";
-import { InstagramDmButton } from "@/components/layout/instagram-dm-button";
-import { findSnsContacts } from "@/lib/settings/sns";
+import { InquiryChannels } from "@/components/layout/inquiry-channels";
+import { findInstagramContact } from "@/lib/settings/sns";
 
 // 店舗情報はDBから読むため、管理画面での編集が即座に反映されるようリクエストごとに描画する
 export const dynamic = "force-dynamic";
@@ -45,8 +45,8 @@ const SERVICES = [
 // SCR-PUB-018: 店舗情報・アクセス
 export default async function Page() {
   const settings = await getSiteSettings();
-  // 公式SNS（返信が早い問い合わせ窓口。lib/settings/sns.ts）
-  const sns = findSnsContacts(settings.external_links);
+  // 問い合わせ窓口（InstagramのDMに統一。2026-11-08、店主の判断。lib/settings/sns.ts）
+  const instagram = findInstagramContact(settings.external_links);
 
   // FR-SEO-002: 事業者の構造化データ。
   // 未入力の項目はキー自体を出さない。空文字や誤った値を構造化データに含めると、
@@ -281,37 +281,16 @@ export default async function Page() {
             ご来店をご希望の場合は、在庫状況と対応可能なお時間をご案内しますので、事前にご連絡ください。
           </SiteText>
         </p>
-        <div className="mt-6 flex flex-wrap gap-3">
-          {sns.instagram && (
-            <InstagramDmButton href={sns.instagram.dmUrl} size="lg">
-              <SiteText
-                k="about.contact.instagram"
-                description="店舗情報 InstagramのDMボタンの文言"
-              >
-                InstagramのDMで問い合わせる
-              </SiteText>
-            </InstagramDmButton>
-          )}
-          {sns.threads && (
-            <Button href={sns.threads.profileUrl} variant="threads" size="lg">
-              <SiteText
-                k="about.contact.threads"
-                description="店舗情報 Threadsボタンの文言"
-              >
-                Threadsで問い合わせる
-              </SiteText>
-            </Button>
-          )}
-          {settings.line_url && (
-            <Button href={settings.line_url} variant="line" size="lg">
-              <SiteText
-                k="about.contact.line"
-                description="店舗情報 LINEボタンの文言"
-              >
-                LINEで相談する
-              </SiteText>
-            </Button>
-          )}
+        {/* InstagramのDMを先頭に、使っていない人向けに電話・メールを添える（components/layout/inquiry-channels.tsx） */}
+        <InquiryChannels
+          instagram={instagram}
+          phone={settings.phone}
+          email={settings.email}
+          size="lg"
+          mailSubject="お問い合わせ（エムガレージ）"
+          className="mt-6"
+        />
+        <div className="mt-4 flex flex-wrap gap-3">
           <Button href="/contact" variant="outline" size="lg">
             <SiteText
               k="about.contact.form"
