@@ -1,6 +1,6 @@
 -- ============================================================
 -- エムガレージ サイト セットアップ用SQL（これ1つを実行すれば完了）
--- 版数: v3
+-- 版数: v5
 --
 -- 使い方:
 --   1. https://supabase.com/dashboard を開く
@@ -48,6 +48,9 @@ alter table site_settings enable row level security;
 
 -- トップページの大きな写真の保存場所（あとで管理画面からアップロードします）
 alter table site_settings add column if not exists hero_image_path text;
+
+-- 問い合わせ用のメールアドレス（Instagramを使っていない方向けの窓口。未設定なら出しません）
+alter table site_settings add column if not exists email text;
 
 -- 設定を入れる箱を1つだけ用意します
 insert into site_settings (id) values ('singleton')
@@ -153,9 +156,11 @@ update manufacturers m set name = 'ジャガー'
    and m.name is distinct from 'ジャガー'
    and not exists (select 1 from manufacturers o where o.name = 'ジャガー' and o.id <> m.id);
 
+-- 「ディムラー」は在庫の入れ替え（replace-inventory-2026-11-07.sql）で
+-- 掲載とお店の表記に合わせた名前のため、そのままにします
 update manufacturers m set name = 'デイムラー'
  where m.slug = 'daimler'
-   and m.name is distinct from 'デイムラー'
+   and m.name not in ('デイムラー', 'ディムラー')
    and not exists (select 1 from manufacturers o where o.name = 'デイムラー' and o.id <> m.id);
 
 -- 車両本体
@@ -304,5 +309,5 @@ on conflict do nothing;
 --    （版数は、最新のファイルを貼り付けられているか確認するためのものです）
 -- ============================================================
 select
-  'v3' as 版数,
+  'v5' as 版数,
   (select count(*) from vehicles where id::text like 'c0000000-0000-4000-8000-%') as 登録された車両の台数;

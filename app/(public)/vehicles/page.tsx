@@ -4,7 +4,7 @@ import {
   type VehicleSearchFilters,
 } from "@/lib/inventory/search";
 import {
-  getVehiclePhotoPathsByVehicle,
+  getVehicleCardPhotos,
   attachVehicleSlugs,
 } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
@@ -38,6 +38,9 @@ import { Pagination } from "@/components/ui/pagination";
 import { FavoriteIconButton } from "@/components/engagement/favorite-icon-button";
 import { getSessionId } from "@/lib/engagement/session";
 import { listFavoriteVehicleIds } from "@/lib/engagement/queries";
+import { getSiteSettings } from "@/lib/settings/queries";
+import { findInstagramContact } from "@/lib/settings/sns";
+import { InquiryChannels } from "@/components/layout/inquiry-channels";
 
 type SearchParams = Record<string, string | undefined>;
 
@@ -88,22 +91,29 @@ export default async function Page({
   // 1段目: 検索結果・絞り込みの選択肢・お気に入りを同時に取る
   // 2段目: 詳細URLのslugと、カードの写真を同時に取る
   //        （どちらも必要なのは車両IDだけ。以前は「車両→slug→写真」の3段だった）
-  const [{ vehicles: rows, totalCount }, facets, favoriteIds] =
+  const [{ vehicles: rows, totalCount }, facets, favoriteIds, settings] =
     await Promise.all([
       searchPublicVehicles(filters, pagination),
       getVehicleSearchFacetOptions(),
       sessionId ? listFavoriteVehicleIds(sessionId) : Promise.resolve([]),
+      getSiteSettings(),
     ]);
+  // 問い合わせ窓口（InstagramのDMに統一し、電話・メールを添える。2026-11-08）
+  const instagram = findInstagramContact(settings.external_links);
+  const hasInquiryChannel = Boolean(
+    instagram || settings.phone || settings.email,
+  );
   const meta = buildPaginationMeta(pagination, totalCount);
 
-  // 一覧カードで数枚めくれるようにするため、車両ごとに先頭数枚を1クエリで取得する（N+1回避）
-  const [vehicles, photoPaths] = await Promise.all([
+  // 一覧カードで数枚めくれるようにするため、車両ごとに先頭数枚と写真の総数を1クエリで取得する（N+1回避）
+  const [vehicles, cardPhotos] = await Promise.all([
     attachVehicleSlugs(rows),
-    getVehiclePhotoPathsByVehicle(rows.map((v) => v.id)),
+    getVehicleCardPhotos(rows.map((v) => v.id)),
   ]);
   const photoUrlsByVehicle = rows.map((v) =>
-    (photoPaths.get(v.id) ?? []).map((p) => getVehiclePhotoPublicUrl(p)),
+    (cardPhotos.get(v.id)?.paths ?? []).map((p) => getVehiclePhotoPublicUrl(p)),
   );
+  const photoCountByVehicle = rows.map((v) => cardPhotos.get(v.id)?.total ?? 0);
 
   // 「21台中 1〜20台を表示」のための範囲。
   // 総件数だけだと、今どのあたりを見ているのかが分からない。
@@ -345,6 +355,7 @@ export default async function Page({
                   />
                   <VehicleCardPhotos
                     urls={photoUrlsByVehicle[index]}
+                    totalCount={photoCountByVehicle[index]}
                     alt={vehicleName}
                     priority={index < PRIORITY_IMAGE_COUNT}
                   />
@@ -377,6 +388,37 @@ export default async function Page({
         page={meta.page}
         totalPages={meta.total_pages}
       />
+
+      {/* 一覧を見て気になる車があった人が、詳細に入らずその場で聞けるようにする。
+          以前は一覧に問い合わせの入口が1つも無く、在庫の質問をするには
+          車両詳細かお問い合わせページへ移る必要があった。 */}
+      {hasInquiryChannel && (
+        <section className="bg-cream-100 mt-10 rounded-2xl border border-neutral-200 p-6 sm:p-8">
+          <h2 className="text-charcoal-900 font-serif text-xl font-bold">
+            <SiteText
+              k="vehicles.inquiry.heading"
+              description="在庫一覧 問い合わせ欄の見出し"
+            >
+              気になる車両はお気軽にお問い合わせください
+            </SiteText>
+          </h2>
+          <p className="text-foreground-muted mt-2 text-sm">
+            <SiteText
+              k="vehicles.inquiry.body"
+              description="在庫一覧 問い合わせ欄の説明文"
+            >
+              在庫の状態や写真のご希望、ご来店のご相談など、何でもお聞きください。
+            </SiteText>
+          </p>
+          <InquiryChannels
+            instagram={instagram}
+            phone={settings.phone}
+            email={settings.email}
+            mailSubject="在庫車両についてのお問い合わせ（エムガレージ）"
+            className="mt-4"
+          />
+        </section>
+      )}
 
       {/* 人気ランキングは以前は見出しの横にあり、結果にたどり着く前の脇道になっていた。
           一覧を見終えて「決めきれなかった」人に効く導線のため、結果の後ろに置く。 */}

@@ -28,12 +28,12 @@ import {
   buildVehicleStructuredData,
   serializeStructuredData,
 } from "@/lib/seo/structured-data";
-import {
-  SITE_NAME,
-  SITE_URL,
-  buildLineConsultationUrl,
-} from "@/lib/site-config";
+import { SITE_NAME, SITE_URL } from "@/lib/site-config";
 import { getSiteSettings } from "@/lib/settings/queries";
+import { findInstagramContact } from "@/lib/settings/sns";
+import { InstagramDmButton } from "@/components/layout/instagram-dm-button";
+import { InquiryChannels } from "@/components/layout/inquiry-channels";
+import { buildMailtoUrl } from "@/lib/settings/mailto";
 import { absoluteTitle } from "@/lib/seo/metadata";
 import {
   formatMileage,
@@ -179,11 +179,6 @@ export default async function Page({
     getVehicleVideos(vehicle.id),
   ]);
 
-  const lineConsultUrl = buildLineConsultationUrl(
-    settings.line_url,
-    "purchase",
-    buildVehicleDisplayName(vehicle),
-  );
   const isFavorited = favoriteIds.includes(vehicle.id);
   const photosWithUrl = photos.map((photo) => ({
     id: photo.id,
@@ -209,6 +204,18 @@ export default async function Page({
   // （seoMeta は車両を引いた1行から得ているので、ここで読み直さない）
   const canonicalPath = buildPublicPath("vehicle", slug) ?? `/vehicles/${slug}`;
   const canonicalUrl = seoMeta?.canonical_url || `${SITE_URL}${canonicalPath}`;
+  // 問い合わせ窓口はInstagramのDMに統一し、使っていない人向けに電話・メールを添える
+  // （2026-11-08、店主の判断。components/layout/inquiry-channels.tsx）。
+  // InstagramのDMは最初の文章を入れた状態で開けないため、ボタンを押したときに
+  // 車名とこのページのURLをコピーし、DM画面では貼り付けるだけで「どの車か」が伝わるようにする。
+  // メールは件名に車名、本文の書き出しにURLを入れておく。
+  const instagram = findInstagramContact(settings.external_links);
+  const inquiryVehicleTitle =
+    seoMeta?.title?.replace(/｜.*$/, "") || vehicleName;
+  const inquiryCopyText = `${inquiryVehicleTitle}\n${canonicalUrl}`;
+  const inquiryMailSubject = `${inquiryVehicleTitle}について`;
+  const inquiryMailBody = `${canonicalUrl}\n\n`;
+
   const structuredData = buildVehicleStructuredData({
     vehicle,
     name: vehicleName,
@@ -465,19 +472,33 @@ export default async function Page({
 
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <FavoriteButton vehicleId={vehicle.id} initialFavorited={isFavorited} />
-        {/* FR-LINE-002: 車両詳細ページでは「購入」カテゴリに固定した相談導線を表示する。
-            レビュー指摘対応（必須修正3）: プリフィル文言に車両名を含め、ボタン文言と送信内容を一致させる */}
-        {lineConsultUrl && (
-          <Button href={lineConsultUrl} variant="line" size="md">
-            <SiteText
-              k="vehicle.cta.lineTop"
-              description="車両詳細 上部のLINE相談ボタンの文言"
-            >
-              この車をLINEで相談する
-            </SiteText>
-          </Button>
-        )}
       </div>
+
+      <InquiryChannels
+        instagram={instagram}
+        phone={settings.phone}
+        email={settings.email}
+        copyText={inquiryCopyText}
+        mailSubject={inquiryMailSubject}
+        mailBody={inquiryMailBody}
+        className="mt-4"
+        instagramLabel={
+          <SiteText
+            k="vehicle.cta.instagramTop"
+            description="車両詳細 上部のInstagram DMボタンの文言"
+          >
+            この車をInstagramのDMで問い合わせる
+          </SiteText>
+        }
+        instagramHint={
+          <SiteText
+            k="vehicle.cta.instagramHint"
+            description="車両詳細 Instagram DMボタンの下の案内文"
+          >
+            ボタンを押すと、この車の名前とページのURLがコピーされます。DMの入力欄に貼り付けて送ってください。
+          </SiteText>
+        }
+      />
 
       {/* 写真の枠ごと編集対象にする。写真が1枚も無いときの「準備中」表示も含めて囲むのは、
           写真ゼロの車両こそ写真を足したい相手であり、囲まないと押す場所が無くなるため。 */}
@@ -516,15 +537,19 @@ export default async function Page({
                 現車の写真をご希望の方は、お気軽にお問い合わせください。個別にお送りいたします。
               </SiteText>
             </p>
-            {lineConsultUrl && (
-              <Button href={lineConsultUrl} variant="line" size="md">
+            {instagram && (
+              <InstagramDmButton
+                href={instagram.dmUrl}
+                size="md"
+                copyText={inquiryCopyText}
+              >
                 <SiteText
-                  k="vehicle.photo.empty.cta"
-                  description="車両詳細 写真をLINEで請求するボタンの文言"
+                  k="vehicle.photo.empty.instagram"
+                  description="車両詳細 写真をInstagramのDMで請求するボタンの文言"
                 >
-                  写真をLINEで請求する
+                  写真をDMで請求する
                 </SiteText>
-              </Button>
+              </InstagramDmButton>
             )}
           </div>
         ) : (
@@ -632,47 +657,71 @@ export default async function Page({
       </div>
 
       {/* レビュー指摘対応（必須修正4）: 01_public_ui_spec.md 5章（SCR-PUB-003, FR-VEH-007）
-          「LINE相談CTAは常に画面下部に固定表示することを推奨」に基づく画面下部固定バー。
+          「相談CTAは常に画面下部に固定表示することを推奨」に基づく画面下部固定バー。
           冒頭のインラインCTAは早期離脱者への導線として維持したまま併存させる。
           ヘッダーは固定表示ではないため干渉なし。ライトボックス（z-50）より低いz-indexとし、
           モーダル表示中はこのバーの上にライトボックスが正しく重なるようにする。
           fixedを使用（sticky+100vwのフルブリードは縦スクロールバー幅分の横スクロールが
           発生するため不採用）。<main>側にバー高さ分のpadding-bottomを確保済み。 */}
-      {/* LINE・電話とも未設定のあいだは、空のバーだけが残らないよう固定バーごと非表示にする。
-          数百万円の商材で連絡手段がLINEのみだと、LINEを使わない層を取りこぼす。
-          店舗の電話番号が設定されていれば併記する（設定は管理画面 > 店舗情報・リンク）。 */}
-      {(lineConsultUrl || settings.phone) && (
+      {/* 問い合わせ窓口（InstagramのDM・電話・メール）が1つも無いあいだは、空のバーが残らないよう出さない。
+          バーはスマートフォンの幅に収めるため2つまで。電話と、メッセージ（InstagramのDM、
+          Instagramが無ければメール）を並べる。高額商材で、電話でしか問い合わせない層も取りこぼさないため。
+          文言はスマートフォン（幅320pxの小さい機種まで）で2つ並べても1行に収まる長さ・大きさにする
+          （Instagramはボタンの色とマークで分かる）。スマートフォンでは文字を14pxにし、タップ領域44px以上は保つ。 */}
+      {(settings.phone || instagram || settings.email) && (
         <div className="shadow-strong fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm">
           <div className="mx-auto flex h-14 max-w-3xl items-center justify-center gap-3 px-4 sm:h-16">
             {settings.phone && (
               <Button
-                href={`tel:${settings.phone}`}
+                href={`tel:${settings.phone.replace(/[^0-9+]/g, "")}`}
                 variant="outline"
-                size="md"
-                className="w-full max-w-xs"
+                size="sm"
+                className="w-full max-w-xs whitespace-nowrap sm:px-5 sm:py-3 sm:text-base"
+                target="_self"
               >
                 <SiteText
                   k="vehicle.cta.phone"
                   description="車両詳細 下部固定バー 電話ボタンの文言"
                 >
-                  電話で問い合わせる
+                  電話で相談
                 </SiteText>
               </Button>
             )}
-            {lineConsultUrl && (
-              <Button
-                href={lineConsultUrl}
-                variant="line"
-                size="md"
-                className="w-full max-w-xs"
+            {instagram ? (
+              <InstagramDmButton
+                href={instagram.dmUrl}
+                size="sm"
+                className="w-full max-w-xs whitespace-nowrap sm:px-5 sm:py-3 sm:text-base"
+                copyText={inquiryCopyText}
               >
                 <SiteText
-                  k="vehicle.cta.lineBottom"
-                  description="車両詳細 下部固定バー LINEボタンの文言"
+                  k="vehicle.cta.instagramBottom"
+                  description="車両詳細 下部固定バー Instagram DMボタンの文言"
                 >
-                  この車をLINEで相談する
+                  DMで相談
                 </SiteText>
-              </Button>
+              </InstagramDmButton>
+            ) : (
+              settings.email && (
+                <Button
+                  href={buildMailtoUrl(
+                    settings.email,
+                    inquiryMailSubject,
+                    inquiryMailBody,
+                  )}
+                  variant="outline"
+                  size="sm"
+                  className="w-full max-w-xs whitespace-nowrap sm:px-5 sm:py-3 sm:text-base"
+                  target="_self"
+                >
+                  <SiteText
+                    k="vehicle.cta.mailBottom"
+                    description="車両詳細 下部固定バー メールボタンの文言"
+                  >
+                    メールで相談
+                  </SiteText>
+                </Button>
+              )
             )}
           </div>
         </div>

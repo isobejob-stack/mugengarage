@@ -13,7 +13,8 @@ import {
   serializeStructuredData,
 } from "@/lib/seo/structured-data";
 import { getSiteSettings } from "@/lib/settings/queries";
-import { LineConsultationMenu } from "@/components/layout/line-consultation-menu";
+import { InstagramDmButton } from "@/components/layout/instagram-dm-button";
+import { findInstagramContact } from "@/lib/settings/sns";
 import { Button } from "@/components/ui/button";
 import { Card, CardImage, CardBody, CardTitle } from "@/components/ui/card";
 import { VehicleFeatureBadges } from "@/components/ui/status-badge";
@@ -90,6 +91,9 @@ export default async function Page() {
   // トップに出す在庫の上限を超えた場合は「すべて見る」ボタンで在庫一覧へ送る。
   const hasMoreVehicles = vehicleCount > TOP_PAGE_VEHICLE_LIMIT;
 
+  // 問い合わせ窓口（InstagramのDMに統一。2026-11-08、店主の判断）。ヒーローのボタンに使う
+  const instagram = findInstagramContact(settings.external_links);
+
   const heroImageUrl = settings.hero_image_path
     ? getSiteAssetPublicUrl(settings.hero_image_path)
     : null;
@@ -163,10 +167,15 @@ export default async function Page() {
               <Button href="/vehicles" variant="secondary" size="lg">
                 在庫車両を見る
               </Button>
-              {settings.line_url && (
-                <Button href={settings.line_url} variant="line" size="lg">
-                  LINEで相談する
-                </Button>
+              {instagram && (
+                <InstagramDmButton href={instagram.dmUrl} size="lg">
+                  <SiteText
+                    k="home.hero.instagram"
+                    description="トップページ 冒頭のInstagram DMボタンの文言"
+                  >
+                    InstagramのDMで相談する
+                  </SiteText>
+                </InstagramDmButton>
               )}
             </div>
           </div>
@@ -202,10 +211,15 @@ export default async function Page() {
               <Button href="/vehicles" variant="secondary" size="lg">
                 在庫車両を見る
               </Button>
-              {settings.line_url && (
-                <Button href={settings.line_url} variant="line" size="lg">
-                  LINEで相談する
-                </Button>
+              {instagram && (
+                <InstagramDmButton href={instagram.dmUrl} size="lg">
+                  <SiteText
+                    k="home.hero.instagram"
+                    description="トップページ 冒頭のInstagram DMボタンの文言"
+                  >
+                    InstagramのDMで相談する
+                  </SiteText>
+                </InstagramDmButton>
               )}
             </div>
           </section>
@@ -305,11 +319,6 @@ export default async function Page() {
             </div>
           )}
         </section>
-
-        {/* FR-LINE-002: 相談カテゴリ表示（購入／修理／売却／部品／Jaguar全般／カーライフ相談） */}
-        <div className="mt-10">
-          <LineConsultationMenu lineUrl={settings.line_url} />
-        </div>
 
         {/* 「ジャガーを知る」への導線。
             以前はナビゲーションの下位項目（図鑑・年表・ライブラリ）から

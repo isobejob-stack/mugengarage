@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { getSiteSettings } from "@/lib/settings/queries";
-import { Button } from "@/components/ui/button";
 import { SiteText } from "@/components/live-edit/site-text";
+import { InstagramDmButton } from "@/components/layout/instagram-dm-button";
+import { findInstagramContact } from "@/lib/settings/sns";
 
-// 03_ui_rules.md 7章: フッターでもLINE相談CTAを再掲する
+// 03_ui_rules.md 7章: フッターでも相談CTAを再掲する（窓口はInstagramのDMに統一。2026-11-08）
 // 店舗情報・掲載媒体リンクは管理画面から編集する（lib/settings/queries.ts）。
 export async function SiteFooter() {
   const settings = await getSiteSettings();
+  const instagram = findInstagramContact(settings.external_links);
 
   return (
     <footer className="bg-cream-100 mt-16 border-t border-neutral-200">
@@ -24,7 +26,7 @@ export async function SiteFooter() {
 
         {/* 住所・電話番号は実店舗の信頼性に直結する情報のため、全ページのフッターに出す。
             未設定の項目は表示しない（空欄や誤情報を見せない）。 */}
-        {(settings.address || settings.phone) && (
+        {(settings.address || settings.phone || settings.email) && (
           <address className="text-foreground-muted mt-3 not-italic">
             {settings.address && (
               <p>
@@ -44,6 +46,18 @@ export async function SiteFooter() {
                 </a>
               </p>
             )}
+            {/* Instagramを使っていない人のための窓口（問い合わせはInstagramのDMに統一。2026-11-08） */}
+            {settings.email && (
+              <p className="mt-1 break-all">
+                MAIL:{" "}
+                <a
+                  href={`mailto:${settings.email}`}
+                  className="ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
+                >
+                  {settings.email}
+                </a>
+              </p>
+            )}
             {settings.business_hours && (
               <p className="mt-1">営業時間: {settings.business_hours}</p>
             )}
@@ -56,7 +70,10 @@ export async function SiteFooter() {
             href="/about"
             className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
           >
-            <SiteText k="footer.link.about" description="フッター 店舗情報リンクの文言">
+            <SiteText
+              k="footer.link.about"
+              description="フッター 店舗情報リンクの文言"
+            >
               店舗情報・アクセス
             </SiteText>
           </Link>
@@ -64,7 +81,10 @@ export async function SiteFooter() {
             href="/owners-archive"
             className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
           >
-            <SiteText k="footer.link.archive" description="フッター オーナーズアーカイブリンクの文言">
+            <SiteText
+              k="footer.link.archive"
+              description="フッター オーナーズアーカイブリンクの文言"
+            >
               オーナーズアーカイブ
             </SiteText>
           </Link>
@@ -76,7 +96,10 @@ export async function SiteFooter() {
             href="/encyclopedia"
             className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
           >
-            <SiteText k="footer.link.encyclopedia" description="フッター 図鑑リンクの文言">
+            <SiteText
+              k="footer.link.encyclopedia"
+              description="フッター 図鑑リンクの文言"
+            >
               Jaguar図鑑
             </SiteText>
           </Link>
@@ -84,7 +107,10 @@ export async function SiteFooter() {
             href="/timeline"
             className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
           >
-            <SiteText k="footer.link.timeline" description="フッター 年表リンクの文言">
+            <SiteText
+              k="footer.link.timeline"
+              description="フッター 年表リンクの文言"
+            >
               Jaguar年表
             </SiteText>
           </Link>
@@ -92,7 +118,10 @@ export async function SiteFooter() {
             href="/library"
             className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
           >
-            <SiteText k="footer.link.library" description="フッター 用語ライブラリリンクの文言">
+            <SiteText
+              k="footer.link.library"
+              description="フッター 用語ライブラリリンクの文言"
+            >
               用語ライブラリ
             </SiteText>
           </Link>
@@ -100,7 +129,10 @@ export async function SiteFooter() {
             href="/contact"
             className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
           >
-            <SiteText k="footer.link.contact" description="フッター お問い合わせリンクの文言">
+            <SiteText
+              k="footer.link.contact"
+              description="フッター お問い合わせリンクの文言"
+            >
               お問い合わせ
             </SiteText>
           </Link>
@@ -111,16 +143,24 @@ export async function SiteFooter() {
             href="/privacy"
             className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
           >
-            <SiteText k="footer.link.privacy" description="フッター プライバシーポリシーリンクの文言">
+            <SiteText
+              k="footer.link.privacy"
+              description="フッター プライバシーポリシーリンクの文言"
+            >
               プライバシーポリシー
             </SiteText>
           </Link>
-          {settings.line_url && (
-            <Button href={settings.line_url} variant="line" size="md">
-              <SiteText k="footer.line" description="フッター LINE相談ボタンの文言">
-                LINEで相談する
+          {/* InstagramのDMは返信が早い問い合わせ窓口（lib/settings/sns.ts）。下の一覧のリンクとは別に、
+              問い合わせのボタンとして見せる */}
+          {instagram && (
+            <InstagramDmButton href={instagram.dmUrl} size="md">
+              <SiteText
+                k="footer.instagram"
+                description="フッター InstagramのDMボタンの文言"
+              >
+                InstagramのDMで問い合わせる
               </SiteText>
-            </Button>
+            </InstagramDmButton>
           )}
         </div>
 
@@ -134,7 +174,10 @@ export async function SiteFooter() {
             href="/admin"
             className="text-foreground-muted ease-standard hover:text-primary-700 active:text-primary-800 inline-flex min-h-11 items-center rounded-lg px-2 transition-colors duration-200 hover:underline motion-reduce:transition-none"
           >
-            <SiteText k="footer.adminLogin" description="フッター 管理画面リンクの文言">
+            <SiteText
+              k="footer.adminLogin"
+              description="フッター 管理画面リンクの文言"
+            >
               管理画面にログイン
             </SiteText>
           </Link>
@@ -146,10 +189,13 @@ export async function SiteFooter() {
         {settings.external_links.length > 0 && (
           <div className="mt-8 border-t border-neutral-200 pt-6">
             <p className="text-charcoal-900 font-medium">
-            <SiteText k="footer.sns.heading" description="フッター SNS・掲載媒体の見出し">
-              公式SNS・掲載媒体
-            </SiteText>
-          </p>
+              <SiteText
+                k="footer.sns.heading"
+                description="フッター SNS・掲載媒体の見出し"
+              >
+                公式SNS・掲載媒体
+              </SiteText>
+            </p>
             <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
               {settings.external_links.map((link) => (
                 <li key={link.url}>

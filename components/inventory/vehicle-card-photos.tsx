@@ -13,10 +13,14 @@ import { CarIcon } from "@/components/ui/car-icon";
 // 止めてタップすれば詳細へ進む、という挙動が自然に両立する。
 export function VehicleCardPhotos({
   urls,
+  totalCount = urls.length,
   alt,
   priority = false,
 }: {
+  /** カードでめくれる写真（先頭から数枚） */
   urls: string[];
+  /** 登録されている写真の総数。バッジにはめくれる枚数ではなくこちらを出す */
+  totalCount?: number;
   alt: string;
   /** 一覧先頭のカードのみ true。LCPになりうる画像の遅延読み込みを外す */
   priority?: boolean;
@@ -79,9 +83,12 @@ export function VehicleCardPhotos({
           枚数バッジは左上から右下へ移した。左上は status-badge.tsx の
           「おすすめ／新着」バッジ（absolute top-2 left-2 z-10）と同じ座標で、
           おすすめ車両では枚数バッジが完全に隠れていた。
-          文言も「5枚」から「写真5枚」にする。何の枚数か分からなかったため。 */}
+          文言も「5枚」から「写真5枚」にする。何の枚数か分からなかったため。
+
+          数字は「めくれる枚数」ではなく「登録されている総数」にする。
+          めくれるのは先頭数枚だけなので、以前は30〜70枚ある車がすべて「写真5枚」と出ていた。 */}
       <span className="bg-charcoal-900/75 pointer-events-none absolute right-2 bottom-2 rounded-full px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
-        写真{urls.length}枚
+        写真{totalCount}枚
       </span>
     </div>
   );

@@ -19,7 +19,7 @@ export default async function Page() {
     founded_year: settings.founded_year ?? "",
     representative_name: settings.representative_name ?? "",
     access_info: settings.access_info ?? "",
-    line_url: settings.line_url ?? "",
+    email: settings.email ?? "",
     external_links: settings.external_links.map((link) => ({
       label: link.label,
       url: link.url,
@@ -33,7 +33,7 @@ export default async function Page() {
         店舗情報・リンク設定
       </h1>
       <p className="text-foreground-muted mt-2 text-base">
-        住所・電話番号・営業時間・LINEのURL・掲載媒体のリンクを編集できます。
+        住所・電話番号・メールアドレス・営業時間・掲載媒体（Instagram等）のリンクを編集できます。
         保存すると公開サイトにすぐ反映されます。
       </p>
 

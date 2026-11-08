@@ -115,45 +115,36 @@ export type AdminVehicleListItem = {
 // 車名と年式だけを並べると、ほぼ同じ行が10行続いて目的の1台を選べない。
 // 写真・グレード・走行距離は、その中から1台を見分けるための手がかりとして出す。
 //
-// 写真は台数ぶんの問い合わせにせず、1回で全件読んでから車両ごとに振り分ける
-// （在庫は数十台、写真も数百枚の規模なので、まとめて読むほうが速い）。
+// 写真は台数ぶんの問い合わせにせず、車両の行に「先頭1枚」と「枚数」を埋め込んで1回で読む。
+// 以前は写真の行を全件読んでから振り分けていたが、写真が1,000枚を超えると
+// 読み込みの上限で切り捨てられ、枚数が少なく数えられていた（VEHICLE_PHOTO_SUMMARY_SELECT参照）。
 export async function listAdminVehicles(): Promise<AdminVehicleListItem[]> {
   const supabase = createAdminClient();
 
-  const [vehicles, photos] = await Promise.all([
+  const { data } = await withVehiclePhotoSummary(
     supabase
       .from("vehicles")
       .select(
-        "id, status, price, model_year, mileage_km, display_order, updated_at, manufacturers(name), models(name), grades(name)",
+        `id, status, price, model_year, mileage_km, display_order, updated_at, manufacturers(name), models(name), grades(name), ${VEHICLE_PHOTO_SUMMARY_SELECT}`,
       )
       .is("deleted_at", null)
       .order("display_order", { ascending: true }),
-    supabase
-      .from("vehicle_photos")
-      .select("vehicle_id, storage_path, display_order")
-      .order("display_order", { ascending: true }),
-  ]);
+    1,
+  );
 
-  const photoPathsByVehicle = new Map<string, string[]>();
-  for (const row of (photos.data ?? []) as Array<{
-    vehicle_id: string;
-    storage_path: string;
-  }>) {
-    const list = photoPathsByVehicle.get(row.vehicle_id) ?? [];
-    list.push(row.storage_path);
-    photoPathsByVehicle.set(row.vehicle_id, list);
-  }
-
-  const rows = (vehicles.data ?? []) as unknown as Array<
-    Omit<AdminVehicleListItem, "photoCount" | "leadPhotoUrl">
+  const rows = (data ?? []) as unknown as Array<
+    Omit<AdminVehicleListItem, "photoCount" | "leadPhotoUrl"> &
+      VehiclePhotoSummaryColumns
   >;
 
-  return rows.map((vehicle) => {
-    const paths = photoPathsByVehicle.get(vehicle.id) ?? [];
+  return rows.map(({ photos, photo_count, ...vehicle }) => {
+    const summary = toVehiclePhotoSummary({ photos, photo_count });
     return {
       ...vehicle,
-      photoCount: paths.length,
-      leadPhotoUrl: paths[0] ? getVehiclePhotoPublicUrl(paths[0]) : null,
+      photoCount: summary.total,
+      leadPhotoUrl: summary.paths[0]
+        ? getVehiclePhotoPublicUrl(summary.paths[0])
+        : null,
     };
   });
 }
@@ -407,61 +398,98 @@ export async function getVehiclePhotos(vehicleId: string) {
   return data ?? [];
 }
 
-// 一覧表示用: 複数車両の先頭写真（storage_path）のみを1クエリでまとめて取得する
-// （車両ごとにgetVehiclePhotosを呼ぶN+1クエリを避けるため。レビュー指摘対応）
-export async function getLeadVehiclePhotoPaths(vehicleIds: string[]) {
-  if (vehicleIds.length === 0) return new Map<string, string>();
+// 車両ごとの写真の要約: 先頭から数枚の storage_path と、写真の総数。
+export type VehiclePhotoSummary = { paths: string[]; total: number };
+
+// 車両に写真を「先頭N枚」と「総数」だけ埋め込んで読むための select 句。
+// 写真の行そのものを全件読んでから車両ごとに振り分けると、PostgREST が1回に返す
+// 行数の上限（既定1,000行）で途中が切り捨てられ、枚数が少なく数えられる。
+// 在庫20台・写真1,140枚（2026-11-08）で実際に上限を超えたため、
+// 絞り込み・件数はDB側で行い、受け取るのは車両の行数ぶんだけにする。
+// 論理削除された写真は、先頭N枚にも総数にも含めない。
+export const VEHICLE_PHOTO_SUMMARY_SELECT =
+  "photos:vehicle_photos(storage_path), photo_count:vehicle_photos(count)";
+
+type PhotoSummaryQuery<T> = {
+  is: (column: string, value: null) => T;
+  order: (
+    column: string,
+    options: { ascending: boolean; referencedTable: string },
+  ) => T;
+  limit: (count: number, options: { referencedTable: string }) => T;
+};
+
+// VEHICLE_PHOTO_SUMMARY_SELECT を含むクエリに、写真側の絞り込みと並びを付ける
+export function withVehiclePhotoSummary<T extends PhotoSummaryQuery<T>>(
+  query: T,
+  perVehicle: number,
+): T {
+  return query
+    .is("photos.deleted_at", null)
+    .is("photo_count.deleted_at", null)
+    .order("display_order", { ascending: true, referencedTable: "photos" })
+    .limit(perVehicle, { referencedTable: "photos" });
+}
+
+export type VehiclePhotoSummaryColumns = {
+  photos: Array<{ storage_path: string }> | null;
+  photo_count: Array<{ count: number }> | null;
+};
+
+export function toVehiclePhotoSummary(
+  row: VehiclePhotoSummaryColumns,
+): VehiclePhotoSummary {
+  return {
+    paths: (row.photos ?? []).map((photo) => photo.storage_path),
+    total: row.photo_count?.[0]?.count ?? 0,
+  };
+}
+
+// 複数車両の写真の要約を1クエリでまとめて取得する（車両ごとに問い合わせるN+1を避ける）
+async function getVehiclePhotoSummaries(
+  vehicleIds: string[],
+  perVehicle: number,
+) {
+  const result = new Map<string, VehiclePhotoSummary>();
+  if (vehicleIds.length === 0) return result;
 
   const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("vehicle_photos")
-    .select("vehicle_id, storage_path, display_order")
-    .in("vehicle_id", vehicleIds)
-    .is("deleted_at", null)
-    .order("display_order", { ascending: true })
-    .returns<
-      Pick<VehiclePhoto, "vehicle_id" | "storage_path" | "display_order">[]
-    >();
+  const { data } = await withVehiclePhotoSummary(
+    supabase
+      .from("vehicles")
+      .select(`id, ${VEHICLE_PHOTO_SUMMARY_SELECT}`)
+      .in("id", vehicleIds),
+    perVehicle,
+  ).returns<Array<{ id: string } & VehiclePhotoSummaryColumns>>();
 
-  const result = new Map<string, string>();
   for (const row of data ?? []) {
-    if (!result.has(row.vehicle_id)) {
-      result.set(row.vehicle_id, row.storage_path);
-    }
+    result.set(row.id, toVehiclePhotoSummary(row));
   }
   return result;
 }
 
-// 一覧カードで数枚めくれるようにするため、車両ごとに先頭から数枚を取る（N+1クエリ回避）。
+// 一覧表示用: 複数車両の先頭写真（storage_path）のみを1クエリでまとめて取得する
+// （車両ごとにgetVehiclePhotosを呼ぶN+1クエリを避けるため。レビュー指摘対応）
+export async function getLeadVehiclePhotoPaths(vehicleIds: string[]) {
+  const summaries = await getVehiclePhotoSummaries(vehicleIds, 1);
+  const result = new Map<string, string>();
+  for (const [vehicleId, summary] of summaries) {
+    if (summary.paths[0]) result.set(vehicleId, summary.paths[0]);
+  }
+  return result;
+}
+
+// 一覧カードで数枚めくれるようにするため、車両ごとに先頭から数枚と、写真の総数を取る。
 //
 // 中古車探しは「気になった車の写真を何枚か見て、詳細に入るか決める」という進み方をする。
 // 1枚しか出せないと、その判断のたびに詳細ページへの往復が発生していた。
-export async function getVehiclePhotoPathsByVehicle(
+// カードに出す「写真◯枚」は、めくれる枚数ではなく登録されている総数にする
+// （めくれる枚数を出していたため、30〜70枚ある車がすべて「写真5枚」と出ていた）。
+export async function getVehicleCardPhotos(
   vehicleIds: string[],
   perVehicle = 5,
 ) {
-  if (vehicleIds.length === 0) return new Map<string, string[]>();
-
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("vehicle_photos")
-    .select("vehicle_id, storage_path, display_order")
-    .in("vehicle_id", vehicleIds)
-    .is("deleted_at", null)
-    .order("display_order", { ascending: true })
-    .returns<
-      Pick<VehiclePhoto, "vehicle_id" | "storage_path" | "display_order">[]
-    >();
-
-  const result = new Map<string, string[]>();
-  for (const row of data ?? []) {
-    const list = result.get(row.vehicle_id) ?? [];
-    if (list.length < perVehicle) {
-      list.push(row.storage_path);
-      result.set(row.vehicle_id, list);
-    }
-  }
-  return result;
+  return getVehiclePhotoSummaries(vehicleIds, perVehicle);
 }
 
 // FR-INV-010: 車両動画一覧（表示順）。table_definitions.md 4.9

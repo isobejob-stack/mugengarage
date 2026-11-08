@@ -14,7 +14,10 @@ export type SiteSettings = {
   founded_year: number | null;
   representative_name: string | null;
   access_info: string | null;
-  line_url: string | null;
+  // 問い合わせ用メールアドレス（Instagramを使っていない人向けの窓口）。
+  // LINEは使わないことにした（2026-11-08、問い合わせはInstagramのDMに統一）。
+  // DBの line_url 列は残っているが、アプリでは読み書きしない。
+  email: string | null;
   external_links: ExternalLink[];
   // site-assets バケット内のオブジェクトパス。未設定なら文字ベースのヒーローにフォールバックする
   hero_image_path: string | null;
@@ -31,7 +34,7 @@ const EMPTY_SETTINGS: SiteSettings = {
   founded_year: null,
   representative_name: null,
   access_info: null,
-  line_url: null,
+  email: null,
   external_links: [],
   hero_image_path: null,
 };
