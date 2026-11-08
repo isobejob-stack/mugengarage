@@ -13,6 +13,11 @@ import { postJson } from "@/lib/api/client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
+const contactMethodOptions = [
+  { value: "phone", label: "電話で" },
+  { value: "email", label: "メールで" },
+] as const;
+
 // SCR-PUB-017: 問い合わせフォーム
 export function InquiryForm() {
   const [submitted, setSubmitted] = useState(false);
@@ -21,11 +26,15 @@ export function InquiryForm() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<InquiryFormValues>({
     resolver: zodResolver(inquiryFormSchema),
     defaultValues: emptyInquiryFormValues,
   });
+
+  // 選ばれた連絡方法によって、入力欄のラベル・種類を切り替える
+  const contactMethod = watch("contact_method");
 
   const onSubmit = async (values: InquiryFormValues) => {
     setSubmitError(null);
@@ -69,16 +78,69 @@ export function InquiryForm() {
         </select>
       </Field>
 
-      <Field label="お名前" error={errors.name?.message}>
-        <input type="text" className="input" {...register("name")} />
+      {/* 連絡先は1つだけ受け取る。
+          以前は電話番号とメールアドレスを並べて置いており、多くの人が
+          両方を埋めて送っていた。返信に要るのは1つなので、残りは
+          「使わないのに預かる情報」になる。預からなければ漏れようがない。 */}
+      <fieldset>
+        <legend className="text-charcoal-900 text-base font-medium">
+          ご返信の方法
+        </legend>
+        <p className="text-foreground-muted mt-1 text-base">
+          どちらか1つだけで結構です。ご記入いただいた方法でご連絡します。
+        </p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {contactMethodOptions.map((option) => {
+            const isSelected = contactMethod === option.value;
+            return (
+              <label
+                key={option.value}
+                className={`ease-standard flex min-h-11 cursor-pointer items-center rounded-full border px-4 text-base font-medium transition-colors duration-200 ${
+                  isSelected
+                    ? "border-primary-600 bg-primary-600 text-white"
+                    : "text-charcoal-800 hover:border-primary-400 hover:bg-primary-50 border-neutral-300 bg-white"
+                }`}
+              >
+                <input
+                  type="radio"
+                  value={option.value}
+                  className="sr-only"
+                  {...register("contact_method")}
+                />
+                {option.label}
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
+
+      <Field
+        label={contactMethod === "email" ? "メールアドレス" : "電話番号"}
+        error={errors.contact?.message}
+      >
+        {/* 連絡方法を切り替えたら入力値を持ち越さない（key で入れ替える）。
+            電話番号の入力がメールアドレス欄に残ると、形式エラーの理由が
+            本人には分からなくなる。 */}
+        <input
+          key={contactMethod}
+          type={contactMethod === "email" ? "email" : "tel"}
+          inputMode={contactMethod === "email" ? "email" : "tel"}
+          autoComplete={contactMethod === "email" ? "email" : "tel"}
+          className="input"
+          {...register("contact")}
+        />
       </Field>
 
-      <Field label="電話番号" error={errors.phone?.message}>
-        <input type="tel" className="input" {...register("phone")} />
-      </Field>
-
-      <Field label="メールアドレス" error={errors.email?.message}>
-        <input type="email" className="input" {...register("email")} />
+      <Field label="お名前（任意）" error={errors.name?.message}>
+        <p className="text-foreground-muted mb-1 text-base">
+          折り返しの際の呼びかけに使います。空欄でも送信できます。
+        </p>
+        <input
+          type="text"
+          autoComplete="name"
+          className="input"
+          {...register("name")}
+        />
       </Field>
 
       <Field label="お問い合わせ内容" error={errors.message?.message}>
@@ -112,7 +174,8 @@ export function InquiryForm() {
           高額商材ではここで手が止まる人が実際にいるため、
           フッターまで探させずに送信ボタンの手前で示す。 */}
       <p className="text-foreground-muted text-base">
-        ご入力いただいた情報は、ご返答とご相談への対応にのみ使用します。詳しくは
+        お預かりするのは、ご記入いただいた連絡先1つとご相談内容だけです。
+        ご返答とご相談への対応にのみ使用します。詳しくは
         <Link
           href="/privacy"
           className="text-primary-700 mx-1 underline underline-offset-4"
