@@ -106,15 +106,13 @@ describe("llms.txt", () => {
     });
 
     expect(text.startsWith("# エムガレージ（M-GARAGE）")).toBe(true);
+    expect(text).toContain("神奈川県川崎市・南足柄市のジャガー・ディムラー");
     expect(text).toContain("- 所在地: 神奈川県川崎市宮前区初山1-3-2");
     expect(text).toContain("- 定休日: 土曜日");
     expect(text).toContain("https://www.instagram.com/mgarage9333/");
     expect(text).toContain("在庫車両（2026/11/11時点・1台）");
     expect(text).toContain(
-      "[ディムラー ディムラー ダブルシックス 特注ワイヤーホイール](",
-    );
-    expect(text).toContain(
-      "1990年式、走行5.9万km、支払総額405万円、修復歴なし、右ハンドル",
+      "[ディムラー ダブルシックス](https://mugengarage.vercel.app/vehicles/double-six-1990): 特注ワイヤーホイール。1990年式、走行5.9万km、支払総額405万円、修復歴なし、右ハンドル",
     );
     expect(text).not.toContain("電話:");
   });

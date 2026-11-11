@@ -239,6 +239,8 @@ type PublicVehicleListItem = {
   status: string;
   is_recommended: boolean;
   is_new_arrival: boolean;
+  // 車名のグレード部分を掲載の見出しから取るため（lib/inventory/display.ts の buildVehicleName）
+  sales_comment: string | null;
   manufacturers: { name: string } | null;
   models: { name: string } | null;
   grades: { name: string } | null;
@@ -286,7 +288,7 @@ export async function listPublicVehicles() {
   const { data } = await supabase
     .from("vehicles")
     .select(
-      "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, status, is_recommended, is_new_arrival, manufacturers(name), models(name), grades(name)",
+      "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, status, is_recommended, is_new_arrival, sales_comment, manufacturers(name), models(name), grades(name)",
     )
     .eq("status", "published")
     .is("deleted_at", null)
@@ -310,7 +312,7 @@ export async function listPublicVehiclePreview(limit: number) {
   const { data, count } = await supabase
     .from("vehicles")
     .select(
-      "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, status, is_recommended, is_new_arrival, manufacturers(name), models(name), grades(name)",
+      "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, status, is_recommended, is_new_arrival, sales_comment, manufacturers(name), models(name), grades(name)",
       { count: "exact" },
     )
     .eq("status", "published")

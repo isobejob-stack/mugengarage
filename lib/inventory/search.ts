@@ -92,7 +92,7 @@ export async function searchPublicVehicles(
     .select(
       // grades: 旧車は同じ車種でもグレードで価格が大きく変わるため、
       // 一覧の車名は「メーカー + 車種 + グレード」まで出す（ISSUE-006 3.1）
-      "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, status, transmission, is_recommended, is_new_arrival, manufacturers(name), models(name), grades(name)",
+      "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, status, transmission, is_recommended, is_new_arrival, sales_comment, manufacturers(name), models(name), grades(name)",
       { count: "exact" },
     )
     .eq("status", "published")
@@ -176,6 +176,8 @@ export async function searchPublicVehicles(
     transmission: string | null;
     is_recommended: boolean;
     is_new_arrival: boolean;
+    // 車名のグレード部分を掲載の見出しから取るため（lib/inventory/display.ts の buildVehicleName）
+    sales_comment: string | null;
     manufacturers: { name: string } | null;
     models: { name: string } | null;
     grades: { name: string } | null;

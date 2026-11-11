@@ -1,3 +1,4 @@
+import { buildVehicleName } from "@/lib/inventory/display";
 import {
   getVehicleSearchFacetOptions,
   searchPublicVehicles,
@@ -334,14 +335,9 @@ export default async function Page({
         <ul className="mt-6 grid grid-cols-2 gap-3 sm:gap-6 md:gap-8">
           {vehicles.map((v, index) => {
             if (!v.slug) return null;
-            // グレードまで出す。「Jaguar Eタイプ」だけでは同車種内で比較にならない
-            const vehicleName = [
-              v.manufacturers?.name,
-              v.models?.name,
-              v.grades?.name,
-            ]
-              .filter(Boolean)
-              .join(" ");
+            // グレードまで出す。「Jaguar Eタイプ」だけでは同車種内で比較にならない。
+            // 組み立て方は車両ページと共通（掲載の見出しからグレードを取り、重なる語を省く。lib/inventory/display.ts）
+            const vehicleName = buildVehicleName(v);
             return (
               // お気に入りボタンをカード（リンク）の外側に重ねるため、liを基準位置にする
               <li key={v.id} className="relative">

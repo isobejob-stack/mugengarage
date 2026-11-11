@@ -21,7 +21,7 @@ export async function SiteFooter() {
         <p className="text-foreground-muted mt-1">
           {/* 既定の文言は掲載媒体の店名（エムガレージ【ジャガー、ディムラー専門店】）に揃える（lib/seo/business.ts） */}
           <SiteText k="footer.tagline" description="フッター 店名の下の一行">
-            ジャガー・ディムラー専門店（神奈川県川崎市）
+            ジャガー・ディムラー専門店（神奈川県川崎市・南足柄市）
           </SiteText>
         </p>
 

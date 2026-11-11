@@ -151,22 +151,137 @@ export function stripListingHeadline(salesComment: string | null): string {
   return salesComment.trimStart().replace(/^\*\*[^*\n]{1,60}\*\*\s*/, "");
 }
 
-// 車両の呼び名: 「メーカー 車種 見出し」。見出しが無ければグレード名を使う。
-// 年式は呼び出し側で添える（見出し・一覧・構造化データで添え方が違うため）。
-export function buildVehicleName(vehicle: {
+// 掲載の見出しを「車名の続き（グレード）」と「売り文句（装備・状態など）」に分ける（2026-11-11）。
+//
+// 掲載の見出しは「グレード＋売り文句」がひと続きになっている。
+//   「ダブルシックス 特注ワイヤーホイール」→ ダブルシックス ／ 特注ワイヤーホイール
+//   「XJ6-3.2 40型/丸型4灯ライト/革×布シート」→ XJ6-3.2 ／ 40型・丸型4灯ライト・革×布シート
+//   「XJR 4.0 スーパーチャージド スーパーチャージャー」→ XJR 4.0 スーパーチャージド ／ スーパーチャージャー
+// 全部をタイトルに入れると長く読みにくいため、タイトルには車名（グレード）までを使い、
+// 売り文句は本文（車名の下の一行）に回す。
+//
+// 先頭から順に、グレードらしい語（英数字の型式・排気量、下の一覧にあるグレード名）が続くあいだを車名とみなし、
+// それ以外の語（漢字・かなを含む語、「/」区切りの装備の列挙、一覧に無い片仮名語）が出たところから売り文句とする。
+// 一覧に無いグレード名は売り文句の側に入るが、本文には必ず出るので情報は落ちない。
+const GRADE_WORDS = new Set([
+  "ダブルシックス",
+  "マジェスティック",
+  "ソブリン",
+  "ソヴリン",
+  "ヴァンデンプラ",
+  "バンデンプラ",
+  "エグゼクティブ",
+  "ポートフォリオ",
+  "スーパーチャージド",
+  "アバンギャルド",
+  "エレガンス",
+  "ラグジュアリー",
+  "プレミアム",
+  "スポーツ",
+  "クーペ",
+  "コンバーチブル",
+  "カブリオレ",
+]);
+
+// 英数字だけの語でも、装備の略称は車名に入れない（「ETC」「HID」など）
+const EQUIPMENT_ABBREVIATIONS = new Set([
+  "ETC",
+  "HID",
+  "LED",
+  "DVD",
+  "CD",
+  "MD",
+  "HDD",
+  "ABS",
+  "AW",
+  "SR",
+  "TV",
+  "USB",
+]);
+
+function isGradeToken(token: string): boolean {
+  if (GRADE_WORDS.has(token)) return true;
+  if (EQUIPMENT_ABBREVIATIONS.has(token.toUpperCase())) return false;
+  return /^[A-Za-z0-9][A-Za-z0-9.\-+]*$/.test(token);
+}
+
+export function splitListingHeadline(headline: string | null): {
+  grade: string | null;
+  catchPhrase: string | null;
+} {
+  if (!headline) return { grade: null, catchPhrase: null };
+  const tokens = headline.trim().split(/\s+/);
+  const grade: string[] = [];
+  let rest: string[] = tokens;
+
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    if (isGradeToken(token)) {
+      grade.push(token);
+      continue;
+    }
+    // 「4.2/シリーズ3/青革」のように、車名の続き（4.2）に装備の列挙がくっついている語は、
+    // 先頭だけ車名に入れる。ただし車名がまだ1語も無いとき（「ETC/本革シート」）はすべて売り文句
+    const [head, ...tail] = token.split("/");
+    if (grade.length > 0 && tail.length > 0 && isGradeToken(head)) {
+      grade.push(head);
+      rest = [tail.join("/"), ...tokens.slice(i + 1)];
+    } else {
+      rest = tokens.slice(i);
+    }
+    break;
+  }
+  if (rest === tokens) rest = [];
+
+  // 装備の列挙は「/」区切りで書かれている。本文では「・」で読みやすくする
+  const catchPhrase = rest
+    .join(" ")
+    .replace(/\s*\/\s*/g, "・")
+    .trim();
+  return {
+    grade: grade.length > 0 ? grade.join(" ") : null,
+    catchPhrase: catchPhrase || null,
+  };
+}
+
+// 車両の呼び名（タイトル・見出し・一覧のカードで共通）と、本文に回す売り文句。
+//
+// 車名は「メーカー 車種 グレード」。取り込んだ車両は掲載の表記のまま登録してあるため
+// 「ディムラー ディムラー」「ジャガー XJ XJ6-3.2」のように同じ語が重なる。読みやすさのため、
+// 車種がメーカー名と同じとき、または車種とグレードの頭が重なるとき（XJ と XJ6-3.2、XJ-Sクーペ と XJ-S V12）は
+// 車種を省く（「ディムラー ダブルシックス」「ジャガー XJ6-3.2」「ジャガー XJ-S V12」）。
+// グレードは掲載の見出しから取り、無ければ登録されたグレード名を使う。
+export function buildVehicleNameParts(vehicle: {
   manufacturers: { name: string } | null;
   models: { name: string } | null;
   grades?: { name: string } | null;
   sales_comment?: string | null;
-}): string {
-  const headline = extractListingHeadline(vehicle.sales_comment ?? null);
-  return [
-    vehicle.manufacturers?.name,
-    vehicle.models?.name,
-    headline ?? vehicle.grades?.name ?? null,
-  ]
+}): { name: string; catchPhrase: string | null } {
+  const maker = vehicle.manufacturers?.name ?? null;
+  const model = vehicle.models?.name ?? null;
+  const { grade: headlineGrade, catchPhrase } = splitListingHeadline(
+    extractListingHeadline(vehicle.sales_comment ?? null),
+  );
+  const grade = headlineGrade ?? vehicle.grades?.name ?? null;
+
+  const gradeHead = grade?.split(/\s+/)[0] ?? null;
+  const modelIsRedundant =
+    model !== null &&
+    (model === maker ||
+      (grade !== null &&
+        gradeHead !== null &&
+        (grade.startsWith(model) || model.startsWith(gradeHead))));
+
+  const name = [maker, modelIsRedundant ? null : model, grade]
     .filter(Boolean)
     .join(" ");
+  return { name, catchPhrase };
+}
+
+export function buildVehicleName(
+  vehicle: Parameters<typeof buildVehicleNameParts>[0],
+): string {
+  return buildVehicleNameParts(vehicle).name;
 }
 
 // 金額を「410万円」「405.5万円」の形にする（検索結果の説明文向け。1万円未満は切り捨てない）

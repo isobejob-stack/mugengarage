@@ -1,6 +1,7 @@
 import type { Vehicle } from "@/lib/inventory/types";
 import {
   buildVehicleName,
+  buildVehicleNameParts,
   formatAccidentHistory,
   formatManYen,
   formatMileage,
@@ -27,8 +28,9 @@ type VehicleForMeta = Pick<
   models: { name: string } | null;
 };
 
-// 車両ページのタイトル: 「ディムラー ディムラー ダブルシックス 特注ワイヤーホイール（1990年式）」。
-// 店名（｜エムガレージ）はルートlayoutの title.template が付ける。
+// 車両ページのタイトル: 「ディムラー ダブルシックス（1990年式）」。
+// 車名はグレードまでにとどめ、売り文句（「特注ワイヤーホイール」等）は本文と説明文に回す
+// （lib/inventory/display.ts の buildVehicleNameParts）。店名（｜エムガレージ）はルートlayoutの title.template が付ける。
 export function buildVehiclePageTitle(vehicle: VehicleForMeta): string {
   const name = buildVehicleName(vehicle);
   return vehicle.model_year ? `${name}（${vehicle.model_year}年式）` : name;
@@ -41,7 +43,7 @@ export function buildVehiclePageTitle(vehicle: VehicleForMeta): string {
 // 探す人が検索結果で比べたいのは、年式・走行距離・支払総額・修復歴・ハンドル位置・車検なので、
 // それを先頭に並べ、残りの字数で販売コメントの冒頭を添える。どの店の車かも最後に入れる。
 export function buildVehicleMetaDescription(vehicle: VehicleForMeta): string {
-  const name = buildVehicleName(vehicle);
+  const { name, catchPhrase } = buildVehicleNameParts(vehicle);
   const facts = [
     vehicle.mileage_km !== null
       ? `走行${formatMileage(vehicle.mileage_km)}`
@@ -54,7 +56,8 @@ export function buildVehicleMetaDescription(vehicle: VehicleForMeta): string {
     formatShaken(vehicle.shaken_status, vehicle.shaken_expiry),
   ].filter(Boolean);
 
-  const lead = `${vehicle.model_year ? `${vehicle.model_year}年式 ` : ""}${name}。${facts.join("・")}。`;
+  // 売り文句（「特注ワイヤーホイール」等）はタイトルから外したぶん、説明文の頭に入れる
+  const lead = `${vehicle.model_year ? `${vehicle.model_year}年式 ` : ""}${name}。${catchPhrase ? `${catchPhrase}。` : ""}${facts.join("・")}。`;
   const shop = `${BUSINESS_AREA}の${BUSINESS_SPECIALTY}エムガレージの在庫車両です。`;
 
   // 説明文は120字前後で切られるため、販売コメントは残りの字数ぶんだけ入れる

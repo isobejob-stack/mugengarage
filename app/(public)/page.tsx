@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildVehicleName } from "@/lib/inventory/display";
 import Image from "next/image";
 import {
   listPublicVehiclePreview,
@@ -28,7 +29,7 @@ import { listFavoriteVehicleIds } from "@/lib/engagement/queries";
 // リクエストごとに描画する（理由の詳細は app/(public)/blog/page.tsx のコメント参照）。
 export const dynamic = "force-dynamic";
 
-// トップページはルートlayoutのtitle.default（"エムガレージ｜ジャガー・ディムラー専門店｜神奈川県川崎市"）を
+// トップページはルートlayoutのtitle.default（"エムガレージ｜ジャガー・ディムラー専門店｜神奈川県川崎市・南足柄市"）を
 // そのまま使いたいため、titleは上書きせずcanonicalのみ明示する。
 // トップは "/" と "" の両方で到達しうるため、正規URLを示しておく。
 //
@@ -139,7 +140,7 @@ export default async function Page() {
                 k="home.hero.lead"
                 description="トップページ 冒頭の紹介文"
               >
-                神奈川県川崎市のジャガー・ディムラー専門店。XJ6・XJ-S・ダブルシックスなど英国の旧車を中心に、30年以上の実績で販売・整備・修理・買取・ご相談まで承ります。
+                神奈川県川崎市・南足柄市のジャガー・ディムラー専門店。XJ6・XJ-S・ダブルシックスなど英国の旧車を中心に、30年以上の実績で販売・整備・修理・買取・ご相談まで承ります。
               </SiteText>
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -183,7 +184,7 @@ export default async function Page() {
                 k="home.hero.lead"
                 description="トップページ 冒頭の紹介文"
               >
-                神奈川県川崎市のジャガー・ディムラー専門店。XJ6・XJ-S・ダブルシックスなど英国の旧車を中心に、30年以上の実績で販売・整備・修理・買取・ご相談まで承ります。
+                神奈川県川崎市・南足柄市のジャガー・ディムラー専門店。XJ6・XJ-S・ダブルシックスなど英国の旧車を中心に、30年以上の実績で販売・整備・修理・買取・ご相談まで承ります。
               </SiteText>
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -235,14 +236,8 @@ export default async function Page() {
             <ul className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
               {featuredVehicles.map((v, index) => {
                 if (!v.slug) return null;
-                // 車名は在庫一覧・お気に入り・ランキングと同じくグレードまで出す
-                const vehicleName = [
-                  v.manufacturers?.name,
-                  v.models?.name,
-                  v.grades?.name,
-                ]
-                  .filter(Boolean)
-                  .join(" ");
+                // 車名は車両ページ・在庫一覧・お気に入り・ランキングと同じ組み立て方（lib/inventory/display.ts）
+                const vehicleName = buildVehicleName(v);
                 return (
                   // お気に入りボタンをカード（リンク）の外側に重ねるため、liを基準位置にする
                   <li key={v.id} className="relative">

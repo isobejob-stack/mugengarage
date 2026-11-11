@@ -25,7 +25,7 @@ export default async function PublicLayout({
   ]);
 
   // 店舗とサイトの構造化データ（lib/seo/business.ts）。全ページに同じものを出し、
-  // どのページから入っても「川崎市のジャガー・ディムラー専門店エムガレージのサイト」だと分かるようにする
+  // どのページから入っても「神奈川（川崎市・南足柄市）のジャガー・ディムラー専門店エムガレージのサイト」だと分かるようにする
   const businessGraphJson = serializeStructuredData(
     buildBusinessGraph({
       settings,

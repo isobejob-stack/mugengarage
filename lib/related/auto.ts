@@ -1,4 +1,5 @@
 import "server-only";
+import { buildVehicleName } from "@/lib/inventory/display";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // 車両と知識コンテンツ（図鑑・年表・ライブラリ・ブログ・整備実績）を自動で結びつける。
@@ -227,7 +228,7 @@ export async function getSimilarVehicles(
   const supabase = createAdminClient();
 
   const select =
-    "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, model_id, manufacturers(name), models(name), grades(name)";
+    "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, model_id, sales_comment, manufacturers(name), models(name), grades(name)";
 
   type VehicleRow = {
     id: string;
@@ -239,6 +240,7 @@ export async function getSimilarVehicles(
     shaken_expiry: string | null;
     accident_history: boolean | null;
     model_id: string | null;
+    sales_comment: string | null;
     manufacturers: { name: string } | null;
     models: { name: string } | null;
     grades: { name: string } | null;
@@ -294,9 +296,8 @@ export async function getSimilarVehicles(
   return rows.map(({ row, reason }) => ({
     id: row.id,
     slug: slugById.get(row.id) ?? null,
-    name: [row.manufacturers?.name, row.models?.name, row.grades?.name]
-      .filter(Boolean)
-      .join(" "),
+    // 車名は車両ページ・在庫一覧と同じ組み立て方（lib/inventory/display.ts）
+    name: buildVehicleName(row),
     price: row.price,
     total_price: row.total_price,
     model_year: row.model_year,

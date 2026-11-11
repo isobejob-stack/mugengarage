@@ -10,7 +10,7 @@ import { SITE_NAME, SITE_URL } from "@/lib/site-config";
 // 店名・別名・住所・営業時間・公式SNS・掲載媒体を1つの実体（@id）にまとめて全ページで出す。
 //
 // 記事・図鑑の発行元や、在庫車両の売り手も同じ @id を指す。
-// 「この記事を書いた店」と「この車を売っている店」と「川崎市の専門店」が
+// 「この記事を書いた店」と「この車を売っている店」と「神奈川（川崎市・南足柄市）の専門店」が
 // 同一の事業者だと、ページをまたいで結び付けられるようにするため。
 
 /** 事業者の実体を指すID。URLの形をしているが、ページではなく実体の識別子 */
@@ -31,9 +31,13 @@ export const BUSINESS_ALTERNATE_NAMES = [
 // 掲載媒体と公式サイトで店の名乗りが揃っていると、同じ店だと結び付けられやすい。
 export const BUSINESS_SPECIALTY = "ジャガー・ディムラー専門店";
 
-// 所在地の地域名。タイトルや説明文のように、店舗情報（DB）を読まずに組み立てる文言で使う。
-// 移転したらここを直す（住所そのものは管理画面の店舗情報が正）。
-export const BUSINESS_AREA = "神奈川県川崎市";
+// 拠点のある地域。タイトルや説明文のように、店舗情報（DB）を読まずに組み立てる文言で使う。
+// 拠点は神奈川県内の2か所（川崎市・南足柄市。2026-11-11 発注者の指示）。
+// 拠点が変わったらここを直す（住所そのものは管理画面の店舗情報が正）。
+export const BUSINESS_PREFECTURE = "神奈川県";
+export const BUSINESS_CITIES = ["川崎市", "南足柄市"] as const;
+/** 「神奈川県川崎市・南足柄市」 */
+export const BUSINESS_AREA = `${BUSINESS_PREFECTURE}${BUSINESS_CITIES.join("・")}`;
 
 // Daimler の片仮名は3通りに割れている。店の表記は「ディムラー」だが、
 // グーネット・webCG・carview は「デイムラー」、他店や AI の回答には「ダイムラー」もある。
@@ -58,7 +62,7 @@ export const BUSINESS_KNOWS_ABOUT = [
 ] as const;
 
 // 店の紹介文（構造化データ・説明文・llms.txt で共通）。「デイムラー」は検索で最も多い表記のため括弧で添える
-export const BUSINESS_DESCRIPTION = `${BUSINESS_AREA}宮前区のジャガー・ディムラー（デイムラー）専門店。XJ6・XJ-S・ダブルシックスなど英国の旧車を中心に、30年以上の実績で販売・整備・修理・買取を行っています。`;
+export const BUSINESS_DESCRIPTION = `${BUSINESS_AREA}のジャガー・ディムラー（デイムラー）専門店。XJ6・XJ-S・ダブルシックスなど英国の旧車を中心に、30年以上の実績で販売・整備・修理・買取を行っています。`;
 
 // ── 住所 ────────────────────────────────────────────────────────────────
 
@@ -222,7 +226,7 @@ export function buildBusinessGraph(params: {
 
   const business: Record<string, unknown> = {
     // 販売店であり整備工場でもある（販売・整備・修理・買取）。
-    // 「ジャガー 修理 川崎」のような整備の検索でも同じ店として扱われるよう、両方の型を持たせる
+    // 「ジャガー 修理 川崎」「ジャガー 整備 南足柄」のような整備の検索でも同じ店として扱われるよう、両方の型を持たせる
     "@type": ["AutoDealer", "AutoRepair"],
     "@id": BUSINESS_ID,
     name: SITE_NAME,
@@ -253,6 +257,17 @@ export function buildBusinessGraph(params: {
           hasMap: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.address ?? "")}`,
         }
       : {}),
+    // 拠点は2か所（川崎市・南足柄市）。住所の欄（店舗情報）は1つなので、
+    // 2か所の市をここで示し、どちらの地域で探した人にも同じ店だと分かるようにする
+    location: BUSINESS_CITIES.map((city) => ({
+      "@type": "Place",
+      address: {
+        "@type": "PostalAddress",
+        addressCountry: "JP",
+        addressRegion: BUSINESS_PREFECTURE,
+        addressLocality: city,
+      },
+    })),
     ...(openingHours ? { openingHoursSpecification: openingHours } : {}),
     ...(settings.founded_year
       ? { foundingDate: String(settings.founded_year) }

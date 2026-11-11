@@ -46,7 +46,7 @@ export async function getPublicFavoriteVehicles(sessionId: string) {
   const { data } = await supabase
     .from("vehicles")
     .select(
-      "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, status, manufacturers(name), models(name), grades(name)",
+      "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, status, sales_comment, manufacturers(name), models(name), grades(name)",
     )
     .in("id", vehicleIds)
     .eq("status", "published")
@@ -62,6 +62,7 @@ export async function getPublicFavoriteVehicles(sessionId: string) {
     shaken_expiry: string | null;
     accident_history: boolean | null;
     status: string;
+    sales_comment: string | null;
     manufacturers: { name: string } | null;
     models: { name: string } | null;
     grades: { name: string } | null;
@@ -123,7 +124,7 @@ export async function getVehicleFavoriteRanking(limit = 10) {
   const { data } = await supabase
     .from("vehicles")
     .select(
-      "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, status, manufacturers(name), models(name), grades(name)",
+      "id, price, total_price, model_year, mileage_km, shaken_status, shaken_expiry, accident_history, status, sales_comment, manufacturers(name), models(name), grades(name)",
     )
     .in("id", vehicleIds)
     .eq("status", "published")
@@ -139,6 +140,7 @@ export async function getVehicleFavoriteRanking(limit = 10) {
     shaken_expiry: string | null;
     accident_history: boolean | null;
     status: string;
+    sales_comment: string | null;
     manufacturers: { name: string } | null;
     models: { name: string } | null;
     grades: { name: string } | null;

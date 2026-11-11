@@ -1,4 +1,5 @@
 import { getSessionId } from "@/lib/engagement/session";
+import { buildVehicleName } from "@/lib/inventory/display";
 import { getPublicFavoriteVehicles } from "@/lib/engagement/queries";
 import { getLeadVehiclePhotoPaths } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
@@ -77,13 +78,8 @@ export default async function Page() {
           <ul className="mt-6 grid grid-cols-2 gap-3 sm:gap-6 md:gap-8">
             {vehicles.map((v, index) => {
               if (!v.slug) return null;
-              const vehicleName = [
-                v.manufacturers?.name,
-                v.models?.name,
-                v.grades?.name,
-              ]
-                .filter(Boolean)
-                .join(" ");
+              // 車名は車両ページと同じ組み立て方（lib/inventory/display.ts）
+              const vehicleName = buildVehicleName(v);
               return (
                 <li key={v.id} className="relative">
                   {/* この画面ではハートは常に登録済み。押すと解除になる

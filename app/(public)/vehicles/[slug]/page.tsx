@@ -41,6 +41,7 @@ import {
 } from "@/lib/seo/vehicle-meta";
 import { getSoldVehicleArchivePath } from "@/lib/inventory/queries";
 import {
+  buildVehicleNameParts,
   formatMileage,
   formatModelYear,
   formatShakenValue,
@@ -181,6 +182,9 @@ export default async function Page({
   }));
   // UIUXデザイナーレビュー指摘: ギャラリー画像のalt属性に使う車両名（メーカー・モデル・年式）
   const vehicleName = buildVehiclePageTitle(vehicle);
+  // 掲載の見出しのうち、車名に入れなかった売り文句（「特注ワイヤーホイール」「ワンオーナー車」等）。
+  // タイトルを短く保つかわりに、車名のすぐ下に一行で出す
+  const { catchPhrase } = buildVehicleNameParts(vehicle);
 
   // 第3要素は車両テーブルの列名。ライブ編集（管理画面から公開画面を見ながら直す）で
   // 「画面のこの文章」と「DBのどの列」を対応付けるために持つ（lib/live-edit/registry.ts）。
@@ -373,10 +377,14 @@ export default async function Page({
         <VehicleStatusBadge status={vehicle.status} />
       </div>
       <h1 className="text-charcoal-900 mt-3 font-serif text-3xl font-bold">
-        {/* 掲載の見出し（「ダブルシックス 特注ワイヤーホイール」等）まで含めた車名。
-            「ディムラー ディムラー」だけでは、何の車かも、探す人の言葉（ダブルシックス）も伝わらない */}
+        {/* 車名はグレードまで（「ディムラー ダブルシックス（1990年式）」）。
+            「ディムラー ディムラー」だけでは何の車かも、探す人の言葉（ダブルシックス）も伝わらない一方、
+            売り文句まで入れると長くて読みにくいため、売り文句は下の一行に分ける */}
         {vehicleName}
       </h1>
+      {catchPhrase && (
+        <p className="text-charcoal-700 mt-2 text-base">{catchPhrase}</p>
+      )}
       {/* 購入検討者が最終的に比較するのは支払総額のため、登録されていればそちらを主役にし、
           車両本体価格を併記する。支払総額が未確定のあいだは本体価格のみを出す
           （諸費用が分からない段階で総額らしき数字を見せない）。 */}

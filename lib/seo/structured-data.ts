@@ -12,7 +12,7 @@ export function serializeStructuredData(data: unknown): string {
 
 // 発行元。記事・図鑑・用語のすべてで同じ事業者を指すため共通化する。
 // 全ページに出している事業者の実体（lib/seo/business.ts の BUSINESS_ID）と同じ @id を持たせ、
-// 「この記事を書いたのは川崎市のジャガー・ディムラー専門店」だと結び付ける。
+// 「この記事を書いたのは神奈川（川崎市・南足柄市）のジャガー・ディムラー専門店」だと結び付ける。
 const publisher = businessReference;
 
 // FR-SEO-002: ブログ記事の構造化データ。

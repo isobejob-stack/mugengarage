@@ -1,6 +1,6 @@
 import type { SiteSettings } from "@/lib/settings/queries";
 import {
-  buildVehicleName,
+  buildVehicleNameParts,
   formatAccidentHistory,
   formatManYen,
   formatMileage,
@@ -38,7 +38,7 @@ export type LlmsVehicle = {
 
 function vehicleLine(v: LlmsVehicle): string | null {
   if (!v.slug) return null;
-  const name = buildVehicleName(v);
+  const { name, catchPhrase } = buildVehicleNameParts(v);
   const facts = [
     v.model_year ? `${v.model_year}年式` : null,
     v.mileage_km !== null ? `走行${formatMileage(v.mileage_km)}` : null,
@@ -48,7 +48,7 @@ function vehicleLine(v: LlmsVehicle): string | null {
     formatAccidentHistory(v.accident_history),
     formatSteeringSide(v.steering_side),
   ].filter(Boolean);
-  return `- [${name}](${SITE_URL}/vehicles/${v.slug}): ${facts.join("、")}`;
+  return `- [${name}](${SITE_URL}/vehicles/${v.slug}): ${catchPhrase ? `${catchPhrase}。` : ""}${facts.join("、")}`;
 }
 
 export function buildLlmsTxt(params: {

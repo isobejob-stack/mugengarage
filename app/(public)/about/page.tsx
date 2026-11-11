@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export const metadata = buildPageMetadata({
   title: "店舗情報・アクセス",
   description:
-    "神奈川県川崎市宮前区のジャガー・ディムラー（デイムラー）専門店エムガレージの店舗情報とアクセス。営業時間・定休日・電話番号と、公式Instagram・掲載媒体をご案内します。",
+    "神奈川県川崎市・南足柄市の2か所に拠点を持つ、ジャガー・ディムラー（デイムラー）専門店エムガレージの店舗情報とアクセス。営業時間・定休日・電話番号と、公式Instagram・掲載媒体をご案内します。",
   path: "/about",
 });
 

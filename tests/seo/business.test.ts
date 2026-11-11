@@ -154,6 +154,28 @@ describe("buildBusinessGraph", () => {
       "https://www.kurumaerabi.com/shop/detail/14921/",
     ]);
     expect(business.openingHoursSpecification).toBeDefined();
+    // 拠点は2か所（川崎市・南足柄市）。住所の欄は1つなので、市を別に示す
+    expect(business.location).toEqual([
+      {
+        "@type": "Place",
+        address: {
+          "@type": "PostalAddress",
+          addressCountry: "JP",
+          addressRegion: "神奈川県",
+          addressLocality: "川崎市",
+        },
+      },
+      {
+        "@type": "Place",
+        address: {
+          "@type": "PostalAddress",
+          addressCountry: "JP",
+          addressRegion: "神奈川県",
+          addressLocality: "南足柄市",
+        },
+      },
+    ]);
+    expect(business.description).toContain("神奈川県川崎市・南足柄市");
 
     // サイト名（検索結果に出る名前）とその発行元
     expect(website["@type"]).toBe("WebSite");

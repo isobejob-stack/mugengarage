@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   buildVehicleName,
+  buildVehicleNameParts,
   extractListingHeadline,
   formatManYen,
+  splitListingHeadline,
 } from "@/lib/inventory/display";
 import {
   buildVehicleListDescription,
@@ -17,7 +19,8 @@ import { buildVehicleRecord } from "../support/vehicle-fixtures";
 //
 // 車選びドットコムから取り込んだ車は、車名が「ディムラー ディムラー」のように登録されており
 // （店主の指示で掲載の表記のまま）、探す人の言葉（ダブルシックス・XJ6）は販売コメント1行目の
-// 見出しにしか無い。見出しをタイトルに使うこと、説明文に Markdown の記号を出さないことを固定する。
+// 見出しにしか無い。見出しのうちグレードまでをタイトルに使い、売り文句（装備・状態）は本文と説明文に回すこと、
+// 説明文に Markdown の記号を出さないことを固定する。
 
 const DOUBLE_SIX = buildVehicleRecord({
   model_year: 1990,
@@ -49,6 +52,68 @@ describe("掲載の見出し", () => {
     expect(extractListingHeadline(null)).toBeNull();
   });
 
+  // 取り込んだ20台の見出しから代表的な形を選んでいる（supabase/replace-inventory-2026-11-07.sql）
+  it.each([
+    [
+      "ダブルシックス 特注ワイヤーホイール",
+      "ダブルシックス",
+      "特注ワイヤーホイール",
+    ],
+    ["XJ6-3.2 ワンオーナー車", "XJ6-3.2", "ワンオーナー車"],
+    [
+      "XJ6-3.2 40型/丸型4灯ライト/革×布シート",
+      "XJ6-3.2",
+      "40型・丸型4灯ライト・革×布シート",
+    ],
+    [
+      "XJ6 4.2/シリーズ3/青革/新品タイヤ",
+      "XJ6 4.2",
+      "シリーズ3・青革・新品タイヤ",
+    ],
+    [
+      "マジェスティック V12 セパレートリアシート",
+      "マジェスティック V12",
+      "セパレートリアシート",
+    ],
+    [
+      "XJR 4.0 スーパーチャージド スーパーチャージャー",
+      "XJR 4.0 スーパーチャージド",
+      "スーパーチャージャー",
+    ],
+    ["ETC/本革シート/左ハンドル", null, "ETC・本革シート・左ハンドル"],
+    ["XJ8 3.5", "XJ8 3.5", null],
+  ])(
+    "見出し「%s」→ 車名「%s」／売り文句「%s」",
+    (headline, grade, catchPhrase) => {
+      expect(splitListingHeadline(headline)).toEqual({ grade, catchPhrase });
+    },
+  );
+
+  it("車種がメーカー名やグレードと重なるときは省く", () => {
+    const name = (maker: string, model: string, headline: string) =>
+      buildVehicleName({
+        manufacturers: { name: maker },
+        models: { name: model },
+        sales_comment: `**${headline}**`,
+      });
+    expect(
+      name("ディムラー", "ディムラー", "ダブルシックス ブラックレザー"),
+    ).toBe("ディムラー ダブルシックス");
+    expect(name("ジャガー", "XJ", "XJ6-3.2 ワンオーナー車")).toBe(
+      "ジャガー XJ6-3.2",
+    );
+    expect(name("ジャガー", "XJ-Sクーペ", "XJ-S V12 ディーラー整備車両")).toBe(
+      "ジャガー XJ-S V12",
+    );
+    // 重ならない車種は残す
+    expect(
+      name("ジャガー", "Sタイプ", "3.0 V6 シーフロストメタリック/ETC"),
+    ).toBe("ジャガー Sタイプ 3.0 V6");
+    expect(
+      name("ジャガー", "XJコンバーチブル", "ETC/本革シート/左ハンドル"),
+    ).toBe("ジャガー XJコンバーチブル");
+  });
+
   it("見出しが無ければグレード名を使う", () => {
     expect(
       buildVehicleName({
@@ -62,22 +127,29 @@ describe("掲載の見出し", () => {
 });
 
 describe("車両ページのタイトル・説明文", () => {
-  it("タイトルに見出し（ダブルシックス）と年式が入る", () => {
+  it("タイトルは車名（グレードまで）と年式だけ。売り文句は本文に回す", () => {
     expect(buildVehiclePageTitle(daimler)).toBe(
-      "ディムラー ディムラー ダブルシックス 特注ワイヤーホイール（1990年式）",
+      "ディムラー ダブルシックス（1990年式）",
+    );
+    expect(buildVehicleNameParts(daimler).catchPhrase).toBe(
+      "特注ワイヤーホイール",
     );
   });
 
   it("説明文は年式・走行距離・支払総額などの事実から始まり、Markdownの記号を含まない", () => {
     const description = buildVehicleMetaDescription(daimler);
     expect(
-      description.startsWith("1990年式 ディムラー ディムラー ダブルシックス"),
+      description.startsWith(
+        "1990年式 ディムラー ダブルシックス。特注ワイヤーホイール。",
+      ),
     ).toBe(true);
     expect(description).toContain("走行5.9万km");
     expect(description).toContain("支払総額405万円（車両本体385万円）");
     expect(description).toContain("修復歴なし");
     expect(description).toContain("右ハンドル");
-    expect(description).toContain("エムガレージの在庫車両です。");
+    expect(description).toContain(
+      "神奈川県川崎市・南足柄市のジャガー・ディムラー専門店エムガレージの在庫車両です。",
+    );
     expect(description).not.toContain("**");
   });
 
