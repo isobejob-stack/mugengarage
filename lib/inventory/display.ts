@@ -123,3 +123,57 @@ export function formatSteeringSideValue(value: string | null): string | null {
   if (value === "left") return "左ハンドル";
   return null;
 }
+
+// ── 車名（掲載の見出し） ─────────────────────────────────────────────────
+//
+// 車選びドットコムから取り込んだ車両は、販売コメントの1行目に掲載の見出しが太字で入っている
+// （例: 「**ダブルシックス 特注ワイヤーホイール**」「**XJ6-3.2 ワンオーナー車、**」）。
+// 車名の登録は「メーカー：ディムラー／車種：ディムラー」のように掲載の表記のままなので（店主の指示）、
+// 見出しを使わないと、ページのタイトルが「ディムラー ディムラー（1990年）」になり、
+// 「ダブルシックス」「XJ6」といった、探す人が実際に打ち込む言葉がどこにも出てこない。
+// 見出しは掲載と同じ表記であり、店主の「掲載の表記のまま」という方針にも沿う。
+//
+// 販売コメントが太字の短い1行で始まる場合だけ見出しとみなす（手入力の車両には無いことが多い）。
+export function extractListingHeadline(
+  salesComment: string | null,
+): string | null {
+  if (!salesComment) return null;
+  const match = salesComment.trimStart().match(/^\*\*([^*\n]{1,60})\*\*/);
+  if (!match) return null;
+  // 掲載の見出しには「ワンオーナー車、」のように末尾の読点が残っているものがある
+  const headline = match[1].trim().replace(/[、,。．.\s]+$/u, "");
+  return headline || null;
+}
+
+// 見出しを取り除いた販売コメント（説明文の抜粋に使う。見出しと同じ文言を二度並べないため）
+export function stripListingHeadline(salesComment: string | null): string {
+  if (!salesComment) return "";
+  return salesComment.trimStart().replace(/^\*\*[^*\n]{1,60}\*\*\s*/, "");
+}
+
+// 車両の呼び名: 「メーカー 車種 見出し」。見出しが無ければグレード名を使う。
+// 年式は呼び出し側で添える（見出し・一覧・構造化データで添え方が違うため）。
+export function buildVehicleName(vehicle: {
+  manufacturers: { name: string } | null;
+  models: { name: string } | null;
+  grades?: { name: string } | null;
+  sales_comment?: string | null;
+}): string {
+  const headline = extractListingHeadline(vehicle.sales_comment ?? null);
+  return [
+    vehicle.manufacturers?.name,
+    vehicle.models?.name,
+    headline ?? vehicle.grades?.name ?? null,
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+// 金額を「410万円」「405.5万円」の形にする（検索結果の説明文向け。1万円未満は切り捨てない）
+export function formatManYen(yen: number): string {
+  const man = yen / 10000;
+  const text = Number.isInteger(man)
+    ? man.toLocaleString()
+    : (Math.round(man * 10) / 10).toLocaleString();
+  return `${text}万円`;
+}

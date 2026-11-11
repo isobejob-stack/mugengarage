@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { apiError, apiInternalError } from "@/lib/api/error-response";
 import { recordAuditLog } from "@/lib/audit/log";
+import { collectChangedUrls, submitToIndexNow } from "@/lib/seo/indexnow";
+
+// IndexNow で知らせる範囲。1日1回の実行なので、取りこぼしが出ないよう少し重ねて25時間前からとする
+const INDEXNOW_LOOKBACK_MS = 25 * 60 * 60 * 1000;
 
 // FR-INV-007: 車両の公開予約。status = 'draft' かつ scheduled_publish_at が現在時刻以前の
 // 車両を 'published' に切り替える。
@@ -88,8 +92,21 @@ export async function GET(request: NextRequest) {
     ),
   ]);
 
+  // その日に変わった公開ページを Bing などに知らせる（lib/seo/indexnow.ts）。
+  // 知らせるのは補助的な処理なので、失敗しても公開予約の結果は返す（ログには残す）
+  let indexNow: { submitted: number; status: number | null } | null = null;
+  try {
+    const urls = await collectChangedUrls(
+      new Date(Date.now() - INDEXNOW_LOOKBACK_MS),
+    );
+    indexNow = await submitToIndexNow(urls);
+  } catch (error) {
+    console.error("[cron] IndexNow への送信に失敗しました", error);
+  }
+
   return NextResponse.json({
     data: {
+      indexNow,
       publishedVehicleCount: publishedVehicles?.length ?? 0,
       publishedVehicleIds: (publishedVehicles ?? []).map((v) => v.id as string),
       publishedArticleCount: publishedArticles?.length ?? 0,

@@ -1,5 +1,6 @@
 import type { Vehicle } from "@/lib/inventory/types";
 import { SITE_NAME, SITE_URL } from "@/lib/site-config";
+import { businessReference } from "@/lib/seo/business";
 
 // JSON-LDは管理画面からの入力（記事本文・車両説明等）を含むため、`</script>` の混入で
 // scriptタグを閉じられないよう `<` をエスケープしてから埋め込む。
@@ -9,12 +10,10 @@ export function serializeStructuredData(data: unknown): string {
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }
 
-// 発行元。記事・用語の両方で同じ事業者を指すため共通化する。
-const publisher = {
-  "@type": "Organization",
-  name: SITE_NAME,
-  url: SITE_URL,
-};
+// 発行元。記事・図鑑・用語のすべてで同じ事業者を指すため共通化する。
+// 全ページに出している事業者の実体（lib/seo/business.ts の BUSINESS_ID）と同じ @id を持たせ、
+// 「この記事を書いたのは川崎市のジャガー・ディムラー専門店」だと結び付ける。
+const publisher = businessReference;
 
 // FR-SEO-002: ブログ記事の構造化データ。
 // 記事が「いつ・誰が書いた何についての文章か」を検索エンジンに明示する。
@@ -71,54 +70,9 @@ export function buildDefinedTermStructuredData(params: {
   };
 }
 
-// FR-SEO-002: サイト自体の構造化データ（トップページ）。
-//
-// 2つの意味がある。
-// 1. WebSite + SearchAction …「エムガレージ」で検索したときに、
-//    検索結果の中に直接サイト内検索の窓が出る可能性がある（sitelinks searchbox）。
-//    在庫検索を持つサイトなので、そこへ直接入れる価値は大きい
-// 2. AutoDealer … 中古車販売店としての実体を示す。
-//    店舗情報ページにも同じ型を出しているが、トップページはブランド名で検索されたときの
-//    着地点になるため、こちらにも置いて同一の事業者だと示す
-export function buildSiteStructuredData(params: {
-  siteUrl: string;
-  siteName: string;
-  description: string;
-  address: string | null;
-  phone: string | null;
-}) {
-  const { siteUrl, siteName, description, address, phone } = params;
-
-  return [
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      name: siteName,
-      url: siteUrl,
-      description,
-      inLanguage: "ja",
-      potentialAction: {
-        "@type": "SearchAction",
-        target: {
-          "@type": "EntryPoint",
-          urlTemplate: `${siteUrl}/vehicles?model={search_term_string}`,
-        },
-        "query-input": "required name=search_term_string",
-      },
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "AutoDealer",
-      name: siteName,
-      url: siteUrl,
-      description,
-      // 未入力の項目は出さない。空文字や仮の値を構造化データに出すと、
-      // 検索エンジンに誤った事業者情報を渡すことになる。
-      ...(address ? { address: { "@type": "PostalAddress", streetAddress: address } } : {}),
-      ...(phone ? { telephone: phone } : {}),
-    },
-  ];
-}
+// サイト自体と事業者の構造化データは、全ページ共通で app/(public)/layout.tsx から出す
+// （lib/seo/business.ts の buildBusinessGraph）。以前はトップと店舗情報のページにだけ
+// 別々に書いており、住所の持ち方や項目がページごとに食い違っていた。
 
 // FR-SEO-002: 図鑑項目の構造化データ。
 //
@@ -180,7 +134,9 @@ export function buildTimelineStructuredData(params: {
       "@type": "ListItem",
       position: index + 1,
       name: item.name,
-      ...(item.date ? { item: { "@type": "Event", name: item.name, startDate: item.date } } : {}),
+      ...(item.date
+        ? { item: { "@type": "Event", name: item.name, startDate: item.date } }
+        : {}),
     })),
   };
 }
@@ -188,6 +144,11 @@ export function buildTimelineStructuredData(params: {
 // FR-SEO-002: 車両詳細ページ用のSchema.org構造化データ（JSON-LD）を生成する。
 // schema.orgの Car（Vehicle ⊂ Product のサブタイプ）を用い、中古車販売店向けの
 // Google Vehicle Listing構造化データの形式に準拠する。
+//
+// 2026-11-11: AI検索が車の条件を答えに使えるよう、掲載している諸元をできるだけ機械が読める形で渡す
+// （ハンドル位置・燃料・ドア数・乗車定員・排気量・中古であること・売り手）。
+// 価格は支払総額を優先する。購入者が実際に払う金額であり、2023年10月からの
+// 支払総額表示のルールとも揃う。総額が未確定のあいだは本体価格を出す。
 export function buildVehicleStructuredData(params: {
   vehicle: Vehicle & {
     manufacturers: { name: string } | null;
@@ -200,6 +161,8 @@ export function buildVehicleStructuredData(params: {
 }) {
   const { vehicle, name, description, images, url } = params;
 
+  const offerPrice = vehicle.total_price ?? vehicle.price;
+
   const structuredData: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Car",
@@ -207,12 +170,16 @@ export function buildVehicleStructuredData(params: {
     url,
     ...(description ? { description } : {}),
     ...(images.length > 0 ? { image: images } : {}),
+    itemCondition: "https://schema.org/UsedCondition",
     ...(vehicle.manufacturers?.name
       ? { brand: { "@type": "Brand", name: vehicle.manufacturers.name } }
       : {}),
     ...(vehicle.models?.name ? { model: vehicle.models.name } : {}),
     ...(vehicle.model_year
       ? { vehicleModelDate: String(vehicle.model_year) }
+      : {}),
+    ...(vehicle.registration_year
+      ? { dateVehicleFirstRegistered: String(vehicle.registration_year) }
       : {}),
     ...(vehicle.vin ? { vehicleIdentificationNumber: vehicle.vin } : {}),
     ...(vehicle.body_type ? { bodyType: vehicle.body_type } : {}),
@@ -222,9 +189,34 @@ export function buildVehicleStructuredData(params: {
     ...(vehicle.drivetrain
       ? { driveWheelConfiguration: vehicle.drivetrain }
       : {}),
+    ...(vehicle.steering_side
+      ? {
+          steeringPosition:
+            vehicle.steering_side === "right"
+              ? "https://schema.org/RightHandDriving"
+              : "https://schema.org/LeftHandDriving",
+        }
+      : {}),
+    ...(vehicle.fuel_type ? { fuelType: vehicle.fuel_type } : {}),
+    ...(vehicle.door_count !== null
+      ? { numberOfDoors: vehicle.door_count }
+      : {}),
+    ...(vehicle.capacity !== null
+      ? { vehicleSeatingCapacity: vehicle.capacity }
+      : {}),
     ...(vehicle.exterior_color ? { color: vehicle.exterior_color } : {}),
+    ...(vehicle.interior_color
+      ? { vehicleInteriorColor: vehicle.interior_color }
+      : {}),
+    ...(vehicle.seat_material
+      ? { vehicleInteriorType: vehicle.seat_material }
+      : {}),
     ...(vehicle.owner_count !== null
       ? { numberOfPreviousOwners: vehicle.owner_count }
+      : {}),
+    // 修復歴は「あり」のときだけ損傷の記載として出す（「なし」は損傷の記述ではないため）
+    ...(vehicle.accident_history === true
+      ? { knownVehicleDamages: "修復歴あり" }
       : {}),
     ...(vehicle.mileage_km !== null
       ? {
@@ -235,11 +227,20 @@ export function buildVehicleStructuredData(params: {
           },
         }
       : {}),
-    ...(vehicle.engine
+    ...(vehicle.engine || vehicle.displacement_cc
       ? {
           vehicleEngine: {
             "@type": "EngineSpecification",
-            name: vehicle.engine,
+            ...(vehicle.engine ? { name: vehicle.engine } : {}),
+            ...(vehicle.displacement_cc
+              ? {
+                  engineDisplacement: {
+                    "@type": "QuantitativeValue",
+                    value: vehicle.displacement_cc,
+                    unitCode: "CMQ",
+                  },
+                }
+              : {}),
             ...(vehicle.horsepower
               ? {
                   enginePower: {
@@ -254,11 +255,32 @@ export function buildVehicleStructuredData(params: {
       : {}),
     offers: {
       "@type": "Offer",
-      price: vehicle.price,
+      price: offerPrice,
       priceCurrency: "JPY",
+      ...(vehicle.total_price !== null
+        ? {
+            priceSpecification: [
+              {
+                "@type": "PriceSpecification",
+                name: "支払総額",
+                price: vehicle.total_price,
+                priceCurrency: "JPY",
+              },
+              {
+                "@type": "PriceSpecification",
+                name: "車両本体価格",
+                price: vehicle.price,
+                priceCurrency: "JPY",
+              },
+            ],
+          }
+        : {}),
+      itemCondition: "https://schema.org/UsedCondition",
       // このJSON-LDはstatus='published'の車両詳細ページでのみ出力される（getPublicVehicleBySlug参照）
       availability: "https://schema.org/InStock",
       url,
+      // 売り手は全ページに出している事業者の実体（lib/seo/business.ts）
+      seller: businessReference,
     },
   };
 

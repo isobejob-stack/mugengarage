@@ -10,7 +10,7 @@ import { SiteText } from "@/components/live-edit/site-text";
 export const metadata = buildPageMetadata({
   title: "ライブラリ",
   description:
-    "SUキャブレター、モノコックボディ、マッチングナンバーなど、クラシックJaguarに関する用語を辞典形式で解説します。",
+    "SUキャブレター、モノコックボディ、マッチングナンバーなど、クラシックジャガー（Jaguar）に関する用語を辞典形式で解説します。",
   path: "/library",
 });
 

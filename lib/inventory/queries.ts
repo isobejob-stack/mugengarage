@@ -504,3 +504,33 @@ export async function getVehicleVideos(vehicleId: string) {
 
   return data ?? [];
 }
+
+// 公開中でなくなった車両URLの行き先（売約済み → オーナーズアーカイブ）。
+//
+// 車両詳細は公開中（published）の車しか表示しない。売約済みになった車のURLは、
+// オーナーズアーカイブに公開している場合だけ、そのページのパスを返す（呼び出し側で恒久転送する）。
+// 404になるときにだけ呼ばれるため、通常の表示の往復は増えない。
+export async function getSoldVehicleArchivePath(
+  slug: string,
+): Promise<string | null> {
+  const supabase = createAdminClient();
+  const { data: seoMeta } = await supabase
+    .from("seo_metas")
+    .select("target_id")
+    .eq("target_type", "vehicle")
+    .eq("slug", slug)
+    .maybeSingle<{ target_id: string }>();
+  if (!seoMeta) return null;
+
+  const { data: entry } = await supabase
+    .from("owner_archive_entries")
+    .select("vehicle_id, vehicles!inner(status, deleted_at)")
+    .eq("vehicle_id", seoMeta.target_id)
+    .eq("is_published", true)
+    .is("deleted_at", null)
+    .eq("vehicles.status", "sold")
+    .is("vehicles.deleted_at", null)
+    .maybeSingle<{ vehicle_id: string }>();
+
+  return entry ? `/owners-archive/${entry.vehicle_id}` : null;
+}

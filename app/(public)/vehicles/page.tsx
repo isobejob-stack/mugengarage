@@ -17,6 +17,8 @@ import { Card, CardBody, CardTitle } from "@/components/ui/card";
 import { VehicleCardPhotos } from "@/components/inventory/vehicle-card-photos";
 import { VehicleFeatureBadges } from "@/components/ui/status-badge";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import { buildVehicleListDescription } from "@/lib/seo/vehicle-meta";
+import { getPublicVehicleStockSummary } from "@/lib/inventory/queries";
 import { VehicleCardPrice } from "@/components/inventory/vehicle-price";
 import {
   SelectField,
@@ -55,12 +57,17 @@ function toNumber(value: string | undefined) {
 // （画面外まで優先すると帯域を奪い合ってかえって遅くなる）。
 const PRIORITY_IMAGE_COUNT = 2;
 
-export const metadata = buildPageMetadata({
-  title: "在庫車両",
-  description:
-    "エムガレージが取り扱うクラシックJaguarの在庫一覧です。Eタイプ・XK・Mark2など、年式・価格・状態からお探しいただけます。",
-  path: "/vehicles",
-});
+// 説明文は、いま実際に並んでいる在庫（台数・車種・年式の幅）から組み立てる。
+// 以前は「Eタイプ・XK・Mark2など」と固定で書いており、在庫（XJ・XJ-S・ダブルシックス中心）と食い違っていた。
+// 絞り込み・並び替えのURL（?model=…）も canonical は /vehicles に揃える（重複扱いを避ける）。
+export async function generateMetadata() {
+  const stock = await getPublicVehicleStockSummary();
+  return buildPageMetadata({
+    title: "ジャガー・ディムラーの在庫車両（中古車）",
+    description: buildVehicleListDescription(stock),
+    path: "/vehicles",
+  });
+}
 
 // SCR-PUB-002: 車両一覧・検索結果（FR-SRCH-001〜003: 複合条件絞り込み、URLクエリでの状態保持）
 export default async function Page({

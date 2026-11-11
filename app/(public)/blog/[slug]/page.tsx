@@ -31,7 +31,8 @@ export async function generateMetadata({
   return buildPageMetadata({
     title: article.title,
     description:
-      excerptFromMarkdown(article.body) || "クラシックJaguarに関する記事です。",
+      excerptFromMarkdown(article.body) ||
+      "ジャガー・ディムラーに関する記事です。",
     path: `/blog/${slug}`,
   });
 }
