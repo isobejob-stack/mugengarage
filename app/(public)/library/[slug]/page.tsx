@@ -32,7 +32,7 @@ export async function generateMetadata({
   return buildPageMetadata({
     title: entry.title,
     description:
-      excerptFromMarkdown(entry.body) || "クラシックJaguarの用語解説です。",
+      excerptFromMarkdown(entry.body) || "クラシックジャガーの用語解説です。",
     path: `/library/${slug}`,
   });
 }

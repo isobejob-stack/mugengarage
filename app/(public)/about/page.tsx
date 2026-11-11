@@ -1,5 +1,4 @@
 import { buildPageMetadata } from "@/lib/seo/metadata";
-import { SITE_NAME, SITE_URL } from "@/lib/site-config";
 import { getSiteSettings } from "@/lib/settings/queries";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardTitle, CardMeta } from "@/components/ui/card";
@@ -14,7 +13,7 @@ export const dynamic = "force-dynamic";
 export const metadata = buildPageMetadata({
   title: "店舗情報・アクセス",
   description:
-    "クラシックJaguar専門店エムガレージの店舗情報とアクセスのご案内です。在庫車両の掲載媒体・公式SNSもご覧いただけます。",
+    "神奈川県川崎市・南足柄市の2か所に拠点を持つ、ジャガー・ディムラー（デイムラー）専門店エムガレージの店舗情報とアクセス。営業時間・定休日・電話番号と、公式Instagram・掲載媒体をご案内します。",
   path: "/about",
 });
 
@@ -23,7 +22,7 @@ const SERVICES = [
   {
     key: "sales",
     title: "販売",
-    body: "クラシックJaguarの在庫車両をご紹介します。ご希望の条件に合わせたお探しのご相談も承ります。",
+    body: "ジャガー・ディムラーの在庫車両をご紹介します。XJ6・XJ-S・ダブルシックスなどの旧車を中心に、ご希望の条件に合わせたお探しのご相談も承ります。",
   },
   {
     key: "maintenance",
@@ -48,45 +47,8 @@ export default async function Page() {
   // 問い合わせ窓口（InstagramのDMに統一。2026-11-08、店主の判断。lib/settings/sns.ts）
   const instagram = findInstagramContact(settings.external_links);
 
-  // FR-SEO-002: 事業者の構造化データ。
-  // 未入力の項目はキー自体を出さない。空文字や誤った値を構造化データに含めると、
-  // 検索エンジンに誤った事業者情報を学習させてしまうため。
-  const organizationStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "AutoDealer",
-    name: SITE_NAME,
-    description: "クラシックJaguar専門店",
-    url: SITE_URL,
-    ...(settings.phone ? { telephone: settings.phone } : {}),
-    ...(settings.address
-      ? {
-          address: {
-            "@type": "PostalAddress",
-            addressCountry: "JP",
-            ...(settings.postal_code
-              ? { postalCode: settings.postal_code }
-              : {}),
-            streetAddress: settings.address,
-          },
-        }
-      : {}),
-    ...(settings.business_hours
-      ? { openingHours: settings.business_hours }
-      : {}),
-    ...(settings.founded_year
-      ? { foundingDate: String(settings.founded_year) }
-      : {}),
-    // sameAsに公式アカウントを列挙すると、それらが同一事業者のものであると検索エンジンに伝わる
-    ...(settings.external_links.length > 0
-      ? { sameAs: settings.external_links.map((link) => link.url) }
-      : {}),
-  };
-
-  // 車両詳細と同じ方針で、JSON-LD内の "<" をエスケープしてscriptタグの早期終了を防ぐ
-  const structuredDataJson = JSON.stringify(organizationStructuredData).replace(
-    /</g,
-    "\\u003c",
-  );
+  // 事業者の構造化データ（住所・営業時間・公式SNS等）は、全ページ共通で
+  // app/(public)/layout.tsx から出している（lib/seo/business.ts）。
 
   // 表示する値と、それが site_settings のどの項目かを一緒に持つ。
   // ライブ編集で「画面に出ている住所」を押したときに、どの項目を開けばよいかを
@@ -132,11 +94,6 @@ export default async function Page() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: structuredDataJson }}
-      />
-
       <h1 className="text-charcoal-900 font-serif text-3xl font-bold tracking-tight text-balance sm:text-4xl">
         <SiteText k="about.title" description="店舗情報 見出し">
           店舗情報・アクセス

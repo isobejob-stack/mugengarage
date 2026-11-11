@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { buildVehicleName } from "@/lib/inventory/display";
 import { getVehicleFavoriteRanking } from "@/lib/engagement/queries";
 import { getLeadVehiclePhotoPaths } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
@@ -68,13 +69,8 @@ export default async function Page() {
           {ranking.map((v, i) => {
             if (!v.slug) return null;
             const photoPath = leadPhotoPaths.get(v.id);
-            const vehicleName = [
-              v.manufacturers?.name,
-              v.models?.name,
-              v.grades?.name,
-            ]
-              .filter(Boolean)
-              .join(" ");
+            // 車名は車両ページと同じ組み立て方（lib/inventory/display.ts）
+            const vehicleName = buildVehicleName(v);
             return (
               <li key={v.id}>
                 <Link

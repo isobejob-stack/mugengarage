@@ -6,6 +6,21 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { SITE_URL } from "@/lib/site-config";
+import {
+  BUSINESS_AREA,
+  BUSINESS_DESCRIPTION,
+  BUSINESS_SPECIALTY,
+} from "@/lib/seo/business";
+
+// トップページのタイトル（検索結果で一番目に入る文言）。
+//
+// 2026-11-11 以前は「エムガレージ｜クラシックJaguar専門店」で、説明文も
+// 「Eタイプ・XK・Mark2などの在庫車両」としていた。実際の店は
+// 「ジャガー、ディムラー専門店」（車選びドットコムの店名）で、在庫は XJ6・XJ-S・ダブルシックスが中心。
+// 探す人は片仮名の「ジャガー」と地名で検索する（「ジャガー 専門店 神奈川」「ジャガー 修理 川崎」）ため、
+// 拠点の2か所（川崎市・南足柄市）を入れ、
+// 店の名乗り・地域・取り扱い車種を、実態と検索の言葉の両方に合わせた。
+const HOME_TITLE = `エムガレージ｜${BUSINESS_SPECIALTY}｜${BUSINESS_AREA}`;
 
 // 数字専用。価格（font-mono）にだけ使う。
 //
@@ -49,11 +64,10 @@ const zenKakuGothicNew = Zen_Kaku_Gothic_New({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "エムガレージ｜クラシックJaguar専門店",
+    default: HOME_TITLE,
     template: "%s｜エムガレージ",
   },
-  description:
-    "30年以上の実績を持つクラシックJaguar専門店エムガレージ。Eタイプ・XK・Mark2などの在庫車両、整備・修理・買取まで、Jaguarのことならご相談ください。",
+  description: `エムガレージは${BUSINESS_DESCRIPTION}在庫車両・整備のご相談はお気軽にどうぞ。`,
   // LINEでの共有が最重要導線（FR-LINE-001）でありながらOGPが未設定で、
   // URLを送ってもプレビューが出ない状態だった。既定値をここで持たせ、
   // 各ページで上書きできるようにする。
@@ -61,9 +75,8 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ja_JP",
     siteName: "エムガレージ",
-    title: "エムガレージ｜クラシックJaguar専門店",
-    description:
-      "30年以上の実績を持つクラシックJaguar専門店。在庫車両・整備・修理・買取のご相談を承ります。",
+    title: HOME_TITLE,
+    description: BUSINESS_DESCRIPTION,
     url: SITE_URL,
   },
   twitter: {
@@ -74,9 +87,18 @@ export const metadata: Metadata = {
   // content の値を Vercel の環境変数 GOOGLE_SITE_VERIFICATION に入れて再デプロイすると、
   // 全ページの <head> に出る。コードを変えずに店主側で登録できるようにするため環境変数にしている。
   // 未設定なら何も出さない。
-  verification: process.env.GOOGLE_SITE_VERIFICATION
-    ? { google: process.env.GOOGLE_SITE_VERIFICATION }
-    : undefined,
+  //
+  // BING_SITE_VERIFICATION は Bing Webmaster Tools の所有権確認（<meta name="msvalidate.01">）。
+  // ChatGPT の検索や Microsoft Copilot は Bing の索引を土台にしているため、
+  // AI検索に載るには Bing への登録が効く。Search Console からの取り込みで登録した場合は不要。
+  verification: {
+    ...(process.env.GOOGLE_SITE_VERIFICATION
+      ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+      : {}),
+    ...(process.env.BING_SITE_VERIFICATION
+      ? { other: { "msvalidate.01": process.env.BING_SITE_VERIFICATION } }
+      : {}),
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

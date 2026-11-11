@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildVehicleName } from "@/lib/inventory/display";
 import Image from "next/image";
 import {
   listPublicVehiclePreview,
@@ -7,11 +8,7 @@ import {
 } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
 import { getSiteAssetPublicUrl } from "@/lib/settings/storage";
-import { SITE_URL, SITE_NAME } from "@/lib/site-config";
-import {
-  buildSiteStructuredData,
-  serializeStructuredData,
-} from "@/lib/seo/structured-data";
+import { SITE_URL } from "@/lib/site-config";
 import { getSiteSettings } from "@/lib/settings/queries";
 import { InstagramDmButton } from "@/components/layout/instagram-dm-button";
 import { findInstagramContact } from "@/lib/settings/sns";
@@ -32,7 +29,7 @@ import { listFavoriteVehicleIds } from "@/lib/engagement/queries";
 // リクエストごとに描画する（理由の詳細は app/(public)/blog/page.tsx のコメント参照）。
 export const dynamic = "force-dynamic";
 
-// トップページはルートlayoutのtitle.default（"エムガレージ｜クラシックJaguar専門店"）を
+// トップページはルートlayoutのtitle.default（"エムガレージ｜ジャガー・ディムラー専門店｜神奈川県川崎市・南足柄市"）を
 // そのまま使いたいため、titleは上書きせずcanonicalのみ明示する。
 // トップは "/" と "" の両方で到達しうるため、正規URLを示しておく。
 //
@@ -98,26 +95,9 @@ export default async function Page() {
     ? getSiteAssetPublicUrl(settings.hero_image_path)
     : null;
 
-  // FR-SEO-002: サイト自体の構造化データ。
-  // ブランド名で検索したときの着地点はトップページなので、
-  // 「どういう事業者か」と「サイト内検索がある」ことをここで示す。
-  const structuredDataJson = serializeStructuredData(
-    buildSiteStructuredData({
-      siteUrl: SITE_URL,
-      siteName: SITE_NAME,
-      description:
-        "30年以上の実績を持つクラシックJaguar専門店。在庫車両・整備・修理・買取のご相談を承ります。",
-      address: settings.address,
-      phone: settings.phone,
-    }),
-  );
-
   return (
     <main className="pb-8">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: structuredDataJson }}
-      />
+      {/* 店舗とサイトの構造化データは全ページ共通で app/(public)/layout.tsx から出している */}
       {/* ヒーロー。管理画面で店舗写真が設定されていれば全幅の写真、未設定なら従来の文字ベース。
           クラシックJaguar専門店にとって車と店の佇まいが最も強い訴求材料であるため、
           写真がある場合は画面幅いっぱいに見せる。 */}
@@ -125,7 +105,7 @@ export default async function Page() {
         <section className="relative flex min-h-[60vh] items-end overflow-hidden sm:min-h-[70vh]">
           <Image
             src={heroImageUrl}
-            alt="エムガレージの店舗とクラシックJaguar"
+            alt="エムガレージの店舗と在庫のジャガー"
             fill
             // ファーストビューの主役でありLCPそのものなので、遅延読み込みを外す
             priority
@@ -144,7 +124,7 @@ export default async function Page() {
                 k="home.hero.eyebrow"
                 description="トップページ 冒頭の英字"
               >
-                Classic Jaguar Specialist
+                Jaguar &amp; Daimler Specialist
               </SiteText>
             </p>
             <h1 className="mt-3 font-serif text-4xl font-bold tracking-tight text-balance text-white sm:text-5xl">
@@ -160,7 +140,7 @@ export default async function Page() {
                 k="home.hero.lead"
                 description="トップページ 冒頭の紹介文"
               >
-                30年以上の実績を持つクラシックJaguar専門店。販売・整備・修理・買取・ご相談まで、Jaguarのことなら何でもお任せください。
+                神奈川県川崎市・南足柄市のジャガー・ディムラー専門店。XJ6・XJ-S・ダブルシックスなど英国の旧車を中心に、30年以上の実績で販売・整備・修理・買取・ご相談まで承ります。
               </SiteText>
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -188,7 +168,7 @@ export default async function Page() {
                 k="home.hero.eyebrow"
                 description="トップページ 冒頭の英字"
               >
-                Classic Jaguar Specialist
+                Jaguar &amp; Daimler Specialist
               </SiteText>
             </p>
             <h1 className="mt-3 font-serif text-3xl font-bold sm:text-4xl">
@@ -204,7 +184,7 @@ export default async function Page() {
                 k="home.hero.lead"
                 description="トップページ 冒頭の紹介文"
               >
-                30年以上の実績を持つクラシックJaguar専門店。販売・整備・修理・買取・ご相談まで、Jaguarのことなら何でもお任せください。
+                神奈川県川崎市・南足柄市のジャガー・ディムラー専門店。XJ6・XJ-S・ダブルシックスなど英国の旧車を中心に、30年以上の実績で販売・整備・修理・買取・ご相談まで承ります。
               </SiteText>
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -256,14 +236,8 @@ export default async function Page() {
             <ul className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
               {featuredVehicles.map((v, index) => {
                 if (!v.slug) return null;
-                // 車名は在庫一覧・お気に入り・ランキングと同じくグレードまで出す
-                const vehicleName = [
-                  v.manufacturers?.name,
-                  v.models?.name,
-                  v.grades?.name,
-                ]
-                  .filter(Boolean)
-                  .join(" ");
+                // 車名は車両ページ・在庫一覧・お気に入り・ランキングと同じ組み立て方（lib/inventory/display.ts）
+                const vehicleName = buildVehicleName(v);
                 return (
                   // お気に入りボタンをカード（リンク）の外側に重ねるため、liを基準位置にする
                   <li key={v.id} className="relative">

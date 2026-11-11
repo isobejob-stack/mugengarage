@@ -10,14 +10,12 @@ import type { ExternalLink } from "@/lib/settings/schema";
 // InstagramのURLは管理画面の「掲載媒体・公式SNS」（site_settings.external_links）に入っている。
 // 専用の列を増やさないのは、external_links が「媒体は今後増減しうるため列を増やさない」
 // 方針で作られているため。ここではURLのホスト名からInstagramを見分け、
-// アカウント名を取り出してDM画面のURLを組み立てる。
+// アカウント名を取り出してプロフィールのURLを組み立て直す。
 // 管理画面でInstagramのリンクを消せば、問い合わせボタンも自動で消える。
 
 export type InstagramContact = {
   username: string;
   profileUrl: string;
-  /** DM画面を直接開くURL（Instagram公式の ig.me リンク） */
-  dmUrl: string;
 };
 
 // Instagramのユーザー名に使える文字（英数字・ピリオド・アンダースコア、30文字まで）
@@ -61,7 +59,6 @@ export function parseInstagramUrl(value: string): InstagramContact | null {
     username,
     // 共有メニューから取ったURLには追跡用のパラメータ（?igshid= 等）が付くため、組み立て直す
     profileUrl: `https://www.instagram.com/${username}/`,
-    dmUrl: `https://ig.me/m/${username}`,
   };
 }
 
@@ -76,13 +73,20 @@ export function findInstagramContact(
   return null;
 }
 
-// ボタンの行き先を、見ている端末で選ぶ（2026-11-11）。
+// Instagramのボタンの行き先と開き方（2026-11-11 改訂）。
 //
-// ig.me のDMリンクは、Instagramにログインしていないと開けない。スマホでアプリが入っていれば
-// アプリのDM画面が直接開くが、パソコンのブラウザではログイン画面が出るだけで、
-// お店のアカウントがどんなものかも見えない（店主から「ログイン画面が出る」と指摘があった）。
-// プロフィールはログインしていなくても見られ、そこからDMにも進めるため、
-// パソコンではプロフィール、スマホ・タブレットではDMを開く。
+// 以前はスマホで DM の短縮リンク（ig.me/m/<アカウント>）を開いていたが、iPhone の Chrome で
+// 「アプリが入っているのに App Store が開く」「読み込み中のまま止まる」と報告があった。
+// 原因は次の2つが重なったことと考えられる。
+// - ig.me は instagram.com へ転送するだけの短縮リンクで、iOS がアプリに引き渡すのは
+//   アプリに紐付いたドメイン（instagram.com）を直接タップしたときだけ。転送を挟むと、
+//   特に Safari 以外のブラウザではアプリに渡らず、Instagram のWebページ側の
+//   「アプリで開く → 開けなければ App Store へ」という処理に流れる
+// - 外部リンクを新しいタブ（target="_blank"）で開いていた。アプリに引き渡すと
+//   開いた側のタブが空のまま残り、「読み込み中のまま」に見える
+// そこで、どの端末でもプロフィール（instagram.com/<アカウント>/）を直接開き、
+// スマホでは同じタブで開く（ふつうのリンクのタップとして扱われ、アプリが入っていればアプリが開く）。
+// DMはプロフィールの「メッセージ」から1タップで進める。パソコンでは今のページを残すため新しいタブで開く。
 //
 // iPadOS は既定で Mac と同じ userAgent を名乗るため、タッチ操作の可否であわせて見分ける。
 export function isMobileDevice(userAgent: string, maxTouchPoints = 0): boolean {
@@ -90,9 +94,12 @@ export function isMobileDevice(userAgent: string, maxTouchPoints = 0): boolean {
   return /Macintosh/.test(userAgent) && maxTouchPoints > 1;
 }
 
-export function instagramHrefFor(
+export function instagramLinkFor(
   contact: InstagramContact,
   isMobile: boolean,
-): string {
-  return isMobile ? contact.dmUrl : contact.profileUrl;
+): { href: string; target: "_self" | "_blank" } {
+  return {
+    href: contact.profileUrl,
+    target: isMobile ? "_self" : "_blank",
+  };
 }

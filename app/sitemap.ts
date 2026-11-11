@@ -1,6 +1,17 @@
 import type { MetadataRoute } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SITE_URL } from "@/lib/site-config";
+import {
+  VEHICLE_PHOTO_SUMMARY_SELECT,
+  withVehiclePhotoSummary,
+  type VehiclePhotoSummaryColumns,
+} from "@/lib/inventory/queries";
+import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
+
+// 車両1台あたり、サイトマップに載せる写真の枚数（掲載順の先頭から）。
+// 画像検索（「ダブルシックス」「XJ40 内装」等）から車両ページに来てもらうための入口。
+// 全枚数（1台50枚以上ある車もある）を載せるとサイトマップが重くなるだけなので、先頭の数枚に絞る。
+const SITEMAP_PHOTOS_PER_VEHICLE = 10;
 
 // サイトマップは1時間ごとに再生成する（FR-SEO-005: サイトマップ自動生成）
 export const revalidate = 3600;
@@ -73,11 +84,18 @@ async function collectDynamicEntries(): Promise<MetadataRoute.Sitemap> {
     libraryEntries,
     ownerArchiveEntries,
   ] = await Promise.all([
-    supabase
-      .from("vehicles")
-      .select("id, updated_at")
-      .eq("status", "published")
-      .is("deleted_at", null),
+    withVehiclePhotoSummary(
+      supabase
+        .from("vehicles")
+        .select(`id, updated_at, ${VEHICLE_PHOTO_SUMMARY_SELECT}`)
+        .eq("status", "published")
+        .is("deleted_at", null),
+      SITEMAP_PHOTOS_PER_VEHICLE,
+    ).returns<
+      Array<
+        { id: string; updated_at: string | null } & VehiclePhotoSummaryColumns
+      >
+    >(),
     supabase
       .from("seo_metas")
       .select("target_id, slug")
@@ -110,11 +128,15 @@ async function collectDynamicEntries(): Promise<MetadataRoute.Sitemap> {
   for (const v of vehicles.data ?? []) {
     const slug = vehicleSlugById.get(v.id);
     if (!slug) continue;
+    const images = (v.photos ?? []).map((photo) =>
+      getVehiclePhotoPublicUrl(photo.storage_path),
+    );
     vehicleEntries.push({
       url: `${SITE_URL}/vehicles/${slug}`,
       lastModified: v.updated_at ? new Date(v.updated_at) : undefined,
       changeFrequency: "weekly",
       priority: 0.8,
+      ...(images.length > 0 ? { images } : {}),
     });
   }
 

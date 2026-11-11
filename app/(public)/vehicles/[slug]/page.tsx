@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { Markdown } from "@/components/ui/markdown";
 import { Editable } from "@/components/live-edit/editable";
 import {
@@ -36,6 +36,12 @@ import { InquiryChannels } from "@/components/layout/inquiry-channels";
 import { buildMailtoUrl } from "@/lib/settings/mailto";
 import { absoluteTitle } from "@/lib/seo/metadata";
 import {
+  buildVehicleMetaDescription,
+  buildVehiclePageTitle,
+} from "@/lib/seo/vehicle-meta";
+import { getSoldVehicleArchivePath } from "@/lib/inventory/queries";
+import {
+  buildVehicleNameParts,
   formatMileage,
   formatModelYear,
   formatShakenValue,
@@ -78,20 +84,6 @@ function formatYesNo(value: boolean | null): string | null {
   return value ? "あり" : "なし";
 }
 
-function buildVehicleDisplayName(vehicle: {
-  manufacturers: { name: string } | null;
-  models: { name: string } | null;
-  model_year: number | null;
-}) {
-  return [
-    vehicle.manufacturers?.name,
-    vehicle.models?.name,
-    vehicle.model_year ? `${vehicle.model_year}年` : null,
-  ]
-    .filter(Boolean)
-    .join(" ");
-}
-
 // FR-INV-011 / FR-SEO-001: 車両ごとに設定されたSEOメタ情報（Title/Description/OGP/Canonical）を
 // generateMetadataで反映する。未設定の場合は車両情報から自動生成した値をフォールバックとして使う。
 export async function generateMetadata({
@@ -108,17 +100,15 @@ export async function generateMetadata({
 
   // SEOメタは車両を引くのと同じ1行から得ている（往復を増やさない）
   const { vehicle, seoMeta } = found;
-  const displayName = buildVehicleDisplayName(vehicle);
   // ルートlayoutの title.template（"%s｜エムガレージ"）が適用されるため、ここで店舗名を
   // 付けると「◯◯｜エムガレージ｜エムガレージ」と二重になる。車両名のみを渡す。
   // 管理画面でSEOタイトルが明示指定されている場合は、その文言をそのまま出したいので
   // template を適用させない（absolute）。
-  const title = displayName;
+  // 車両名には掲載の見出し（「ダブルシックス 特注ワイヤーホイール」等）と年式を含める（lib/seo/vehicle-meta.ts）
+  const title = buildVehiclePageTitle(vehicle);
+  // 説明文は、管理画面のSEO設定が無ければ年式・走行距離・支払総額などの事実から組み立てる
   const description =
-    seoMeta?.description ||
-    vehicle.sales_comment ||
-    vehicle.appeal_points ||
-    `${displayName}の車両詳細ページです。`;
+    seoMeta?.description || buildVehicleMetaDescription(vehicle);
   const canonicalPath = buildPublicPath("vehicle", slug) ?? `/vehicles/${slug}`;
   const canonicalUrl = seoMeta?.canonical_url || `${SITE_URL}${canonicalPath}`;
 
@@ -160,6 +150,12 @@ export default async function Page({
   const found = await getPublicVehicleBySlug(slug);
 
   if (!found) {
+    // 売約済みになった車は、オーナーズアーカイブに載せていればそちらへ恒久的に転送する。
+    // 在庫ページは検索に載り、外部（Instagram・掲載媒体）からもリンクされている。
+    // 売れた途端に404にすると、そのURLが積み上げた評価と、来た人の行き場が両方なくなる。
+    // 「この店はこういう車を納めてきた」という実績のページに渡すのが、来た人にも検索にも筋がよい。
+    const archivePath = await getSoldVehicleArchivePath(slug);
+    if (archivePath) permanentRedirect(archivePath);
     notFound();
   }
 
@@ -185,7 +181,10 @@ export default async function Page({
     public_url: getVehiclePhotoPublicUrl(photo.storage_path),
   }));
   // UIUXデザイナーレビュー指摘: ギャラリー画像のalt属性に使う車両名（メーカー・モデル・年式）
-  const vehicleName = buildVehicleDisplayName(vehicle);
+  const vehicleName = buildVehiclePageTitle(vehicle);
+  // 掲載の見出しのうち、車名に入れなかった売り文句（「特注ワイヤーホイール」「ワンオーナー車」等）。
+  // タイトルを短く保つかわりに、車名のすぐ下に一行で出す
+  const { catchPhrase } = buildVehicleNameParts(vehicle);
 
   // 第3要素は車両テーブルの列名。ライブ編集（管理画面から公開画面を見ながら直す）で
   // 「画面のこの文章」と「DBのどの列」を対応付けるために持つ（lib/live-edit/registry.ts）。
@@ -207,7 +206,7 @@ export default async function Page({
   // 問い合わせ窓口はInstagramのDMに統一し、使っていない人向けに電話・メールを添える
   // （2026-11-08、店主の判断。components/layout/inquiry-channels.tsx）。
   // InstagramのDMは最初の文章を入れた状態で開けないため、ボタンを押したときに
-  // 車名とこのページのURLをコピーし、DM画面では貼り付けるだけで「どの車か」が伝わるようにする。
+  // 車名とこのページのURLをコピーし、メッセージの入力欄では貼り付けるだけで「どの車か」が伝わるようにする。
   // メールは件名に車名、本文の書き出しにURLを入れておく。
   const instagram = findInstagramContact(settings.external_links);
   const inquiryVehicleTitle =
@@ -219,7 +218,7 @@ export default async function Page({
   const structuredData = buildVehicleStructuredData({
     vehicle,
     name: vehicleName,
-    description: seoMeta?.description ?? vehicle.sales_comment,
+    description: seoMeta?.description || buildVehicleMetaDescription(vehicle),
     images: photosWithUrl.map((p) => p.public_url),
     url: canonicalUrl,
   });
@@ -378,9 +377,14 @@ export default async function Page({
         <VehicleStatusBadge status={vehicle.status} />
       </div>
       <h1 className="text-charcoal-900 mt-3 font-serif text-3xl font-bold">
-        {vehicle.manufacturers?.name} {vehicle.models?.name}
-        {vehicle.model_year ? `（${vehicle.model_year}年）` : ""}
+        {/* 車名はグレードまで（「ディムラー ダブルシックス（1990年式）」）。
+            「ディムラー ディムラー」だけでは何の車かも、探す人の言葉（ダブルシックス）も伝わらない一方、
+            売り文句まで入れると長くて読みにくいため、売り文句は下の一行に分ける */}
+        {vehicleName}
       </h1>
+      {catchPhrase && (
+        <p className="text-charcoal-700 mt-2 text-base">{catchPhrase}</p>
+      )}
       {/* 購入検討者が最終的に比較するのは支払総額のため、登録されていればそちらを主役にし、
           車両本体価格を併記する。支払総額が未確定のあいだは本体価格のみを出す
           （諸費用が分からない段階で総額らしき数字を見せない）。 */}
@@ -495,7 +499,7 @@ export default async function Page({
             k="vehicle.cta.instagramHint"
             description="車両詳細 Instagram DMボタンの下の案内文"
           >
-            ボタンを押すと、この車の名前とページのURLがコピーされます。DMの入力欄に貼り付けて送ってください。
+            ボタンを押すと、この車の名前とページのURLがコピーされます。Instagramの「メッセージ」を開いて、入力欄に貼り付けて送ってください。
           </SiteText>
         }
       />

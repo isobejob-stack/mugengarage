@@ -1,4 +1,5 @@
 import { getSessionId } from "@/lib/engagement/session";
+import { buildVehicleName } from "@/lib/inventory/display";
 import { getPublicFavoriteVehicles } from "@/lib/engagement/queries";
 import { getLeadVehiclePhotoPaths } from "@/lib/inventory/queries";
 import { getVehiclePhotoPublicUrl } from "@/lib/inventory/storage";
@@ -11,11 +12,16 @@ import { FavoriteIconButton } from "@/components/engagement/favorite-icon-button
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { SiteText } from "@/components/live-edit/site-text";
 
-export const metadata = buildPageMetadata({
-  title: "お気に入り",
-  description: "お気に入りに登録したクラシックJaguarの一覧です。",
-  path: "/favorites",
-});
+// お気に入りは来訪者ごとに中身が違い、検索から来た人には空のページになる。
+// 検索結果に出す意味がなく、中身の薄いページとして評価を下げる要因にもなるため、索引の対象から外す。
+export const metadata = {
+  ...buildPageMetadata({
+    title: "お気に入り",
+    description: "お気に入りに登録した在庫車両の一覧です。",
+    path: "/favorites",
+  }),
+  robots: { index: false, follow: true },
+};
 
 // SCR-PUB-004: お気に入り一覧（匿名セッションIDに紐づく車両を表示、FR-FAV-002）
 //
@@ -72,13 +78,8 @@ export default async function Page() {
           <ul className="mt-6 grid grid-cols-2 gap-3 sm:gap-6 md:gap-8">
             {vehicles.map((v, index) => {
               if (!v.slug) return null;
-              const vehicleName = [
-                v.manufacturers?.name,
-                v.models?.name,
-                v.grades?.name,
-              ]
-                .filter(Boolean)
-                .join(" ");
+              // 車名は車両ページと同じ組み立て方（lib/inventory/display.ts）
+              const vehicleName = buildVehicleName(v);
               return (
                 <li key={v.id} className="relative">
                   {/* この画面ではハートは常に登録済み。押すと解除になる

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   findInstagramContact,
-  instagramHrefFor,
+  instagramLinkFor,
   isMobileDevice,
   parseInstagramUrl,
 } from "@/lib/settings/sns";
@@ -18,11 +18,10 @@ const SHARED_INSTAGRAM_URL =
   "https://www.instagram.com/mgarage9333?obrf=MWUxYjBsN3drd28yOQ==";
 
 describe("parseInstagramUrl", () => {
-  it("共有メニューのURLからアカウント名を取り出し、DM画面のURLを組み立てる", () => {
+  it("共有メニューのURLからアカウント名を取り出し、追跡用のパラメータを外したプロフィールのURLにする", () => {
     expect(parseInstagramUrl(SHARED_INSTAGRAM_URL)).toEqual({
       username: "mgarage9333",
       profileUrl: "https://www.instagram.com/mgarage9333/",
-      dmUrl: "https://ig.me/m/mgarage9333",
     });
   });
 
@@ -65,7 +64,7 @@ describe("findInstagramContact", () => {
       { label: "Instagram", url: SHARED_INSTAGRAM_URL, description: null },
     ]);
 
-    expect(contact?.dmUrl).toBe("https://ig.me/m/mgarage9333");
+    expect(contact?.profileUrl).toBe("https://www.instagram.com/mgarage9333/");
   });
 
   it("登録が無ければ null（問い合わせボタンを出さない）", () => {
@@ -73,8 +72,11 @@ describe("findInstagramContact", () => {
   });
 });
 
-describe("ボタンの行き先（パソコンはプロフィール、スマホはDM）", () => {
-  // DMはログインが必要で、パソコンのブラウザではログイン画面しか出ない（2026-11-11 の指摘）
+describe("ボタンの行き先と開き方", () => {
+  // 2026-11-11 の報告:
+  // - パソコン: DMリンクはログイン画面しか出ない
+  // - iPhone の Chrome: DMの短縮リンク（ig.me）でアプリが入っているのに App Store が開く・読み込み中で止まる
+  // どの端末でもプロフィールを直接開き、スマホでは同じタブで開く（アプリへの引き渡しを妨げない）
   const contact = parseInstagramUrl(SHARED_INSTAGRAM_URL)!;
 
   const IPHONE =
@@ -86,18 +88,31 @@ describe("ボタンの行き先（パソコンはプロフィール、スマホ�
   const WINDOWS =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 
-  it("スマホはDM画面を開く", () => {
-    expect(instagramHrefFor(contact, isMobileDevice(IPHONE))).toBe(
-      "https://ig.me/m/mgarage9333",
-    );
-    expect(isMobileDevice(ANDROID)).toBe(true);
+  it("スマホはプロフィールを同じタブで開く（転送を挟む短縮リンクや新しいタブを使わない）", () => {
+    expect(instagramLinkFor(contact, isMobileDevice(IPHONE))).toEqual({
+      href: "https://www.instagram.com/mgarage9333/",
+      target: "_self",
+    });
+    expect(instagramLinkFor(contact, isMobileDevice(ANDROID))).toEqual({
+      href: "https://www.instagram.com/mgarage9333/",
+      target: "_self",
+    });
   });
 
-  it("パソコンはログインなしで見られるプロフィールを開く", () => {
-    expect(instagramHrefFor(contact, isMobileDevice(WINDOWS))).toBe(
-      "https://www.instagram.com/mgarage9333/",
-    );
+  it("パソコンはログインなしで見られるプロフィールを新しいタブで開く", () => {
+    expect(instagramLinkFor(contact, isMobileDevice(WINDOWS))).toEqual({
+      href: "https://www.instagram.com/mgarage9333/",
+      target: "_blank",
+    });
     expect(isMobileDevice(MAC, 0)).toBe(false);
+  });
+
+  it("どの端末でも ig.me（DMの短縮リンク）は使わない", () => {
+    for (const ua of [IPHONE, ANDROID, MAC, WINDOWS]) {
+      expect(instagramLinkFor(contact, isMobileDevice(ua)).href).not.toContain(
+        "ig.me",
+      );
+    }
   });
 
   it("Macを名乗るiPad（タッチ操作できる）はスマホと同じ扱い", () => {
