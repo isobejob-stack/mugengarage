@@ -206,7 +206,7 @@ export default async function Page({
   // 問い合わせ窓口はInstagramのDMに統一し、使っていない人向けに電話・メールを添える
   // （2026-11-08、店主の判断。components/layout/inquiry-channels.tsx）。
   // InstagramのDMは最初の文章を入れた状態で開けないため、ボタンを押したときに
-  // 車名とこのページのURLをコピーし、DM画面では貼り付けるだけで「どの車か」が伝わるようにする。
+  // 車名とこのページのURLをコピーし、メッセージの入力欄では貼り付けるだけで「どの車か」が伝わるようにする。
   // メールは件名に車名、本文の書き出しにURLを入れておく。
   const instagram = findInstagramContact(settings.external_links);
   const inquiryVehicleTitle =
@@ -499,7 +499,7 @@ export default async function Page({
             k="vehicle.cta.instagramHint"
             description="車両詳細 Instagram DMボタンの下の案内文"
           >
-            ボタンを押すと、この車の名前とページのURLがコピーされます。DMの入力欄に貼り付けて送ってください。
+            ボタンを押すと、この車の名前とページのURLがコピーされます。Instagramの「メッセージ」を開いて、入力欄に貼り付けて送ってください。
           </SiteText>
         }
       />

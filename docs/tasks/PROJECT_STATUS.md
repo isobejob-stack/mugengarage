@@ -113,7 +113,9 @@ curl -s -o /dev/null -w "%{http_code}" -X POST https://mugengarage.vercel.app/ap
    2. 管理画面 > 設定 > 店舗情報・リンク で次を入れて保存
       - 「掲載媒体・公式SNS」にリンク名「Instagram」 URL `https://www.instagram.com/mgarage9333/`
       - 「電話番号」「メールアドレス」（お問い合わせの窓口の欄）
-   Instagramのボタンは DM画面（`https://ig.me/m/mgarage9333`）を直接開く。車両詳細では、押すと車名とURLがコピーされる。
+   Instagramのボタンは、どの端末でもプロフィール（`https://www.instagram.com/mgarage9333/`）を開く。スマホでは同じタブで開く
+   （2026-11-11、iPhone の Chrome で DM の短縮リンク ig.me が App Store に飛ぶ・読み込み中で止まる報告があったため。`lib/settings/sns.ts`）。
+   DMはプロフィールの「メッセージ」から。車両詳細では、押すと車名とURLがコピーされる。
    出る場所: ヘッダー、フッター、トップ、在庫一覧（一覧の下）、車両詳細（上部・写真が無いとき・下部固定バー）、
    お問い合わせ、店舗情報。未入力の窓口は出さない（components/layout/inquiry-channels.tsx）
 

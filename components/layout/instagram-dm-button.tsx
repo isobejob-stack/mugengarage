@@ -3,7 +3,7 @@
 import { useSyncExternalStore, type ReactNode } from "react";
 import { Button, type ButtonSize } from "@/components/ui/button";
 import {
-  instagramHrefFor,
+  instagramLinkFor,
   isMobileDevice,
   type InstagramContact,
 } from "@/lib/settings/sns";
@@ -12,17 +12,18 @@ import {
 const subscribeNothing = () => () => {};
 const detectMobile = () =>
   isMobileDevice(navigator.userAgent, navigator.maxTouchPoints);
-// サーバーでは端末が分からないので、どの端末でも開けるプロフィールを出しておく
+// サーバーでは端末が分からないので、パソコン向け（新しいタブで開く）として出しておく
 const assumeDesktop = () => false;
 
 // Instagramで問い合わせるボタン。
-// スマホ・タブレットではDM画面（lib/settings/sns.ts の dmUrl）、パソコンではプロフィールを開く。
-// DMはログインが必要で、パソコンのブラウザではログイン画面しか出ないため（instagramHrefFor）。
+// どの端末でもお店のプロフィールを開き、スマホでは同じタブで開く（lib/settings/sns.ts の instagramLinkFor）。
+// 以前のスマホ向けDM直通リンク（ig.me）は、iPhone の Chrome でアプリに渡らず App Store が開くことがあったため。
+// DMはプロフィールの「メッセージ」から送ってもらう。
 //
 // LINEなどは最初の文章を入れた状態でトークを開けるが、InstagramのDMはそれができない。車両ページから問い合わせた人が
 // 「どの車のことか」を自分で打ち込む手間を減らすため、copyText を渡すと
-// ボタンを押した時点で車名とURLをクリップボードに入れる。DM画面では貼り付けるだけで済む。
-// コピーに失敗しても（権限が無い等）DM画面はそのまま開く。
+// ボタンを押した時点で車名とURLをクリップボードに入れる。メッセージの入力欄では貼り付けるだけで済む。
+// コピーに失敗しても（権限が無い等）Instagramはそのまま開く。
 //
 // 色はInstagramのブランドカラー（マゼンタ）ではなく、サイトの主ボタンと同じ深緑にする。
 // マゼンタは英国クラシックの落ち着いた配色から浮き、店主の評価も悪かった（2026-11-08）。
@@ -46,9 +47,12 @@ export function InstagramDmButton({
     assumeDesktop,
   );
 
+  const link = instagramLinkFor(instagram, isMobile);
+
   return (
     <Button
-      href={instagramHrefFor(instagram, isMobile)}
+      href={link.href}
+      target={link.target}
       variant="primary"
       size={size}
       className={className}
