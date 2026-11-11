@@ -539,7 +539,7 @@ export default async function Page({
             </p>
             {instagram && (
               <InstagramDmButton
-                href={instagram.dmUrl}
+                instagram={instagram}
                 size="md"
                 copyText={inquiryCopyText}
               >
@@ -689,7 +689,7 @@ export default async function Page({
             )}
             {instagram ? (
               <InstagramDmButton
-                href={instagram.dmUrl}
+                instagram={instagram}
                 size="sm"
                 className="w-full max-w-xs whitespace-nowrap sm:px-5 sm:py-3 sm:text-base"
                 copyText={inquiryCopyText}

@@ -1,9 +1,23 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useSyncExternalStore, type ReactNode } from "react";
 import { Button, type ButtonSize } from "@/components/ui/button";
+import {
+  instagramHrefFor,
+  isMobileDevice,
+  type InstagramContact,
+} from "@/lib/settings/sns";
 
-// InstagramのDM画面を開くボタン（lib/settings/sns.ts の dmUrl へ飛ぶ）。
+// 端末の種類は表示中に変わらないので、購読するものは無い
+const subscribeNothing = () => () => {};
+const detectMobile = () =>
+  isMobileDevice(navigator.userAgent, navigator.maxTouchPoints);
+// サーバーでは端末が分からないので、どの端末でも開けるプロフィールを出しておく
+const assumeDesktop = () => false;
+
+// Instagramで問い合わせるボタン。
+// スマホ・タブレットではDM画面（lib/settings/sns.ts の dmUrl）、パソコンではプロフィールを開く。
+// DMはログインが必要で、パソコンのブラウザではログイン画面しか出ないため（instagramHrefFor）。
 //
 // LINEなどは最初の文章を入れた状態でトークを開けるが、InstagramのDMはそれができない。車両ページから問い合わせた人が
 // 「どの車のことか」を自分で打ち込む手間を減らすため、copyText を渡すと
@@ -14,21 +28,27 @@ import { Button, type ButtonSize } from "@/components/ui/button";
 // マゼンタは英国クラシックの落ち着いた配色から浮き、店主の評価も悪かった（2026-11-08）。
 // 行き先がInstagramであることは、ボタン内のマークと文言で伝える。
 export function InstagramDmButton({
-  href,
+  instagram,
   size = "md",
   className,
   copyText,
   children,
 }: {
-  href: string;
+  instagram: InstagramContact;
   size?: ButtonSize;
   className?: string;
   copyText?: string;
   children: ReactNode;
 }) {
+  const isMobile = useSyncExternalStore(
+    subscribeNothing,
+    detectMobile,
+    assumeDesktop,
+  );
+
   return (
     <Button
-      href={href}
+      href={instagramHrefFor(instagram, isMobile)}
       variant="primary"
       size={size}
       className={className}

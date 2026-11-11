@@ -46,7 +46,7 @@ export async function InquiryChannels({
     <div className={className}>
       {instagram && (
         <InstagramDmButton
-          href={instagram.dmUrl}
+          instagram={instagram}
           size={size}
           copyText={copyText}
         >

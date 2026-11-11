@@ -75,3 +75,24 @@ export function findInstagramContact(
   }
   return null;
 }
+
+// ボタンの行き先を、見ている端末で選ぶ（2026-11-11）。
+//
+// ig.me のDMリンクは、Instagramにログインしていないと開けない。スマホでアプリが入っていれば
+// アプリのDM画面が直接開くが、パソコンのブラウザではログイン画面が出るだけで、
+// お店のアカウントがどんなものかも見えない（店主から「ログイン画面が出る」と指摘があった）。
+// プロフィールはログインしていなくても見られ、そこからDMにも進めるため、
+// パソコンではプロフィール、スマホ・タブレットではDMを開く。
+//
+// iPadOS は既定で Mac と同じ userAgent を名乗るため、タッチ操作の可否であわせて見分ける。
+export function isMobileDevice(userAgent: string, maxTouchPoints = 0): boolean {
+  if (/iPhone|iPad|iPod|Android/i.test(userAgent)) return true;
+  return /Macintosh/.test(userAgent) && maxTouchPoints > 1;
+}
+
+export function instagramHrefFor(
+  contact: InstagramContact,
+  isMobile: boolean,
+): string {
+  return isMobile ? contact.dmUrl : contact.profileUrl;
+}

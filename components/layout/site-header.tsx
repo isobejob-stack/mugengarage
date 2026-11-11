@@ -37,7 +37,7 @@ export async function SiteHeader() {
           {/* 店主いわく、InstagramのDMが最も返信が早い。どのページからでも1タップで届くよう常設する。
               管理画面の「掲載媒体・公式SNS」にInstagramが無いあいだは出さない（lib/settings/sns.ts）。 */}
           {instagram && (
-            <InstagramDmButton href={instagram.dmUrl} size="md">
+            <InstagramDmButton instagram={instagram} size="md">
               <SiteText
                 k="header.instagram"
                 description="ヘッダー InstagramのDMボタンの文言"
