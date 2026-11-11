@@ -168,7 +168,7 @@ export default async function Page() {
                 在庫車両を見る
               </Button>
               {instagram && (
-                <InstagramDmButton href={instagram.dmUrl} size="lg">
+                <InstagramDmButton instagram={instagram} size="lg">
                   <SiteText
                     k="home.hero.instagram"
                     description="トップページ 冒頭のInstagram DMボタンの文言"
@@ -212,7 +212,7 @@ export default async function Page() {
                 在庫車両を見る
               </Button>
               {instagram && (
-                <InstagramDmButton href={instagram.dmUrl} size="lg">
+                <InstagramDmButton instagram={instagram} size="lg">
                   <SiteText
                     k="home.hero.instagram"
                     description="トップページ 冒頭のInstagram DMボタンの文言"

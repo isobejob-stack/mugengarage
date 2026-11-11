@@ -162,7 +162,7 @@ export default async function Page({
               在庫車両を見る
             </Button>
             {instagram ? (
-              <InstagramDmButton href={instagram.dmUrl} size="md">
+              <InstagramDmButton instagram={instagram} size="md">
                 InstagramのDMで相談する
               </InstagramDmButton>
             ) : (

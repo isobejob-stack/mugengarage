@@ -61,7 +61,7 @@ export default async function Page() {
             </SiteText>
           </p>
           <div className="mt-4">
-            <InstagramDmButton href={instagram.dmUrl} size="lg">
+            <InstagramDmButton instagram={instagram} size="lg">
               <SiteText
                 k="contact.instagram.button"
                 description="お問い合わせ InstagramのDMボタンの文言"

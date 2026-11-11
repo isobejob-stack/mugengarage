@@ -153,7 +153,7 @@ export async function SiteFooter() {
           {/* InstagramのDMは返信が早い問い合わせ窓口（lib/settings/sns.ts）。下の一覧のリンクとは別に、
               問い合わせのボタンとして見せる */}
           {instagram && (
-            <InstagramDmButton href={instagram.dmUrl} size="md">
+            <InstagramDmButton instagram={instagram} size="md">
               <SiteText
                 k="footer.instagram"
                 description="フッター InstagramのDMボタンの文言"

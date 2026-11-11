@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { findInstagramContact, parseInstagramUrl } from "@/lib/settings/sns";
+import {
+  findInstagramContact,
+  instagramHrefFor,
+  isMobileDevice,
+  parseInstagramUrl,
+} from "@/lib/settings/sns";
 import { buildMailtoUrl } from "@/lib/settings/mailto";
 import { siteSettingsFormSchema } from "@/lib/settings/schema";
 
@@ -65,6 +70,38 @@ describe("findInstagramContact", () => {
 
   it("登録が無ければ null（問い合わせボタンを出さない）", () => {
     expect(findInstagramContact([])).toBeNull();
+  });
+});
+
+describe("ボタンの行き先（パソコンはプロフィール、スマホはDM）", () => {
+  // DMはログインが必要で、パソコンのブラウザではログイン画面しか出ない（2026-11-11 の指摘）
+  const contact = parseInstagramUrl(SHARED_INSTAGRAM_URL)!;
+
+  const IPHONE =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
+  const ANDROID =
+    "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36";
+  const MAC =
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15";
+  const WINDOWS =
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
+
+  it("スマホはDM画面を開く", () => {
+    expect(instagramHrefFor(contact, isMobileDevice(IPHONE))).toBe(
+      "https://ig.me/m/mgarage9333",
+    );
+    expect(isMobileDevice(ANDROID)).toBe(true);
+  });
+
+  it("パソコンはログインなしで見られるプロフィールを開く", () => {
+    expect(instagramHrefFor(contact, isMobileDevice(WINDOWS))).toBe(
+      "https://www.instagram.com/mgarage9333/",
+    );
+    expect(isMobileDevice(MAC, 0)).toBe(false);
+  });
+
+  it("Macを名乗るiPad（タッチ操作できる）はスマホと同じ扱い", () => {
+    expect(isMobileDevice(MAC, 5)).toBe(true);
   });
 });
 
