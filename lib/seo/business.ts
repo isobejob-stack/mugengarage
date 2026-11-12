@@ -58,11 +58,47 @@ export const BUSINESS_KNOWS_ABOUT = [
   "XJ-S",
   "ダブルシックス",
   "ジャガーの旧車",
+  "クラシックジャガー",
+  "クラシックカー",
   "英国車",
+  "ジャガーの整備・修理",
 ] as const;
 
-// 店の紹介文（構造化データ・説明文・llms.txt で共通）。「デイムラー」は検索で最も多い表記のため括弧で添える
-export const BUSINESS_DESCRIPTION = `${BUSINESS_AREA}のジャガー・ディムラー（デイムラー）専門店。XJ6・XJ-S・ダブルシックスなど英国の旧車を中心に、30年以上の実績で販売・整備・修理・買取を行っています。`;
+// 店の紹介文（構造化データ・説明文・llms.txt で共通）。「デイムラー」は検索で最も多い表記のため括弧で添える。
+// 探す人の言い方は「ジャガー 旧車」「ジャガー クラシックカー」「クラシックジャガー 専門店」と割れているため（2026-11-12）、
+// 旧車・クラシックカーの両方を一度ずつ入れる
+export const BUSINESS_DESCRIPTION = `${BUSINESS_AREA}のジャガー・ディムラー（デイムラー）専門店。XJ6・XJ-S・ダブルシックスなどジャガーの旧車・クラシックカーを中心に、30年以上の実績で販売・整備・修理・買取を行っています。`;
+
+// お客様の来られる地域（構造化データの areaServed）。2026-11-12 追加。
+//
+// 「ジャガー 東京」「ジャガー 神奈川」のように地域名で探す人に対して、どこの人を相手にしている店かを示す。
+// 川崎市は多摩川をはさんで東京都と接しているため、東京都も入れる。
+// 地域ごとに中身の同じページ（/area/tokyo 等）を量産するのは、Google が「誘導ページ」として
+// 順位を下げる対象にしているのでやらない。地域はこの一覧と、店舗情報・よくある質問の本文で伝える。
+export const BUSINESS_AREA_SERVED = ["神奈川県", "東京都"] as const;
+
+// 取り扱い内容（構造化データの hasOfferCatalog・llms.txt・各ページで共通）。2026-11-12 追加。
+// 名前は探す人の言い方に合わせる（「ジャガー 修理」「ジャガー 整備」「ジャガー 買取」）。
+// 車検はここに入れていない。店として受けているかを確かめてから足す（docs/tasks/SEO_KEYWORDS_2026-11-12.md）
+export const BUSINESS_SERVICES = [
+  {
+    name: "ジャガー・ディムラーの中古車販売",
+    description:
+      "XJ6・XJ-S・ダブルシックスなど、ジャガー・ディムラーの旧車・クラシックカーの販売",
+    path: "/vehicles",
+  },
+  {
+    name: "ジャガー・ディムラーの整備・修理",
+    description:
+      "旧車・クラシックカーの定期的な整備、故障・不調の修理、レストアや部品のご相談",
+    path: "/repair",
+  },
+  {
+    name: "ジャガー・ディムラーの買取",
+    description: "長く乗られたジャガー・ディムラーの買取・売却のご相談",
+    path: "/about",
+  },
+] as const;
 
 // ── 住所 ────────────────────────────────────────────────────────────────
 
@@ -269,6 +305,25 @@ export function buildBusinessGraph(params: {
       },
     })),
     ...(openingHours ? { openingHoursSpecification: openingHours } : {}),
+    // 「ジャガー 東京」「ジャガー 神奈川」で探す人に、相手にしている地域を示す
+    areaServed: BUSINESS_AREA_SERVED.map((name) => ({
+      "@type": "AdministrativeArea",
+      name,
+    })),
+    // 販売だけでなく整備・修理・買取もする店だと、検索エンジンとAIに分かるようにする
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "取り扱い内容",
+      itemListElement: BUSINESS_SERVICES.map((service) => ({
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: service.name,
+          description: service.description,
+          url: `${SITE_URL}${service.path}`,
+        },
+      })),
+    },
     ...(settings.founded_year
       ? { foundingDate: String(settings.founded_year) }
       : {}),

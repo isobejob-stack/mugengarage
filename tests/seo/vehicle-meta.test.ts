@@ -9,6 +9,7 @@ import {
 import {
   buildVehicleListDescription,
   buildVehicleMetaDescription,
+  buildVehicleDocumentTitle,
   buildVehiclePageTitle,
 } from "@/lib/seo/vehicle-meta";
 import { buildVehicleStructuredData } from "@/lib/seo/structured-data";
@@ -130,6 +131,10 @@ describe("車両ページのタイトル・説明文", () => {
   it("タイトルは車名（グレードまで）と年式だけ。売り文句は本文に回す", () => {
     expect(buildVehiclePageTitle(daimler)).toBe(
       "ディムラー ダブルシックス（1990年式）",
+    );
+    // 検索結果のタイトルだけ「の中古車」を付ける（「ダブルシックス 中古」で探されるため）
+    expect(buildVehicleDocumentTitle(daimler)).toBe(
+      "ディムラー ダブルシックス（1990年式）の中古車",
     );
     expect(buildVehicleNameParts(daimler).catchPhrase).toBe(
       "特注ワイヤーホイール",

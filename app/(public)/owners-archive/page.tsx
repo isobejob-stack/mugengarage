@@ -9,9 +9,9 @@ import { SiteText } from "@/components/live-edit/site-text";
 export const dynamic = "force-dynamic";
 
 export const metadata = buildPageMetadata({
-  title: "オーナーズアーカイブ",
+  title: "オーナーズアーカイブ｜ジャガー・ディムラーの販売実績",
   description:
-    "これまでにご成約いただいたクラシックJaguarを、当店の販売実績としてご紹介します。",
+    "これまでにご成約いただいたジャガー・ディムラーの旧車・クラシックカーを、神奈川県川崎市・南足柄市の専門店エムガレージの販売実績としてご紹介します。",
   path: "/owners-archive",
 });
 

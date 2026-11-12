@@ -28,12 +28,20 @@ type VehicleForMeta = Pick<
   models: { name: string } | null;
 };
 
-// 車両ページのタイトル: 「ディムラー ダブルシックス（1990年式）」。
+// 車両ページの車名: 「ディムラー ダブルシックス（1990年式）」。見出し・パンくず・写真の説明・構造化データに使う。
 // 車名はグレードまでにとどめ、売り文句（「特注ワイヤーホイール」等）は本文と説明文に回す
-// （lib/inventory/display.ts の buildVehicleNameParts）。店名（｜エムガレージ）はルートlayoutの title.template が付ける。
+// （lib/inventory/display.ts の buildVehicleNameParts）。
 export function buildVehiclePageTitle(vehicle: VehicleForMeta): string {
   const name = buildVehicleName(vehicle);
   return vehicle.model_year ? `${name}（${vehicle.model_year}年式）` : name;
+}
+
+// 検索結果に出るタイトル（<title>）: 「ディムラー ダブルシックス（1990年式）の中古車」（2026-11-12）。
+// 「ダブルシックス 中古」「XJ6 中古車」のように車名と「中古」で探されるため、末尾に「の中古車」を付ける。
+// 見出しには付けない（ページの中で車名の後ろに「の中古車」と出るのは読みにくい）。
+// 店名（｜エムガレージ）はルートlayoutの title.template が付ける。
+export function buildVehicleDocumentTitle(vehicle: VehicleForMeta): string {
+  return `${buildVehiclePageTitle(vehicle)}の中古車`;
 }
 
 // 車両ページの説明文（検索結果の説明・AIの回答の材料）。

@@ -16,6 +16,7 @@ import {
   serializeStructuredData,
 } from "@/lib/seo/structured-data";
 import { SITE_URL } from "@/lib/site-config";
+import { encyclopediaPageTitle } from "@/lib/seo/search-terms";
 
 // 各詳細ページに固有のtitle/descriptionを与える。従来はルートlayoutの値を継承しており、
 // 検索結果でどのページも同じ文言になっていた（docs/tasks/ISSUE-005）。
@@ -31,7 +32,8 @@ export async function generateMetadata({
   if (!result?.entry) return {};
 
   return buildPageMetadata({
-    title: result.entry.title,
+    // 「ジャガー eタイプ」のように車名の前にメーカー名を付けて探されるため、タイトルにも付ける
+    title: encyclopediaPageTitle(result.entry.title),
     description:
       excerptFromMarkdown(result.entry.body) || "Jaguar図鑑の解説ページです。",
     path: `/encyclopedia/${slug}`,

@@ -16,6 +16,7 @@ import {
   serializeStructuredData,
 } from "@/lib/seo/structured-data";
 import { SITE_URL } from "@/lib/site-config";
+import { libraryPageTitle } from "@/lib/seo/search-terms";
 
 // 各詳細ページに固有のtitle/descriptionを与える。従来はルートlayoutの値を継承しており、
 // 検索結果でどのページも同じ文言になっていた（docs/tasks/ISSUE-005）。
@@ -30,7 +31,8 @@ export async function generateMetadata({
   if (!entry) return {};
 
   return buildPageMetadata({
-    title: entry.title,
+    // 用語は「SUキャブレター とは」の形で探されるため、タイトルもその形にする
+    title: libraryPageTitle(entry.title),
     description:
       excerptFromMarkdown(entry.body) || "クラシックジャガーの用語解説です。",
     path: `/library/${slug}`,

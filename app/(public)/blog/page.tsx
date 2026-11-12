@@ -16,9 +16,9 @@ import { buildPageMetadata } from "@/lib/seo/metadata";
 export const dynamic = "force-dynamic";
 
 export const metadata = buildPageMetadata({
-  title: "ブログ",
+  title: "ブログ｜ジャガー・ディムラーの入庫情報・整備記録・購入ガイド",
   description:
-    "ジャガー・ディムラーの新着入庫・購入ガイド・整備記録・技術解説など、神奈川（川崎市・南足柄市）の専門店エムガレージの視点で綴る読み物をお届けします。",
+    "ジャガー・ディムラーの旧車・クラシックカーの新着入庫・購入ガイド・整備記録・技術解説など、神奈川（川崎市・南足柄市）の専門店エムガレージの視点で綴る読み物をお届けします。",
   path: "/blog",
 });
 

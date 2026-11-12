@@ -37,6 +37,7 @@ import { buildMailtoUrl } from "@/lib/settings/mailto";
 import { absoluteTitle } from "@/lib/seo/metadata";
 import {
   buildVehicleMetaDescription,
+  buildVehicleDocumentTitle,
   buildVehiclePageTitle,
 } from "@/lib/seo/vehicle-meta";
 import { getSoldVehicleArchivePath } from "@/lib/inventory/queries";
@@ -105,7 +106,7 @@ export async function generateMetadata({
   // 管理画面でSEOタイトルが明示指定されている場合は、その文言をそのまま出したいので
   // template を適用させない（absolute）。
   // 車両名には掲載の見出し（「ダブルシックス 特注ワイヤーホイール」等）と年式を含める（lib/seo/vehicle-meta.ts）
-  const title = buildVehiclePageTitle(vehicle);
+  const title = buildVehicleDocumentTitle(vehicle);
   // 説明文は、管理画面のSEO設定が無ければ年式・走行距離・支払総額などの事実から組み立てる
   const description =
     seoMeta?.description || buildVehicleMetaDescription(vehicle);

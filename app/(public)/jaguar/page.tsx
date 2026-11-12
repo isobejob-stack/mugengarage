@@ -19,9 +19,10 @@ import { buildPageMetadata } from "@/lib/seo/metadata";
 export const dynamic = "force-dynamic";
 
 export const metadata = buildPageMetadata({
-  title: "ジャガーを知る",
+  // 「ジャガー 旧車」「ジャガー クラシックカー」で探す人の受け皿（2026-11-12）。見出し（h1）は「ジャガーを知る」のまま
+  title: "ジャガーの旧車・クラシックカーを知る｜歴史と車種の選び方",
   description:
-    "クラシックJaguarとはどういう車で、どんな人に選ばれてきたのか。1930年代の成り立ちから、いま手に入る1990〜2000年代のXJ・XK・Xタイプまでを、ひと続きの読み物としてまとめました。",
+    "クラシックジャガー（ジャガーの旧車）とはどういう車で、どんな人に選ばれてきたのか。1930年代の成り立ちとEタイプから、いま手に入る1990〜2000年代のXJ・XK・Xタイプ、直6・V8・V12エンジンまでを、ひと続きの読み物としてまとめました。",
   path: "/jaguar",
 });
 
@@ -95,7 +96,9 @@ export default async function Page() {
   // 在庫の車名で図鑑を引き当てる（図鑑側は在庫に依存しない設計のまま保つ）。
   const stockModelNames = Array.from(
     new Set(
-      vehicles.map((v) => v.models?.name).filter((n): n is string => Boolean(n)),
+      vehicles
+        .map((v) => v.models?.name)
+        .filter((n): n is string => Boolean(n)),
     ),
   );
   const modernModels = models.filter(
@@ -407,7 +410,8 @@ Xタイプは、ジャガーとしては小柄な4ドアセダンです。ジャ
           </p>
           {stockFrom !== null && stockTo !== null && (
             <p className="text-foreground-muted mt-2 text-base">
-              いまご覧いただけるのは{stockFrom}年〜{stockTo}年式の{vehicles.length}
+              いまご覧いただけるのは{stockFrom}年〜{stockTo}年式の
+              {vehicles.length}
               台です。
             </p>
           )}

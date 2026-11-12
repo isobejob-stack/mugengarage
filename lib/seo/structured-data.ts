@@ -286,3 +286,61 @@ export function buildVehicleStructuredData(params: {
 
   return structuredData;
 }
+
+// 整備・修理のページ（/repair）の構造化データ（2026-11-12）。
+//
+// 「ジャガー 修理」「クラシックカー 整備 神奈川」のように、店のサービスそのものを探す検索に対して、
+// このページが「どの事業者が・どの地域で・何の車の整備修理を受けるか」の説明だと示す。
+// 提供者は全ページに出している事業者の実体（lib/seo/business.ts）と同じ @id を指す。
+export function buildServiceStructuredData(params: {
+  name: string;
+  serviceType: string;
+  description: string;
+  url: string;
+  areaServed: readonly string[];
+  brands: readonly string[];
+}) {
+  const { name, serviceType, description, url, areaServed, brands } = params;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name,
+    serviceType,
+    description,
+    url,
+    provider: publisher,
+    areaServed: areaServed.map((area) => ({
+      "@type": "AdministrativeArea",
+      name: area,
+    })),
+    brand: brands.map((brand) => ({ "@type": "Brand", name: brand })),
+  };
+}
+
+// よくある質問（/faq）の構造化データ（2026-11-12）。
+//
+// Google は2023年から、よくある質問のリッチリザルト（検索結果で質問が開く表示）を
+// 政府・医療の公的サイトに限っているため、検索結果の見た目は変わらない。
+// それでも出すのは、質問と答えの組をそのままの形で機械に渡せるから。
+// AIの回答（Google の AI による概要・ChatGPT・Perplexity）は、こうした問いと答えの組を抜き出しやすい。
+//
+// 答えは画面に出している文章と同じものを渡す（ライブ編集で直した文章を含む。呼び出し側で解決する）。
+// 画面と食い違う答えを構造化データだけに書くと、Google のガイドライン違反になる。
+export function buildFaqPageStructuredData(params: {
+  url: string;
+  items: ReadonlyArray<{ question: string; answer: string }>;
+}) {
+  const { url, items } = params;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    url,
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: { "@type": "Answer", text: item.answer },
+    })),
+  };
+}

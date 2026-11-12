@@ -64,7 +64,9 @@ const PRIORITY_IMAGE_COUNT = 2;
 export async function generateMetadata() {
   const stock = await getPublicVehicleStockSummary();
   return buildPageMetadata({
-    title: "ジャガー・ディムラーの在庫車両（中古車）",
+    // 「ジャガー 中古」「ジャガー 旧車 中古」「ディムラー 中古」「ジャガー 旧車一覧」で探されるため、
+    // 中古車・旧車・一覧の3語を入れる（2026-11-12）
+    title: "ジャガー・ディムラーの中古車・旧車 在庫一覧",
     description: buildVehicleListDescription(stock),
     path: "/vehicles",
   });
