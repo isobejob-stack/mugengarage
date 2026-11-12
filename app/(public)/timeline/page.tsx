@@ -29,9 +29,9 @@ import { SITE_URL } from "@/lib/site-config";
 export const dynamic = "force-dynamic";
 
 export const metadata = buildPageMetadata({
-  title: "Jaguar年表",
+  title: "ジャガーの歴史年表｜1922年の創業から現代まで",
   description:
-    "1922年の創業から現代まで、Jaguarの歩みを年表でたどります。名車の登場とレースでの活躍を時系列で解説します。",
+    "1922年の創業から現代まで、ジャガー（Jaguar）の歴史を年表でたどります。Eタイプ・XJ・XJ-Sなど歴代の名車の登場と、ル・マンなどレースでの活躍を時系列で解説します。",
   path: "/timeline",
 });
 

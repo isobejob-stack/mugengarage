@@ -12,9 +12,11 @@ import { SiteText } from "@/components/live-edit/site-text";
 export const dynamic = "force-dynamic";
 
 export const metadata = buildPageMetadata({
-  title: "Jaguar図鑑",
+  // 「ジャガー 旧車一覧」「ジャガー 歴代モデル」「ジャガー 車種一覧」で探す人の受け皿（2026-11-12）。
+  // 見出し（h1）は「Jaguar図鑑」のまま
+  title: "ジャガー歴代モデル図鑑｜旧車・クラシックカーの車種一覧",
   description:
-    "Eタイプ・XK・Mark2・XJなど、Jaguarの名車を車種ごとに解説します。設計思想・乗り味・他にない特色から、その車を所有するということまで。",
+    "Eタイプ・XK・Mark2・XJ・Sタイプ・Xタイプなど、ジャガー（Jaguar）の歴代モデルとエンジンを車種ごとに解説する図鑑です。旧車・クラシックカーの設計思想・乗り味・特色から、その車を所有するということまで。",
   path: "/encyclopedia",
 });
 

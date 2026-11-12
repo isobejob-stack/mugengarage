@@ -15,7 +15,7 @@ import { SiteText } from "@/components/live-edit/site-text";
 export const dynamic = "force-dynamic";
 
 export const metadata = buildPageMetadata({
-  title: "人気ランキング",
+  title: "ジャガー・ディムラー在庫の人気ランキング",
   description:
     "お気に入り登録の多いクラシックJaguarをランキング形式でご紹介します。いま注目されている車両が分かります。",
   path: "/vehicles/ranking",

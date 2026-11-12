@@ -50,25 +50,36 @@ export function excerptFromMarkdown(
   markdown: string | null | undefined,
   maxLength = 110,
 ): string {
-  if (!markdown) return "";
-
-  const plain = markdown
-    // コードブロック・画像は説明文に不要なので落とす
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
-    // リンクは表示テキストだけ残す
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
-    // 見出し記号・箇条書き記号（行頭のみ。S-TYPE等の語中のハイフンは壊さない）
-    .replace(/^\s{0,3}#{1,6}\s+/gm, " ")
-    .replace(/^\s*[-+*]\s+/gm, " ")
-    .replace(/^\s*>\s?/gm, " ")
-    // 強調・インラインコード・表の区切り
-    .replace(/[*_`|]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-
+  const plain = plainTextFromMarkdown(markdown);
   if (plain.length <= maxLength) return plain;
   return `${plain.slice(0, maxLength)}…`;
+}
+
+// Markdownの記法を落として、1続きの平文にする（切り詰めない）。
+// よくある質問の答えのように、画面に出している文章と同じ中身を構造化データにも渡したいときに使う。
+export function plainTextFromMarkdown(
+  markdown: string | null | undefined,
+): string {
+  if (!markdown) return "";
+
+  return (
+    markdown
+      // コードブロック・画像は説明文に不要なので落とす
+      .replace(/```[\s\S]*?```/g, " ")
+      .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+      // リンクは表示テキストだけ残す
+      .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+      // 見出し記号・箇条書き記号（行頭のみ。S-TYPE等の語中のハイフンは壊さない）
+      .replace(/^\s{0,3}#{1,6}\s+/gm, " ")
+      .replace(/^\s*[-+*]\s+/gm, " ")
+      .replace(/^\s*>\s?/gm, " ")
+      // 強調・インラインコード・表の区切り
+      .replace(/[*_`|]/g, "")
+      // 区切り線（---）は文章ではない
+      .replace(/(^|\s)-{3,}(?=\s|$)/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+  );
 }
 
 // 管理画面のSEO設定（seo_metas）で明示的にタイトルが指定されている場合に使う。

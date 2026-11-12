@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button";
 import { SiteText } from "@/components/live-edit/site-text";
 
 export const metadata = buildPageMetadata({
-  title: "ライブラリ",
+  title: "ジャガー用語ライブラリ｜旧車・クラシックカーの専門用語",
   description:
-    "SUキャブレター、モノコックボディ、マッチングナンバーなど、クラシックジャガー（Jaguar）に関する用語を辞典形式で解説します。",
+    "SUキャブレター、モノコックボディ、マッチングナンバーなど、クラシックジャガー（Jaguar）とディムラーの旧車に関する専門用語を辞典形式で解説します。",
   path: "/library",
 });
 

@@ -10,7 +10,9 @@ import { findInstagramContact } from "@/lib/settings/sns";
 import { SITE_URL } from "@/lib/site-config";
 import {
   BUSINESS_ALTERNATE_NAMES,
+  BUSINESS_AREA_SERVED,
   BUSINESS_DESCRIPTION,
+  BUSINESS_SERVICES,
   DAIMLER_SPELLINGS,
 } from "@/lib/seo/business";
 
@@ -55,8 +57,10 @@ export function buildLlmsTxt(params: {
   settings: SiteSettings;
   vehicles: LlmsVehicle[];
   generatedAt: Date;
+  /** よくある質問（lib/seo/faq.ts の resolveFaqItems の結果）。画面と同じ文章を渡す */
+  faq?: ReadonlyArray<{ question: string; answer: string }>;
 }): string {
-  const { settings, vehicles, generatedAt } = params;
+  const { settings, vehicles, generatedAt, faq = [] } = params;
   const instagram = findInstagramContact(settings.external_links);
   const date = generatedAt.toLocaleDateString("ja-JP", {
     timeZone: "Asia/Tokyo",
@@ -77,7 +81,22 @@ export function buildLlmsTxt(params: {
       ? `- 問い合わせ: InstagramのDM（${instagram.profileUrl}）がいちばん早く返信できる窓口です`
       : null,
     settings.founded_year ? `- 創業: ${settings.founded_year}年` : null,
+    // 地域名で尋ねられたとき（「東京でジャガーの旧車を見てもらえる店は？」）に答えられるようにする
+    `- 拠点: 神奈川県の川崎市と南足柄市の2か所（川崎市は多摩川をはさんで東京都と接し、横浜市とも隣り合っています）`,
+    `- 対応地域: ${BUSINESS_AREA_SERVED.join("・")}`,
   ].filter(Boolean);
+
+  const services = BUSINESS_SERVICES.map(
+    (service) =>
+      `- [${service.name}](${SITE_URL}${service.path}): ${service.description}`,
+  );
+
+  const faqLines = faq.flatMap((item) => [
+    `### ${item.question}`,
+    "",
+    item.answer,
+    "",
+  ]);
 
   const links = settings.external_links.map(
     (link) =>
@@ -99,6 +118,10 @@ export function buildLlmsTxt(params: {
     "",
     ...shopFacts,
     "",
+    "## 取り扱い内容",
+    "",
+    ...services,
+    "",
     ...(links.length > 0 ? ["## 公式SNS・掲載媒体", "", ...links, ""] : []),
     `## 在庫車両（${date}時点・${stock.length}台）`,
     "",
@@ -109,15 +132,19 @@ export function buildLlmsTxt(params: {
     "## 主なページ",
     "",
     `- [在庫車両一覧](${SITE_URL}/vehicles): 掲載中の全車両。支払総額・走行距離・修復歴・車検の有無を掲載`,
-    `- [ジャガーを知る](${SITE_URL}/jaguar): ジャガーの歴史と車種の選び方の読み物`,
+    `- [整備・修理](${SITE_URL}/repair): ジャガー・ディムラーの旧車・クラシックカーの整備・修理・故障のご相談`,
+    `- [ジャガーの故障しやすいところ](${SITE_URL}/repair/troubles): 冷却系・ゴム部品・電装・サビなど年代共通のことと、直6・V12・V8のエンジン別、車種別の傾向、買う前の確認点`,
+    `- [よくある質問](${SITE_URL}/faq): 来店・アクセス・車選び・整備修理・買取についての質問と答え`,
+    `- [ジャガーを知る](${SITE_URL}/jaguar): ジャガーの旧車・クラシックカーの歴史と車種の選び方の読み物`,
     `- [ブログ](${SITE_URL}/blog): 入庫のご紹介・購入ガイド・整備記録・技術解説`,
-    `- [Jaguar図鑑](${SITE_URL}/encyclopedia): 車種・シリーズ・エンジンの解説`,
+    `- [ジャガー歴代モデル図鑑](${SITE_URL}/encyclopedia): 歴代の車種・シリーズ・エンジンの解説`,
     `- [用語ライブラリ](${SITE_URL}/library): ジャガーの専門用語の解説`,
     `- [年表](${SITE_URL}/timeline): 1922年の創業からのジャガーの歩み`,
     `- [オーナーズアーカイブ](${SITE_URL}/owners-archive): 納車した車両の記録`,
     `- [店舗情報・アクセス](${SITE_URL}/about)`,
     `- [お問い合わせ](${SITE_URL}/contact)`,
     "",
+    ...(faqLines.length > 0 ? ["## よくある質問", "", ...faqLines] : []),
   ];
 
   return sections.join("\n");

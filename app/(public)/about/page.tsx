@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import { EditableProse } from "@/components/live-edit/editable-prose";
 import { getSiteSettings } from "@/lib/settings/queries";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardTitle, CardMeta } from "@/components/ui/card";
@@ -11,9 +13,10 @@ import { findInstagramContact } from "@/lib/settings/sns";
 export const dynamic = "force-dynamic";
 
 export const metadata = buildPageMetadata({
-  title: "店舗情報・アクセス",
+  // 「ジャガー 神奈川」「ジャガー 川崎」「ジャガー 東京」のように地域名で探す人の受け皿（2026-11-12）
+  title: "店舗情報・アクセス｜神奈川県川崎市・南足柄市（東京・横浜から）",
   description:
-    "神奈川県川崎市・南足柄市の2か所に拠点を持つ、ジャガー・ディムラー（デイムラー）専門店エムガレージの店舗情報とアクセス。営業時間・定休日・電話番号と、公式Instagram・掲載媒体をご案内します。",
+    "神奈川県川崎市・南足柄市の2か所に拠点を持つ、ジャガー・ディムラー（デイムラー）専門店エムガレージの店舗情報とアクセス。東京都内・横浜市からもお越しいただけます。営業時間・定休日・電話番号と、公式Instagram・掲載媒体をご案内します。",
   path: "/about",
 });
 
@@ -27,7 +30,7 @@ const SERVICES = [
   {
     key: "maintenance",
     title: "整備・修理",
-    body: "旧車特有の症状を踏まえた整備・修理を行います。過去の作業内容は整備実績のページでご覧いただけます。",
+    body: "旧車特有の症状を踏まえた整備・修理を行います。過去の作業内容はブログの「整備記録」でご覧いただけます。",
   },
   {
     key: "purchase",
@@ -101,8 +104,7 @@ export default async function Page() {
       </h1>
       <p className="text-foreground-muted mt-4">
         <SiteText k="about.lead" description="店舗情報 冒頭のあいさつ文">
-          エムガレージは、クラシックJaguarを専門に取り扱う販売・整備工場です。
-          Eタイプ、XK、Mark2をはじめとする往年のJaguarについて、販売から整備・修理・買取まで一貫して承っております。
+          エムガレージは、ジャガー・ディムラー（デイムラー）を専門に取り扱う販売・整備の店です。XJ6・XJ-S・ダブルシックスをはじめとするジャガーの旧車・クラシックカーについて、販売から整備・修理・買取まで一貫して承っております。
         </SiteText>
       </p>
 
@@ -172,6 +174,28 @@ export default async function Page() {
           </Editable>
         </section>
       )}
+
+      {/* 地域名で探す人（「ジャガー 東京」「ジャガー 横浜」）に、来られる範囲を伝える（2026-11-12）。
+          地域ごとのページは作らない（同じ中身のページを地域名だけ替えて並べると、Google が順位を下げる対象にしている） */}
+      <section className="mt-12">
+        <h2 className="text-charcoal-900 font-serif text-xl font-bold tracking-tight sm:text-2xl">
+          <SiteText
+            k="about.area.heading"
+            description="店舗情報 見出し（拠点・対応エリア）"
+          >
+            拠点・対応エリア
+          </SiteText>
+        </h2>
+        <EditableProse
+          k="about.area.body"
+          description="店舗情報「拠点・対応エリア」の本文"
+          className="prose mt-4 max-w-none"
+        >
+          {`拠点は神奈川県の川崎市と南足柄市の2か所です。川崎市は多摩川をはさんで東京都と接し、横浜市とも隣り合っているため、東京都内・横浜市からもお越しいただけます。
+
+どちらの拠点でお会いするかは、ご覧になりたい車両の場所とご都合に合わせてご案内します。ご来店の前にご連絡ください。`}
+        </EditableProse>
+      </section>
 
       {settings.external_links.length > 0 && (
         <section className="mt-12">
@@ -295,6 +319,21 @@ export default async function Page() {
             </Card>
           ))}
         </div>
+        <p className="mt-4 flex flex-wrap gap-x-5">
+          {[
+            { href: "/repair", label: "整備・修理について" },
+            { href: "/faq", label: "よくある質問" },
+          ].map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-primary-700 ease-standard inline-flex min-h-11 items-center gap-1.5 font-medium underline decoration-1 underline-offset-4 transition-colors duration-200 hover:decoration-2"
+            >
+              {link.label}
+              <span aria-hidden="true">→</span>
+            </Link>
+          ))}
+        </p>
       </section>
     </main>
   );

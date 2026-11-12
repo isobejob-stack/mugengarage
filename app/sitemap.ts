@@ -33,6 +33,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // 個別ページより高い優先度で載せる（2026-08-17新設）。
     // 整備実績（/maintenance-records）は同日にブログへ統合し、URLは /blog へ転送している。
     { url: `${SITE_URL}/jaguar`, changeFrequency: "weekly", priority: 0.7 },
+    // 整備・修理と、故障しやすいところ・よくある質問（2026-11-12 新設）。
+    // 「ジャガー 修理」「ジャガー 故障」のように、在庫と並んで探される入口なので高めに載せる
+    { url: `${SITE_URL}/repair`, changeFrequency: "monthly", priority: 0.8 },
+    {
+      url: `${SITE_URL}/repair/troubles`,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    { url: `${SITE_URL}/faq`, changeFrequency: "monthly", priority: 0.6 },
     {
       url: `${SITE_URL}/encyclopedia`,
       changeFrequency: "weekly",

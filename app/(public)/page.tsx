@@ -294,6 +294,40 @@ export default async function Page() {
           )}
         </section>
 
+        {/* 整備・修理への導線（2026-11-12）。販売と並ぶ店の柱で、
+            「ジャガー 修理」「ジャガー 故障」で探して来た人が、トップからも行き先を見つけられるようにする。 */}
+        <section className="mt-10">
+          <div className="rounded-2xl border border-neutral-200 bg-white px-6 py-8 sm:px-10 sm:py-10">
+            <p className="text-primary-700 text-xs font-medium tracking-[0.15em] uppercase">
+              Service &amp; Repair
+            </p>
+            <h2 className="text-charcoal-900 mt-3 font-serif text-xl font-bold tracking-tight text-balance sm:text-2xl">
+              <SiteText
+                k="home.repair.heading"
+                description="トップページ 整備・修理の見出し"
+              >
+                整備・修理のご相談
+              </SiteText>
+            </h2>
+            <p className="text-charcoal-800 mt-3 max-w-2xl text-base leading-loose">
+              <SiteText
+                k="home.repair.lead"
+                description="トップページ 整備・修理の説明文"
+              >
+                ジャガー・ディムラーの旧車の整備・修理・故障のご相談を承ります。ほかでお求めになった車も、まずはご相談ください。
+              </SiteText>
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button href="/repair" variant="outline" size="lg">
+                整備・修理について
+              </Button>
+              <Button href="/repair/troubles" variant="ghost" size="lg">
+                ジャガーの故障しやすいところ
+              </Button>
+            </div>
+          </div>
+        </section>
+
         {/* 「ジャガーを知る」への導線。
             以前はナビゲーションの下位項目（図鑑・年表・ライブラリ）から
             カードを3枚並べていたが、まだクラシックJaguarを知らない訪問者に

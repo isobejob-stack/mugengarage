@@ -78,6 +78,40 @@ export async function SiteFooter() {
               店舗情報・アクセス
             </SiteText>
           </Link>
+          {/* 整備・修理と、よくある質問（2026-11-12 新設）。どのページから来た人にも届くよう全ページに置く */}
+          <Link
+            href="/repair"
+            className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
+          >
+            <SiteText
+              k="footer.link.repair"
+              description="フッター 整備・修理リンクの文言"
+            >
+              整備・修理
+            </SiteText>
+          </Link>
+          <Link
+            href="/repair/troubles"
+            className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
+          >
+            <SiteText
+              k="footer.link.troubles"
+              description="フッター 故障しやすいところリンクの文言"
+            >
+              ジャガーの故障しやすいところ
+            </SiteText>
+          </Link>
+          <Link
+            href="/faq"
+            className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"
+          >
+            <SiteText
+              k="footer.link.faq"
+              description="フッター よくある質問リンクの文言"
+            >
+              よくある質問
+            </SiteText>
+          </Link>
           <Link
             href="/owners-archive"
             className="text-charcoal-700 ease-standard hover:text-primary-700 transition-colors duration-200 hover:underline"

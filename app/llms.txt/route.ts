@@ -2,6 +2,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { attachVehicleSlugs } from "@/lib/inventory/queries";
 import { getSiteSettings } from "@/lib/settings/queries";
 import { buildLlmsTxt, type LlmsVehicle } from "@/lib/seo/llms";
+import { buildFaqGroups, resolveFaqItems } from "@/lib/seo/faq";
+import { getSiteTexts } from "@/lib/live-edit/texts";
 
 // AI向けの案内書き（lib/seo/llms.ts）。
 //
@@ -11,7 +13,10 @@ import { buildLlmsTxt, type LlmsVehicle } from "@/lib/seo/llms";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const settings = await getSiteSettings();
+  const [settings, texts] = await Promise.all([
+    getSiteSettings(),
+    getSiteTexts(),
+  ]);
 
   // 在庫が読めなくても、店舗情報だけの案内書きは返す
   let vehicles: LlmsVehicle[] = [];
@@ -33,8 +38,14 @@ export async function GET() {
     console.error("[llms.txt] 在庫の取得に失敗しました", error);
   }
 
+  // よくある質問は /faq と同じ文章（店主が直した文章を含む）を載せる
+  const faq = resolveFaqItems(
+    buildFaqGroups({ settings, stock: vehicles }),
+    texts,
+  );
+
   return new Response(
-    buildLlmsTxt({ settings, vehicles, generatedAt: new Date() }),
+    buildLlmsTxt({ settings, vehicles, generatedAt: new Date(), faq }),
     {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",

@@ -35,8 +35,12 @@ export type SiteNavItem = {
 //
 // 整備実績はブログに統合した。書く側から見て記事と整備実績を書き分ける必然性が薄く、
 // 読む側から見ても入口が分かれている必要が無かったため。
+//
+// 2026-11-12、「整備・修理」を足して5項目にした。販売と並ぶ店の柱なのに、
+// 店舗情報の「取り扱い内容」に2行あるだけで、「ジャガー 修理」で来た人が行き先を見つけられなかった。
 export const siteNav: ReadonlyArray<SiteNavItem> = [
   { label: "在庫車両", href: "/vehicles" },
+  { label: "整備・修理", href: "/repair" },
   { label: "ジャガーを知る", href: "/jaguar" },
   { label: "ブログ", href: "/blog" },
   { label: "お問い合わせ", href: "/contact" },
