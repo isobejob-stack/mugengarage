@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { buildLegacyHostRedirects } from "./lib/seo/legacy-host";
 
 // 車両写真はSupabase Storageの公開URLで配信しているため、next/imageで最適化するには
 // 配信元ホストを明示的に許可する必要がある（Next.js 16では images.domains は廃止され
@@ -43,8 +44,12 @@ const nextConfig: NextConfig = {
   // permanent: true は Next.js では 301 ではなく 308 を返す（リクエストメソッドを保つため）。
   // 検索エンジンにとっては301と同じ「恒久的な移動」として扱われる
   // （node_modules/next/dist/docs/01-app/03-api-reference/05-config/01-next-config-js/redirects.md）。
+  //
+  // 独自ドメインへ移行したら、旧URL（mugengarage.vercel.app）を新しいドメインへ転送する。
+  // NEXT_PUBLIC_SITE_URL が旧URLのまま（または未設定）のあいだは何も足さない（lib/seo/legacy-host.ts）。
   redirects() {
     return [
+      ...buildLegacyHostRedirects(process.env.NEXT_PUBLIC_SITE_URL),
       { source: "/maintenance-records", destination: "/blog", permanent: true },
       {
         source: "/maintenance-records/:slug",
