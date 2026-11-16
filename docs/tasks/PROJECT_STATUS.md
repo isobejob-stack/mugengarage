@@ -134,6 +134,14 @@ curl -s -o /dev/null -w "%{http_code}" -X POST https://mugengarage.vercel.app/ap
    3. 車選びドットコム・グーネットの店舗ページと Instagram のプロフィールに、公式サイトのURLを入れる
    4. 管理画面の「掲載媒体・公式SNS」に、車選びドットコム・グーネットの店舗ページも入れる（同じ店だと結び付けるため）
 
+6. **在庫入れ替え前の車両URLの転送SQLの実行**（2026-11-16 追加）
+   `supabase/redirect-old-vehicle-urls-2026-11-16.sql` をSupabaseのSQL Editorで1回実行する。
+   Search Console の「見つかりませんでした（404）」の主な原因への対処。11/07の在庫入れ替えで、
+   8月から載せていた15台のうち13台が同じ車のまま新しいURLになり、旧URL（例: `/vehicles/daimler-double-six-1990`）が
+   404になっていた。旧URLを同じ車の今のページへ恒久転送（301）する。今の在庫に無い2台（XJ 4.2 ソブリンL 2007年・
+   Xタイプ 2.0 エグゼクティブ 2008年）は404のままにする（もう無い車のページは404が正しい）。
+   実行後、Search Console の 404 の一覧で「修正を検証」を押す。Googleが旧URLを再クロールした時点で一覧から外れる
+
 #### 🟡 Proプランへのアップグレード後にやること
 
 `docs/tasks/ISSUE-003` のProプラン移行が完了したら、`vercel.json` のCron設定を
